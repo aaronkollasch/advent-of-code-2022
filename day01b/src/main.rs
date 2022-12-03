@@ -2,10 +2,11 @@ use std::cmp::Reverse;
 use std::collections::BinaryHeap;
 
 pub fn main() {
-    let mut top_elves: BinaryHeap<Reverse<u32>> = BinaryHeap::with_capacity(4);
-    top_elves.push(Reverse::<u32>(0));
-    top_elves.push(Reverse::<u32>(0));
-    top_elves.push(Reverse::<u32>(0));
+    let num_top = 3;
+    let mut top_elves: BinaryHeap<Reverse<u32>> = BinaryHeap::with_capacity(num_top+1);
+    for _ in 0..num_top {
+        top_elves.push(Reverse::<u32>(0));
+    }
 
     include_str!("../input.txt").split("\n\n").for_each(|elf| {
         top_elves.push(Reverse::<u32>(
