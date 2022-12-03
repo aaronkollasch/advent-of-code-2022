@@ -1,4 +1,4 @@
-fn main() {
+pub fn main() {
     println!(
         "{}",
         include_str!("../input.txt")

@@ -1,7 +1,7 @@
 use std::cmp::Reverse;
 use std::collections::BinaryHeap;
 
-fn main() {
+pub fn main() {
     let mut top_elves: BinaryHeap<Reverse<u32>> = BinaryHeap::with_capacity(4);
     top_elves.push(Reverse::<u32>(0));
     top_elves.push(Reverse::<u32>(0));
