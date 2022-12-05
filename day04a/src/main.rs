@@ -1,7 +1,7 @@
 pub fn main() {
     println!(
         "{}",
-        include_str!("../target.txt")
+        include_str!("../input.txt")
             .lines()
             .map(|l| {
                 let (l, r) = l.split_once(',').unwrap();
