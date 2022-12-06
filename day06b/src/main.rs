@@ -1,18 +1,18 @@
 const WINDOW: usize = 14;
 
-pub fn main() {
-    println!(
-        "{}",
-        include_bytes!("../input.txt")
-            .windows(WINDOW)
-            .enumerate()
-            // https://stackoverflow.com/a/46766782/653173
-            .find(|(_, s)| !(1..s.len()).any(|i| s[i..].contains(&s[i - 1])))
-            .unwrap()
-            .0
-            + WINDOW
-    );
-}
+// pub fn main() {
+//     println!(
+//         "{}",
+//         include_bytes!("../input.txt")
+//             .windows(WINDOW)
+//             .enumerate()
+//             // https://stackoverflow.com/a/46766782/653173
+//             .find(|(_, s)| !(1..s.len()).any(|i| s[i..].contains(&s[i - 1])))
+//             .unwrap()
+//             .0
+//             + WINDOW
+//     );
+// }
 
 // pub fn main() {
 //     let b = include_bytes!("../input.txt").map(|c| c - b'a');
@@ -39,3 +39,23 @@ pub fn main() {
 //         }
 //     }
 // }
+
+pub fn main() {
+    let d = include_bytes!("../input.txt");
+
+    let mut w = 0;
+    'main: loop {
+        let mut seen = 0u32;
+        for i in (1..=WINDOW).rev() {
+            let mask = 1 << d[w + i] - b'a';
+            if seen & mask == mask {
+                w += i;
+                continue 'main;
+            }
+            seen |= mask;
+        }
+        break;
+    }
+
+    println!("{}", w + WINDOW + 1);
+}

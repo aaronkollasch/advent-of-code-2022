@@ -5,11 +5,8 @@ pub fn main() {
         "{}",
         include_bytes!("../input.txt")
             .windows(WINDOW)
-            .enumerate()
-            // https://stackoverflow.com/a/46766782/653173
-            .find(|(_, s)| !(1..s.len()).any(|i| s[i..].contains(&s[i - 1])))
+            .position(|b| !(0..WINDOW-1).any(|i| (i + 1..WINDOW).any(|j| b[i] == b[j])))
             .unwrap()
-            .0
-            + WINDOW
+            + WINDOW,
     );
 }
