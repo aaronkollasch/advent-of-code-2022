@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 pub fn main() {
     let s = "\n".to_owned() + include_str!("../input.txt");
-    let mut wd = vec![""];
+    let mut wd = Vec::<&str>::new();
     let mut sizes = HashMap::<String, u32>::new();
 
     s.split("\n$ ")
@@ -11,7 +11,7 @@ pub fn main() {
         .for_each(|g| match &g[0..2] {
             "cd" => match &g[3..] {
                 "/" => {
-                    wd.drain(1..);
+                    wd.clear();
                 }
                 ".." => {
                     wd.pop();
