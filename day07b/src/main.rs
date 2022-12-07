@@ -1,6 +1,6 @@
 pub fn main() {
     let b = include_bytes!("../input.txt");
-    let mut wd = Vec::<u32>::with_capacity(32);
+    let mut wd = Vec::<u32>::with_capacity(16);
     wd.push(0);
     let mut sizes = Vec::<u32>::with_capacity(256);
 
@@ -16,16 +16,18 @@ pub fn main() {
                 wd.push(0);
             }
             _ if l[0] >= b'0' && l[0] <= b'9' => {
-                *wd.last_mut().unwrap() += atoi::atoi::<u32>(l.split(|b| b == &b' ').next().unwrap()).unwrap()
+                *wd.last_mut().unwrap() += l
+                    .iter()
+                    .take_while(|x| **x != b' ')
+                    .fold(0, |acc, x| acc * 10 + (x - b'0') as u32);
             }
             _ => assert!(true),
         });
 
     let mut size = 0;
-    wd.into_iter().rev().for_each(|x| {
-        let s = x + size;
-        sizes.push(s);
-        size = s;
+    wd.into_iter().rev().for_each(|s| {
+        size += s;
+        sizes.push(size);
     });
 
     let free_space = 70000000 - sizes.last().unwrap();
