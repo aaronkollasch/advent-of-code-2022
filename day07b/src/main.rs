@@ -20,7 +20,7 @@ pub fn main() {
             _ if &l[0..3] == b"$ c" => {
                 wd.push(0);
             }
-            _ => assert!(true),
+            _ => {}
         });
 
     let mut size = 0;
