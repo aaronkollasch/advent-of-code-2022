@@ -23,11 +23,7 @@ pub fn main() {
             _ => {}
         });
 
-    let mut size = 0;
-    wd.into_iter().rev().for_each(|s| {
-        size += s;
-        sizes.push(size);
-    });
+    sizes.extend(wd.into_iter().rev().scan(0, |size, s| Some(*size + s)));
 
     let free_space = 70000000 - sizes.last().unwrap();
     let to_delete = 30000000 - free_space;

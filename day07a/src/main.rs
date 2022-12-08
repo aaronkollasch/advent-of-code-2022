@@ -25,12 +25,11 @@ pub fn main() {
             _ => {}
         });
 
-    let mut size = 0;
-    wd.into_iter().rev().for_each(|s| {
-        size += s;
-        if size <= 100_000 {
-            total_size += size;
-        }
-    });
+    total_size += wd
+        .into_iter()
+        .rev()
+        .scan(0, |size, s| Some(*size + s))
+        .take_while(|s| *s <= 100_000)
+        .sum::<u32>();
     println!("{}", total_size);
 }
