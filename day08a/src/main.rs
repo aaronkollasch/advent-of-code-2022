@@ -53,9 +53,12 @@ pub fn main() {
             }
         });
 
-    // println!("{:?}", visible);
-    // let mut matrix: Vec::<Vec::<u8>> = vec![vec![0; l]; l];
-    // visible.iter().for_each(|(x, y)| matrix[*y][*x] = 1);
-    // matrix.iter().for_each(|l| println!("{:?}", l));
+    #[cfg(debug_assertions)]
+    {
+        println!("{:?}", visible);
+        let mut matrix: Vec<Vec<u8>> = vec![vec![0; l]; l];
+        visible.iter().for_each(|(x, y)| matrix[*y][*x] = 1);
+        matrix.iter().for_each(|l| println!("{:?}", l));
+    };
     println!("{}", visible.len());
 }
