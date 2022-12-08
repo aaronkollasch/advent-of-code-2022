@@ -10,6 +10,7 @@ pub fn main() {
         .enumerate()
         .for_each(|(i, c)| {
             let (x, y) = (i % (l + 1), i / (l + 1));
+            let c_i = (c - b'0') as usize;
             // println!("{} {} {}", x, y, c);
             match x {
                 0 => {
@@ -20,19 +21,10 @@ pub fn main() {
                 }
                 _ => {}
             }
-            let (view_x, view_y) = (
-                x - row_idx[(c - b'0') as usize],
-                y - col_idx[x][(c - b'0') as usize],
-            );
+            let (view_x, view_y) = (x - row_idx[c_i], y - col_idx[x][c_i]);
             scores[y * l + x] *= view_x * view_y;
-            row_idx
-                .iter_mut()
-                .take((c - b'0' + 1).into())
-                .for_each(|idx| *idx = x);
-            col_idx[x]
-                .iter_mut()
-                .take((c - b'0' + 1).into())
-                .for_each(|idx| *idx = y);
+            row_idx.iter_mut().take(c_i + 1).for_each(|idx| *idx = x);
+            col_idx[x].iter_mut().take(c_i + 1).for_each(|idx| *idx = y);
         });
     col_idx
         .iter_mut()
@@ -43,6 +35,7 @@ pub fn main() {
         .enumerate()
         .for_each(|(i, c)| {
             let (x, y) = (i % (l + 1), i / (l + 1));
+            let c_i = (c - b'0') as usize;
             // println!("{} {} {}", x, y, c);
             match x {
                 0 => {
@@ -53,19 +46,10 @@ pub fn main() {
                 }
                 _ => {}
             }
-            let (view_x, view_y) = (
-                x - row_idx[(c - b'0') as usize],
-                y - col_idx[x][(c - b'0') as usize],
-            );
+            let (view_x, view_y) = (x - row_idx[c_i], y - col_idx[x][c_i]);
             scores[(l - y - 1) * l + (l - x - 1)] *= view_x * view_y;
-            row_idx
-                .iter_mut()
-                .take((c - b'0' + 1).into())
-                .for_each(|idx| *idx = x);
-            col_idx[x]
-                .iter_mut()
-                .take((c - b'0' + 1).into())
-                .for_each(|idx| *idx = y);
+            row_idx.iter_mut().take(c_i + 1).for_each(|idx| *idx = x);
+            col_idx[x].iter_mut().take(c_i + 1).for_each(|idx| *idx = y);
         });
 
     // scores.iter().for_each(|l| println!("{:?}", l));
