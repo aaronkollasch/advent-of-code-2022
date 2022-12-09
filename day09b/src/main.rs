@@ -25,11 +25,11 @@ pub fn main() {
             rope[0].1 += dir.1;
             for j in 1..ROPE_LEN {
                 let head = rope[j - 1];
-                let tail = rope[j];
+                let tail = &mut rope[j];
                 if head.0.abs_diff(tail.0) > 1 || head.1.abs_diff(tail.1) > 1 {
-                    rope[j].0 += head.0.cmp(&tail.0) as i32;
-                    rope[j].1 += head.1.cmp(&tail.1) as i32;
-                    (j == ROPE_LEN - 1).then(|| visited.insert(rope[ROPE_LEN - 1]));
+                    tail.0 += head.0.cmp(&tail.0) as i32;
+                    tail.1 += head.1.cmp(&tail.1) as i32;
+                    (j == ROPE_LEN - 1).then(|| visited.insert(*tail));
                 } else {
                     break;
                 }
