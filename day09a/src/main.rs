@@ -17,7 +17,7 @@ pub fn main() {
                 _ => (0, 0),
             };
             let dist = l[2..].iter().fold(0, |acc, x| acc * 10 + (x - b'0') as u8);
-            for _i in 0..dist {
+            for _i_step in 0..dist {
                 hx += dir.0;
                 hy += dir.1;
                 if hx.abs_diff(tx).max(hy.abs_diff(ty)) > 1 {
