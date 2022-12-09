@@ -5,6 +5,7 @@ pub fn main() {
     let (mut hx, mut hy): (i16, i16) = (0, 0);
     let (mut tx, mut ty): (i16, i16) = (0, 0);
     let mut visited: HashSet<(i16, i16)> = HashSet::with_capacity(8192);
+    visited.insert((0, 0));
 
     s.split(|b| *b == b'\n')
         .filter(|l| l.len() >= 3)
@@ -23,8 +24,8 @@ pub fn main() {
                 if hx.abs_diff(tx).max(hy.abs_diff(ty)) > 1 {
                     tx += (hx - tx).signum();
                     ty += (hy - ty).signum();
+                    visited.insert((tx, ty));
                 }
-                visited.insert((tx, ty));
             }
         });
     #[cfg(debug_assertions)]
