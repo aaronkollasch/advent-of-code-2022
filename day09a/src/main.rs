@@ -4,7 +4,7 @@ pub fn main() {
     let s = include_bytes!("../input.txt");
     let (mut hx, mut hy): (i16, i16) = (0, 0);
     let (mut tx, mut ty): (i16, i16)  = (0, 0);
-    let mut visited: HashSet::<(i16, i16)> = HashSet::with_capacity(256);
+    let mut visited: HashSet::<(i16, i16)> = HashSet::with_capacity(8192);
 
     s.split(|b| *b == b'\n').filter(|l| l.len() >= 3).for_each(|l| {
         let dir = match l[0] {
@@ -18,17 +18,14 @@ pub fn main() {
         for _i in 0..dist {
             hx += dir.0;
             hy += dir.1;
-            let (dx, dy) = (hx-tx, hy-ty);
-            match (dx, dy) {
-                (2, 0) => { tx += 1; },
-                (-2, 0) => { tx -= 1; },
-                (0, 2) => { ty += 1; },
-                (0, -2) => { ty -= 1; },
-                _ if dx.abs() + dy.abs() <= 2 => {},
-                _ => { tx += dx.signum(); ty += dy.signum() },
-            };
+            if hx.abs_diff(tx).max(hy.abs_diff(ty)) > 1 {
+                tx += (hx - tx).signum();
+                ty += (hy - ty).signum();
+            }
             visited.insert((tx, ty));
         }
     });
+    #[cfg(debug_assertions)]
+    println!("{} {}", visited.iter().map(|k| k.0.abs()).max().unwrap(), visited.iter().map(|k| k.1.abs()).max().unwrap());
     println!("{}", visited.len());
 }
