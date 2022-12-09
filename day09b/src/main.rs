@@ -26,7 +26,7 @@ pub fn main() {
             for j in 1..ROPE_LEN {
                 let head = rope[j - 1];
                 let tail = rope[j];
-                if head.0.abs_diff(tail.0).max(head.1.abs_diff(tail.1)) > 1 {
+                if head.0.abs_diff(tail.0) > 1 || head.1.abs_diff(tail.1) > 1 {
                     rope[j].0 += head.0.cmp(&tail.0) as i32;
                     rope[j].1 += head.1.cmp(&tail.1) as i32;
                     (j == ROPE_LEN - 1).then(|| visited.insert(rope[ROPE_LEN - 1]));
