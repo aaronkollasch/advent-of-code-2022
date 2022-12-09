@@ -133,6 +133,9 @@ version = "0.1.0"
 [[package]]
 name = "day08a"
 version = "0.1.0"
+dependencies = [
+ "rustc-hash",
+]
 
 [[package]]
 name = "day08b"

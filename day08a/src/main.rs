@@ -1,11 +1,12 @@
-use std::collections::HashSet;
+use rustc_hash::FxHashSet;
 
 const MAX_L: usize = 99;
 
 pub fn main() {
     let b = include_bytes!("../input.txt");
     let l = b.iter().position(|x| *x == b'\n').unwrap();
-    let mut visible: HashSet<usize> = HashSet::with_capacity(l * l / 2);
+    let mut visible: FxHashSet<usize> =  Default::default();
+    visible.reserve(l * l / 2);
     let mut row_max = 0;
     let mut col_max: [u8; MAX_L] = [0; MAX_L];
     b.iter()
