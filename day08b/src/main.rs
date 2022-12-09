@@ -2,12 +2,12 @@ const MAX_L: usize = 99;
 
 pub fn main() {
     let b = include_bytes!("../input.txt");
-    let l = b.iter().take_while(|x| **x != b'\n').count();
+    let l = b.iter().position(|x| *x == b'\n').unwrap();
     let mut scores: Vec<usize> = vec![1; l * l];
     let mut row_idx: [usize; 10] = [0; 10];
     let mut col_idx: [[usize; 10]; MAX_L] = [[0; 10]; MAX_L];
     b.iter()
-        .take((l + 1) * (l + 1) - 1)
+        .take((l + 1) * l - 1)
         .enumerate()
         .for_each(|(i, c)| {
             let (x, y) = (i % (l + 1), i / (l + 1));
@@ -30,7 +30,7 @@ pub fn main() {
         .iter_mut()
         .for_each(|col| col.iter_mut().for_each(|x| *x = 0));
     b.iter()
-        .take((l + 1) * (l + 1) - 1)
+        .take((l + 1) * l - 1)
         .rev()
         .enumerate()
         .for_each(|(i, c)| {
