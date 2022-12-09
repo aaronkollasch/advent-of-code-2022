@@ -144,16 +144,10 @@ version = "0.1.0"
 [[package]]
 name = "day09a"
 version = "0.1.0"
-dependencies = [
- "rustc-hash",
-]
 
 [[package]]
 name = "day09b"
 version = "0.1.0"
-dependencies = [
- "rustc-hash",
-]
 
 [[package]]
 name = "either"
