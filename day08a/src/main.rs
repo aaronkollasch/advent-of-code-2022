@@ -62,5 +62,5 @@ pub fn main() {
         });
         matrix.iter().for_each(|l| println!("{:?}", l));
     };
-    println!("{}", visible.len());
+    print!("{} ", visible.len());
 }

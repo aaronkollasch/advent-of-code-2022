@@ -31,5 +31,5 @@ pub fn main() {
         .scan(0, |size, s| Some(*size + s))
         .take_while(|s| *s <= 100_000)
         .sum::<u32>();
-    println!("{}", total_size);
+    print!("{} ", total_size);
 }

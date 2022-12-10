@@ -29,8 +29,8 @@ pub fn main() {
     let to_delete = 30000000 - free_space;
     // println!("{} {} {}", total_size, free_space, to_delete);
 
-    println!(
-        "{}",
+    print!(
+        "{} ",
         sizes.into_iter().filter(|s| *s >= to_delete).min().unwrap()
     );
 }

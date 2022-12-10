@@ -40,7 +40,5 @@ pub fn main() {
         }
     }
 
-    #[cfg(debug_assertions)]
-    println!("{}", crt);
-    println!("{}", crt.chars().take(WIDTH).collect::<String>());
+    print!("{}", crt);
 }

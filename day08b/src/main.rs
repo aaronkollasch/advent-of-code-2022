@@ -61,5 +61,5 @@ pub fn main() {
             println!("]");
         }
     });
-    println!("{}", scores.iter().max().unwrap());
+    print!("{} ", scores.iter().max().unwrap());
 }

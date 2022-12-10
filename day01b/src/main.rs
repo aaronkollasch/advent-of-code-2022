@@ -16,5 +16,5 @@ pub fn main() {
         ));
         top_elves.pop();
     });
-    println!("{}", top_elves.iter().map(|e| e.0).sum::<u32>());
+    print!("{} ", top_elves.iter().map(|e| e.0).sum::<u32>());
 }

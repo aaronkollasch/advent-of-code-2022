@@ -47,8 +47,8 @@ pub fn main() {
         });
 
     // print last stacks
-    println!(
-        "{}",
+    print!(
+        "{} ",
         stacks
             .iter()
             .map(|c| *c.last().unwrap() as char)

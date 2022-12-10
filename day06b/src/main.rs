@@ -57,5 +57,5 @@ pub fn main() {
         break;
     }
 
-    println!("{}", w + WINDOW + 1);
+    print!("{} ", w + WINDOW + 1);
 }

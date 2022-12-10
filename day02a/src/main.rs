@@ -1,6 +1,6 @@
 pub fn main() {
-    println!(
-        "{}",
+    print!(
+        "{} ",
         include_bytes!("../input.txt")
             .split(|b| *b == b'\n')
             .filter(|l| l.len() == 3)

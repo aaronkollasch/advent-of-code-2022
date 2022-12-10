@@ -22,6 +22,7 @@ fn main() {
         })
         .collect();
 
+    println!();
     times.iter().for_each(|t| Took::from_std(t.1).describe(t.0));
     Took::from_std(times.into_iter().map(|(_, t)| t).sum()).describe("everything");
 }

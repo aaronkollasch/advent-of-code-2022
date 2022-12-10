@@ -80,5 +80,5 @@ pub fn main() {
         visited.bits_pos().map(|(_x, y)| y).min().unwrap(),
         visited.bits_pos().map(|(_x, y)| y).max().unwrap(),
     );
-    println!("{}", visited.count_ones());
+    print!("{} ", visited.count_ones());
 }

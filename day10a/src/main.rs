@@ -58,5 +58,5 @@ pub fn main() {
                 .collect::<Vec<(usize, &i32)>>()
         );
     }
-    println!("{}", strengths.iter().skip(20).step_by(WIDTH).sum::<i32>());
+    print!("{} ", strengths.iter().skip(20).step_by(WIDTH).sum::<i32>());
 }
