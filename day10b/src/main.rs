@@ -23,22 +23,20 @@ pub fn main() {
         _ => {}
     });
 
-    let image = (0..240)
-        .map(|c| {
-            let x = c % 40;
-            if regs[c].abs_diff(x as i8) <= 1 {
-                '@'
-            } else {
-                ' '
-            }
-        })
-        .collect::<Vec<char>>()
-        .chunks(40)
-        .map(|c| c.iter().collect::<String>())
-        .collect::<Vec<String>>()
-        .join("\n");
+    let mut crt = String::with_capacity(246);
+    for cycle in 0..240 {
+        let x = cycle % 40;
+        if regs[cycle].abs_diff(x as i8) <= 1 {
+            crt.push('@');
+        } else {
+            crt.push(' ');
+        }
+        if x == 39 {
+            crt.push('\n');
+        }
+    }
 
     #[cfg(debug_assertions)]
-    println!("{}\n", image);
-    println!("{}", image.chars().take(40).collect::<String>());
+    println!("{}", crt);
+    println!("{}", crt.chars().take(40).collect::<String>());
 }
