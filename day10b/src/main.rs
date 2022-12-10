@@ -4,15 +4,15 @@ pub fn main() {
     let mut reg: i8 = 1;
     let mut regs: [i8; 256] = [0; 256];
 
-    s.split(|b| b == &b'\n').for_each(|l| match &l[0..4] {
-        b"addx" => {
+    s.split(|b| b == &b'\n').for_each(|l| match l[0] {
+        b'a' => {
             cycle += 1;
             regs[cycle - 1] = reg;
             cycle += 1;
             regs[cycle - 1] = reg;
             reg += atoi::atoi::<i8>(&l[5..]).unwrap();
         }
-        b"noop" => {
+        b'n' => {
             cycle += 1;
             regs[cycle - 1] = reg;
         }
@@ -23,9 +23,9 @@ pub fn main() {
         .map(|c| {
             let x = c % 40;
             if regs[c].abs_diff(x as i8) <= 1 {
-                '#'
+                '@'
             } else {
-                '.'
+                ' '
             }
         })
         .collect::<Vec<char>>()
