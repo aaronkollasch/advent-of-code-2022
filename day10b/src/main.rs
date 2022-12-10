@@ -10,7 +10,11 @@ pub fn main() {
             regs[cycle - 1] = reg;
             cycle += 1;
             regs[cycle - 1] = reg;
-            reg += atoi::atoi::<i8>(&l[5..]).unwrap();
+            let addx = match l[5] {
+                b'-' => -l[6..].iter().fold(0, |acc, x| acc * 10 + (x - b'0') as i8),
+                _ => l[5..].iter().fold(0, |acc, x| acc * 10 + (x - b'0') as i8),
+            };
+            reg += addx;
         }
         b'n' => {
             cycle += 1;
