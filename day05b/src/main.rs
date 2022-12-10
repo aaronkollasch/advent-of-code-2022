@@ -25,17 +25,24 @@ pub fn main() {
     instructions
         .split(|b| *b == b'\n')
         .filter(|l| l.len() > 0)
-        .for_each(|l| {
+        .enumerate()
+        .for_each(|(i_line, l)| {
             let (n, from, to): (usize, _, _) = l
                 .split(|b| b == &b' ')
                 .skip(1)
                 .step_by(2)
-                .map(|n| atoi::atoi(n).unwrap())
+                .map(|n| n.iter().fold(0, |acc, x| acc * 10 + (x - b'0') as usize))
                 .collect_tuple()
                 .unwrap();
             let split_index = stacks[from - 1].len() - n;
-            let mut stack_part = stacks.get_mut(from - 1).unwrap().split_off(split_index);
-            stacks.get_mut(to - 1).unwrap().append(&mut stack_part);
+            let mut stack_part = stacks
+                .get_mut(from - 1)
+                .unwrap_or_else(|| panic!("{}: get stack {}: {}", i_line, from - 1, num_stacks))
+                .split_off(split_index);
+            stacks
+                .get_mut(to - 1)
+                .unwrap_or_else(|| panic!("{}: get stack {}: {}", i_line, to - 1, num_stacks))
+                .append(&mut stack_part);
         });
 
     // print last stacks
