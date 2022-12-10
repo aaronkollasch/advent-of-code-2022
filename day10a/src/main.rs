@@ -15,29 +15,29 @@ pub fn main() {
 
     s.split(|b| b == &b'\n').for_each(|l| match l[0] {
         b'a' => {
-            cycle += 1;
-            strengths[cycle] = calc_strength(cycle, reg);
-            #[cfg(debug_assertions)]
-            eprintln!("{} {} {}", cycle, reg, strengths[cycle]);
-            cycle += 1;
-            strengths[cycle] = calc_strength(cycle, reg);
-            #[cfg(debug_assertions)]
-            eprintln!("{} {} {}", cycle, reg, strengths[cycle]);
             let addx = match l[5] {
                 b'-' => -l[6..].iter().fold(0, |acc, x| acc * 10 + (x - b'0') as i8),
                 _ => l[5..].iter().fold(0, |acc, x| acc * 10 + (x - b'0') as i8),
             };
             #[cfg(debug_assertions)]
             eprintln!("addx {}", addx);
-            reg += addx;
-        }
-        b'n' => {
             cycle += 1;
             strengths[cycle] = calc_strength(cycle, reg);
             #[cfg(debug_assertions)]
             eprintln!("{} {} {}", cycle, reg, strengths[cycle]);
+            cycle += 1;
+            strengths[cycle] = calc_strength(cycle, reg);
+            #[cfg(debug_assertions)]
+            eprintln!("{} {} {}", cycle, reg, strengths[cycle]);
+            reg += addx;
+        }
+        b'n' => {
             #[cfg(debug_assertions)]
             eprintln!("noop");
+            cycle += 1;
+            strengths[cycle] = calc_strength(cycle, reg);
+            #[cfg(debug_assertions)]
+            eprintln!("{} {} {}", cycle, reg, strengths[cycle]);
         }
         _ => {}
     });
