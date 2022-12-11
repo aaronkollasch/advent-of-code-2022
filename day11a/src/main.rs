@@ -93,7 +93,7 @@ pub fn main() {
             let monkey = unsafe { &mut *ptr.add(i_monkey) };
             #[cfg(debug_assertions)]
             eprintln!("{} {} {:?}", i_monkey, monkey.inspect_count, monkey.items);
-            monkey.items.iter_mut().for_each(|item| {
+            for item in monkey.items.iter_mut() {
                 monkey.inspect_count += 1;
                 *item = match monkey.operation {
                     Op::Add(y) => *item + y,
@@ -105,7 +105,7 @@ pub fn main() {
                 } else {
                     monkeys[monkey.target2].items.push(*item);
                 }
-            });
+            }
             monkey.items.clear();
         }
     }
