@@ -73,7 +73,7 @@ pub fn main() {
                 monkey.inspect_count += 1;
                 match monkey.operation.0 {
                     0 => {
-                        *item = item.wrapping_add(monkey.operation.1) % lcm;
+                        *item = item.wrapping_add(monkey.operation.1);
                     }
                     1 => {
                         *item = item.wrapping_mul(monkey.operation.1) % lcm;
