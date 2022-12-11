@@ -1,7 +1,15 @@
+#[derive(Debug, Clone)]
+enum Op {
+    Square,
+    Add(u64),
+    Mul(u64),
+}
+
+#[derive(Debug)]
 struct Monkey {
     pub items: Vec<u64>,
     pub test: u64,
-    pub operation: (u8, u64),
+    pub operation: Op,
     pub target1: usize,
     pub target2: usize,
     pub inspect_count: u64,
@@ -16,7 +24,7 @@ pub fn main() {
         let mut monkey: Monkey = Monkey {
             items: Vec::with_capacity(32),
             test: 0,
-            operation: (0, 0),
+            operation: Op::Square,
             target1: 0,
             target2: 0,
             inspect_count: 0,
@@ -34,11 +42,9 @@ pub fn main() {
                 }
                 2 => {
                     if l.chars().nth(23) == Some('+') {
-                        monkey.operation = (0, l[25..].parse::<u64>().unwrap());
-                    } else if &l[25..] == "old" {
-                        monkey.operation = (2, 0);
-                    } else {
-                        monkey.operation = (1, l[25..].parse::<u64>().unwrap());
+                        monkey.operation = Op::Add(l[25..].parse::<u64>().unwrap());
+                    } else if &l[25..] != "old" {
+                        monkey.operation = Op::Mul(l[25..].parse::<u64>().unwrap());
                     }
                 }
                 3 => {
@@ -76,12 +82,12 @@ pub fn main() {
             // eprintln!("{} {} {:?}", i_monkey, monkey.inspect_count, monkey.items);
             monkey.items.iter_mut().for_each(|item| {
                 monkey.inspect_count += 1;
-                match monkey.operation.0 {
-                    0 => {
-                        *item = item.wrapping_add(monkey.operation.1);
+                match monkey.operation {
+                    Op::Add(y) => {
+                        *item = item.wrapping_add(y);
                     }
-                    1 => {
-                        *item = item.wrapping_mul(monkey.operation.1) % lcm;
+                    Op::Mul(y) => {
+                        *item = item.wrapping_mul(y) % lcm;
                     }
                     _ => {
                         *item = item.wrapping_mul(*item) % lcm;
