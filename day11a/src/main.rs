@@ -38,33 +38,34 @@ pub fn main() {
         match i_line {
             1 => {
                 monkey.items.extend(
-                    l[17..]
+                    l["  Starting items:".len()..]
                         .split(|b| *b == b',')
                         .map(|w| w[1..].iter().fold(0, |acc, x| acc * 10 + (x - b'0') as u64)),
                 );
             }
             2 => {
-                if l[23] == b'+' {
+                let idx_start = "  Operation: new = old * ".len();
+                if l[idx_start - 2] == b'+' {
                     monkey.operation = Op::Add(
-                        l[25..]
+                        l[idx_start..]
                             .iter()
                             .fold(0, |acc, x| acc * 10 + (x - b'0') as u64),
                     );
-                } else if l[25] != b'o' {
+                } else if l[idx_start] != b'o' {
                     monkey.operation = Op::Mul(
-                        l[25..]
+                        l[idx_start..]
                             .iter()
                             .fold(0, |acc, x| acc * 10 + (x - b'0') as u64),
                     );
                 }
             }
             3 => {
-                monkey.test = l[21..]
+                monkey.test = l["  Test: divisible by ".len()..]
                     .iter()
                     .fold(0, |acc, x| acc * 10 + (x - b'0') as u64);
             }
             4 => {
-                monkey.target1 = l[29..]
+                monkey.target1 = l["    If true: throw to monkey ".len()..]
                     .iter()
                     .fold(0, |acc, x| acc * 10 + (x - b'0') as usize);
                 if i_monkey == monkey.target1 {
@@ -72,7 +73,7 @@ pub fn main() {
                 }
             }
             5 => {
-                monkey.target2 = l[30..]
+                monkey.target2 = l["    If false: throw to monkey ".len()..]
                     .iter()
                     .fold(0, |acc, x| acc * 10 + (x - b'0') as usize);
                 if i_monkey == monkey.target2 {

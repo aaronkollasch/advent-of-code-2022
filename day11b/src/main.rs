@@ -33,31 +33,34 @@ pub fn main() {
             match i {
                 1 => {
                     monkey.items.extend(
-                        l.split_once(": ")
-                            .unwrap()
-                            .1
+                        l["  Starting items: ".len()..]
                             .split(", ")
                             .map(|w| w.parse::<u64>().expect(w)),
                     );
                 }
                 2 => {
-                    if l.chars().nth(23) == Some('+') {
-                        monkey.operation = Op::Add(l[25..].parse::<u64>().unwrap());
-                    } else if &l[25..] != "old" {
-                        monkey.operation = Op::Mul(l[25..].parse::<u64>().unwrap());
+                    let idx_start = "  Operation: new = old * ".len();
+                    if l.chars().nth(idx_start - 2) == Some('+') {
+                        monkey.operation = Op::Add(l[idx_start..].parse::<u64>().unwrap());
+                    } else if &l[idx_start..] != "old" {
+                        monkey.operation = Op::Mul(l[idx_start..].parse::<u64>().unwrap());
                     }
                 }
                 3 => {
-                    monkey.test = l[21..].parse::<u64>().unwrap();
+                    monkey.test = l["  Test: divisible by ".len()..].parse::<u64>().unwrap();
                 }
                 4 => {
-                    monkey.target1 = l[29..].parse::<usize>().unwrap();
+                    monkey.target1 = l["    If true: throw to monkey ".len()..]
+                        .parse::<usize>()
+                        .unwrap();
                     if i_monkey == monkey.target1 {
                         panic!("monkey {} targets itself!", i_monkey);
                     }
                 }
                 5 => {
-                    monkey.target2 = l[30..].parse::<usize>().unwrap();
+                    monkey.target2 = l["    If false: throw to monkey ".len()..]
+                        .parse::<usize>()
+                        .unwrap();
                     if i_monkey == monkey.target2 {
                         panic!("monkey {} targets itself!", i_monkey);
                     }
