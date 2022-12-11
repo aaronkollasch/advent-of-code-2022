@@ -85,17 +85,11 @@ pub fn main() {
             // eprintln!("{} {} {:?}", i_monkey, monkey.inspect_count, monkey.items);
             monkey.items.iter_mut().for_each(|item| {
                 monkey.inspect_count += 1;
-                match monkey.operation {
-                    Op::Add(y) => {
-                        *item = item.wrapping_add(y);
-                    }
-                    Op::Mul(y) => {
-                        *item = item.wrapping_mul(y) % lcm;
-                    }
-                    _ => {
-                        *item = item.wrapping_mul(*item) % lcm;
-                    }
-                }
+                *item = match monkey.operation {
+                    Op::Add(y) => item.wrapping_add(y),
+                    Op::Mul(y) => item.wrapping_mul(y) % lcm,
+                    Op::Square => item.wrapping_mul(*item) % lcm,
+                };
                 if *item % monkey.test == 0 {
                     monkeys[monkey.target1].items.push(*item);
                 } else {

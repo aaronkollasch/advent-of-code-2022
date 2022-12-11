@@ -95,18 +95,11 @@ pub fn main() {
             eprintln!("{} {} {:?}", i_monkey, monkey.inspect_count, monkey.items);
             monkey.items.iter_mut().for_each(|item| {
                 monkey.inspect_count += 1;
-                match monkey.operation {
-                    Op::Add(y) => {
-                        *item += y;
-                    }
-                    Op::Mul(y) => {
-                        *item *= y;
-                    }
-                    _ => {
-                        *item *= *item;
-                    }
-                }
-                *item /= 3;
+                *item = match monkey.operation {
+                    Op::Add(y) => *item + y,
+                    Op::Mul(y) => *item * y,
+                    Op::Square => *item * *item,
+                } / 3;
                 if *item % monkey.test == 0 {
                     monkeys[monkey.target1].items.push(*item);
                 } else {
