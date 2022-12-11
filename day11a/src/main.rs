@@ -12,7 +12,7 @@ pub fn main() {
 
     s.split("\n\n").for_each(|m| {
         let mut monkey: Monkey = Monkey {
-            items: vec![],
+            items: Vec::with_capacity(32),
             test: 0,
             operation: (0, 0),
             target1: 0,
@@ -50,9 +50,10 @@ pub fn main() {
         monkeys.push(monkey);
     });
 
+    let mut passes: Vec<(usize, u64)> = Vec::with_capacity(32);
     for _round in 1..21 {
         for i_monkey in 0..monkeys.len() {
-            let mut passes: Vec<(usize, u64)> = vec![];
+            passes.clear();
             let monkey = monkeys.get_mut(i_monkey).unwrap();
             #[cfg(debug_assertions)]
             eprintln!("{} {} {:?}", i_monkey, monkey.inspect_count, monkey.items);
@@ -71,11 +72,14 @@ pub fn main() {
                 }
                 false
             });
-            for (target, item) in passes {
-                monkeys[target].items.push(item);
+            for (target, item) in &passes {
+                monkeys[*target].items.push(*item);
             }
         }
     }
+    #[cfg(debug_assertions)]
+    if passes.capacity() != 32 { eprintln!("new capacity: {}", passes.capacity()); }
+
     let mut counts = monkeys.iter().map(|m| m.inspect_count).collect::<Vec::<u32>>();
     counts.sort_unstable();
     print!("{} ", counts.iter().rev().take(2).product::<u32>());

@@ -13,7 +13,7 @@ pub fn main() {
 
     s.split("\n\n").for_each(|m| {
         let mut monkey: Monkey = Monkey {
-            items: vec![],
+            items: Vec::with_capacity(32),
             test: 0,
             operation: (0, 0),
             target1: 0,
@@ -76,12 +76,20 @@ pub fn main() {
                 }
                 false
             });
-            for (target, item) in passes {
-                monkeys[target].items.push(item);
+            for (target, item) in &passes {
+                monkeys[*target].items.push(*item);
             }
         }
     }
-    let mut counts = monkeys.iter().map(|m| m.inspect_count).collect::<Vec::<u64>>();
+    #[cfg(debug_assertions)]
+    if passes.capacity() != 32 {
+        eprintln!("new capacity: {}", passes.capacity());
+    }
+
+    let mut counts = monkeys
+        .iter()
+        .map(|m| m.inspect_count)
+        .collect::<Vec<u64>>();
     counts.sort_unstable();
-    println!("{}", counts.iter().rev().take(2).product::<u64>());
+    print!("{} ", counts.iter().rev().take(2).product::<u64>());
 }
