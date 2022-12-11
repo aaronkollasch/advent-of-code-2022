@@ -23,9 +23,13 @@ pub fn main() {
         for (i, l) in m.lines().enumerate() {
             match i {
                 1 => {
-                    monkey
-                        .items
-                        .extend(l.split_once(": ").unwrap().1.split(", ").map(|w| w.parse::<u64>().expect(w)));
+                    monkey.items.extend(
+                        l.split_once(": ")
+                            .unwrap()
+                            .1
+                            .split(", ")
+                            .map(|w| w.parse::<u64>().expect(w)),
+                    );
                 }
                 2 => {
                     if l.chars().nth(23) == Some('+') {
@@ -55,18 +59,25 @@ pub fn main() {
     #[cfg(debug_assertions)]
     eprintln!("gcd: {}", gcd);
 
+    let mut passes: Vec<(usize, u64)> = Vec::with_capacity(32);
     for _round in 1..10001 {
         for i_monkey in 0..monkeys.len() {
-            let mut passes: Vec<(usize, u64)> = vec![];
-            let mut monkey = monkeys.get_mut(i_monkey).unwrap();
+            passes.clear();
+            let monkey = monkeys.get_mut(i_monkey).unwrap();
             // #[cfg(debug_assertions)]
             // eprintln!("{} {} {:?}", i_monkey, monkey.inspect_count, monkey.items);
             monkey.items.retain_mut(|item| {
                 monkey.inspect_count += 1;
                 match monkey.operation.0 {
-                    0 => { *item = item.wrapping_add(monkey.operation.1); }
-                    1 => { *item = item.wrapping_mul(monkey.operation.1); }
-                    _ => { *item = item.wrapping_mul(*item); }
+                    0 => {
+                        *item = item.wrapping_add(monkey.operation.1);
+                    }
+                    1 => {
+                        *item = item.wrapping_mul(monkey.operation.1);
+                    }
+                    _ => {
+                        *item = item.wrapping_mul(*item);
+                    }
                 }
                 *item %= gcd;
                 if *item % monkey.test == 0 {

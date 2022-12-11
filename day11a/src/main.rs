@@ -22,9 +22,13 @@ pub fn main() {
         for (i, l) in m.lines().enumerate() {
             match i {
                 1 => {
-                    monkey
-                        .items
-                        .extend(l.split_once(": ").unwrap().1.split(", ").map(|w| w.parse::<u64>().expect(w)));
+                    monkey.items.extend(
+                        l.split_once(": ")
+                            .unwrap()
+                            .1
+                            .split(", ")
+                            .map(|w| w.parse::<u64>().expect(w)),
+                    );
                 }
                 2 => {
                     if l.chars().nth(23) == Some('+') {
@@ -60,9 +64,15 @@ pub fn main() {
             monkey.items.retain_mut(|item| {
                 monkey.inspect_count += 1;
                 match monkey.operation.0 {
-                    0 => { *item += monkey.operation.1; }
-                    1 => { *item *= monkey.operation.1; }
-                    _ => { *item *= *item; }
+                    0 => {
+                        *item += monkey.operation.1;
+                    }
+                    1 => {
+                        *item *= monkey.operation.1;
+                    }
+                    _ => {
+                        *item *= *item;
+                    }
                 }
                 *item /= 3;
                 if *item % monkey.test == 0 {
@@ -78,9 +88,14 @@ pub fn main() {
         }
     }
     #[cfg(debug_assertions)]
-    if passes.capacity() != 32 { eprintln!("new capacity: {}", passes.capacity()); }
+    if passes.capacity() != 32 {
+        eprintln!("new capacity: {}", passes.capacity());
+    }
 
-    let mut counts = monkeys.iter().map(|m| m.inspect_count).collect::<Vec::<u32>>();
+    let mut counts = monkeys
+        .iter()
+        .map(|m| m.inspect_count)
+        .collect::<Vec<u32>>();
     counts.sort_unstable();
     print!("{} ", counts.iter().rev().take(2).product::<u32>());
 }
