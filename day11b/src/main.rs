@@ -70,16 +70,15 @@ pub fn main() {
                 monkey.inspect_count += 1;
                 match monkey.operation.0 {
                     0 => {
-                        *item = item.wrapping_add(monkey.operation.1);
+                        *item = item.wrapping_add(monkey.operation.1) % gcd;
                     }
                     1 => {
-                        *item = item.wrapping_mul(monkey.operation.1);
+                        *item = item.wrapping_mul(monkey.operation.1) % gcd;
                     }
                     _ => {
-                        *item = item.wrapping_mul(*item);
+                        *item = item.wrapping_mul(*item) % gcd;
                     }
                 }
-                *item %= gcd;
                 if *item % monkey.test == 0 {
                     passes.push((monkey.target1, *item));
                 } else {
