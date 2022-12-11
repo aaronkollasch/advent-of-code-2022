@@ -12,7 +12,7 @@ pub fn main() {
     let mut monkeys: Vec<Monkey> = Vec::<Monkey>::new();
 
     // parse input
-    s.split("\n\n").for_each(|m| {
+    s.split("\n\n").enumerate().for_each(|(i_monkey, m)| {
         let mut monkey: Monkey = Monkey {
             items: Vec::with_capacity(32),
             test: 0,
@@ -46,9 +46,15 @@ pub fn main() {
                 }
                 4 => {
                     monkey.target1 = l[29..].parse::<usize>().unwrap();
+                    if i_monkey == monkey.target1 {
+                        panic!("monkey {} targets itself!", i_monkey);
+                    }
                 }
                 5 => {
                     monkey.target2 = l[30..].parse::<usize>().unwrap();
+                    if i_monkey == monkey.target2 {
+                        panic!("monkey {} targets itself!", i_monkey);
+                    }
                 }
                 _ => {}
             }
@@ -57,11 +63,10 @@ pub fn main() {
     });
 
     // simulate rounds
-    let mut passes: Vec<(usize, u64)> = Vec::with_capacity(32);
     for _round in 1..21 {
         for i_monkey in 0..monkeys.len() {
-            passes.clear();
-            let monkey = monkeys.get_mut(i_monkey).unwrap();
+            let ptr = monkeys.as_mut_ptr();
+            let monkey = unsafe { &mut *ptr.add(i_monkey) };
             #[cfg(debug_assertions)]
             eprintln!("{} {} {:?}", i_monkey, monkey.inspect_count, monkey.items);
             monkey.items.iter_mut().for_each(|item| {
@@ -79,20 +84,13 @@ pub fn main() {
                 }
                 *item /= 3;
                 if *item % monkey.test == 0 {
-                    passes.push((monkey.target1, *item));
+                    monkeys[monkey.target1].items.push(*item);
                 } else {
-                    passes.push((monkey.target2, *item));
+                    monkeys[monkey.target2].items.push(*item);
                 }
             });
             monkey.items.clear();
-            for (target, item) in &passes {
-                monkeys[*target].items.push(*item);
-            }
         }
-    }
-    #[cfg(debug_assertions)]
-    if passes.capacity() != 32 {
-        eprintln!("new capacity: {}", passes.capacity());
     }
 
     let mut counts = monkeys
