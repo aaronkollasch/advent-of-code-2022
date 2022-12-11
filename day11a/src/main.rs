@@ -6,10 +6,12 @@ struct Monkey {
     pub target2: usize,
     pub inspect_count: u32,
 }
+
 pub fn main() {
     let s = include_str!("../input.txt");
     let mut monkeys: Vec<Monkey> = Vec::<Monkey>::new();
 
+    // parse input
     s.split("\n\n").for_each(|m| {
         let mut monkey: Monkey = Monkey {
             items: Vec::with_capacity(32),
@@ -54,6 +56,7 @@ pub fn main() {
         monkeys.push(monkey);
     });
 
+    // simulate rounds
     let mut passes: Vec<(usize, u64)> = Vec::with_capacity(32);
     for _round in 1..21 {
         for i_monkey in 0..monkeys.len() {

@@ -11,6 +11,7 @@ pub fn main() {
     let s = include_str!("../input.txt");
     let mut monkeys: Vec<Monkey> = Vec::<Monkey>::new();
 
+    // parse input
     s.split("\n\n").for_each(|m| {
         let mut monkey: Monkey = Monkey {
             items: Vec::with_capacity(32),
@@ -55,10 +56,12 @@ pub fn main() {
         monkeys.push(monkey);
     });
 
-    let gcd = monkeys.iter().map(|m| m.test).product::<u64>();
+    // lcm = product of all divisors as they are prime
+    let lcm = monkeys.iter().map(|m| m.test).product::<u64>();
     #[cfg(debug_assertions)]
-    eprintln!("gcd: {}", gcd);
+    eprintln!("lcm: {}", lcm);
 
+    // simulate rounds
     let mut passes: Vec<(usize, u64)> = Vec::with_capacity(32);
     for _round in 1..10001 {
         for i_monkey in 0..monkeys.len() {
@@ -70,13 +73,13 @@ pub fn main() {
                 monkey.inspect_count += 1;
                 match monkey.operation.0 {
                     0 => {
-                        *item = item.wrapping_add(monkey.operation.1) % gcd;
+                        *item = item.wrapping_add(monkey.operation.1) % lcm;
                     }
                     1 => {
-                        *item = item.wrapping_mul(monkey.operation.1) % gcd;
+                        *item = item.wrapping_mul(monkey.operation.1) % lcm;
                     }
                     _ => {
-                        *item = item.wrapping_mul(*item) % gcd;
+                        *item = item.wrapping_mul(*item) % lcm;
                     }
                 }
                 if *item % monkey.test == 0 {
