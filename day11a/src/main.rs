@@ -61,7 +61,7 @@ pub fn main() {
             let monkey = monkeys.get_mut(i_monkey).unwrap();
             #[cfg(debug_assertions)]
             eprintln!("{} {} {:?}", i_monkey, monkey.inspect_count, monkey.items);
-            monkey.items.retain_mut(|item| {
+            monkey.items.iter_mut().for_each(|item| {
                 monkey.inspect_count += 1;
                 match monkey.operation.0 {
                     0 => {
@@ -80,8 +80,8 @@ pub fn main() {
                 } else {
                     passes.push((monkey.target2, *item));
                 }
-                false
             });
+            monkey.items.clear();
             for (target, item) in &passes {
                 monkeys[*target].items.push(*item);
             }
