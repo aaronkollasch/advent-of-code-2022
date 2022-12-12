@@ -26,14 +26,10 @@ impl DistMap {
         let mut output = Vec::with_capacity(4);
         output.extend(
             [
-                // (-1, -1),
                 (-1, 0),
-                // (-1, 1),
                 (0, -1),
                 (0, 1),
-                // (1, -1),
                 (1, 0),
-                // (1, 1),
             ]
             .iter()
             .filter_map(|&p| {
@@ -70,7 +66,8 @@ pub fn main() {
     let w = s.iter().position(|&b| b == b'\n').unwrap();
     let h = s.split(|&b| b == b'\n').filter(|l| l.len() > 0).count();
     let mut heights = Vec::from_iter(s.iter().filter_map(|b| if *b >= b'A' {Some(*b)} else {None}));
-    println!("w: {} h: {} l: {}", w, h, heights.len());
+    #[cfg(debug_assertions)]
+    eprintln!("w: {} h: {} l: {}", w, h, heights.len());
     let mut start = Pos { x: 0, y: 0 };
     let mut end = Pos { x: 0, y: 0 };
     let mut distances: DistMap = DistMap {
@@ -91,35 +88,41 @@ pub fn main() {
             _ => {}
         }
     }
-    println!("start: {} {}", start.x, start.y);
-    println!("end: {} {}", end.x, end.y);
     set_height(&mut heights, w, start, b'a');
     set_height(&mut heights, w, end, b'z');
-    println!("{} {}", get_height(&heights, w, start), get_height(&heights, w, end));
+    #[cfg(debug_assertions)]
+    {
+        eprintln!("start: {} {}", start.x, start.y);
+        eprintln!("end: {} {}", end.x, end.y);
+        eprintln!("{} {}", get_height(&heights, w, start), get_height(&heights, w, end));
+    }
 
     let mut next_positions: HashSet<Pos> = HashSet::with_capacity(32);
     next_positions.insert(end);
     let mut distance = 0;
 
     while next_positions.len() > 0 {
-        println!("distance {}", distance);
-        println!("{:?}", next_positions);
+        #[cfg(debug_assertions)]
+        eprintln!("distance {}", distance);
         for p in next_positions.iter() {
             distances.set_val(*p, distance);
         }
         match next_positions.iter().filter(|p| get_height(&heights, w, **p) == b'a').next() {
             Some(p) => {
-                println!("end {}: {} {}", distance, p.x, p.y);
+                #[cfg(debug_assertions)]
+                eprintln!("end {}: {} {}", distance, p.x, p.y);
+                start = *p;
                 break;
             }
             _ => {}
         }
         let new_positions: HashSet<Pos> = HashSet::from_iter(
             next_positions.iter().map(|p| {
-                println!("neighbors of {} {}: {:?}", p.x, p.y, distances.get_unset_neighbors(*p));
-                println!("height of {} {}: {}", p.x, p.y, get_height(&heights, w, *p));
+                #[cfg(debug_assertions)]
+                println!("*   height of [{}, {}]: {}", p.x, p.y, get_height(&heights, w, *p));
                 distances.get_unset_neighbors(*p).into_iter().filter(|p2| {
-                    println!("height of {} {}: {}", p2.x, p2.y, get_height(&heights, w, *p2));
+                    #[cfg(debug_assertions)]
+                    println!(" -> height of [{}, {}]: {}", p2.x, p2.y, get_height(&heights, w, *p2));
                     get_height(&heights, w, *p2) as i8 - get_height(&heights, w, *p) as i8 >= -1
                 })
             }).flatten());
@@ -127,5 +130,4 @@ pub fn main() {
         distance += 1;
     }
     print!("{} ", distances.get_val(start));
-    print!("{} ", distances.get_val(end));
 }

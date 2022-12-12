@@ -70,13 +70,14 @@ pub fn main() {
     let w = s.iter().position(|&b| b == b'\n').unwrap();
     let h = s.split(|&b| b == b'\n').filter(|l| l.len() > 0).count();
     let mut heights = Vec::from_iter(s.iter().filter_map(|b| if *b >= b'A' {Some(*b)} else {None}));
-    println!("w: {} h: {} l: {}", w, h, heights.len());
+    #[cfg(debug_assertions)]
+    eprintln!("w: {} h: {} l: {}", w, h, heights.len());
     let mut start = Pos { x: 0, y: 0 };
     let mut end = Pos { x: 0, y: 0 };
     let mut distances: DistMap = DistMap {
         distances: vec![-1; w * h],
-        w: w,
-        h: h,
+        w,
+        h,
     };
     for (i, &b) in s.iter().enumerate() {
         match b {
@@ -91,38 +92,44 @@ pub fn main() {
             _ => {}
         }
     }
-    println!("start: {} {}", start.x, start.y);
-    println!("end: {} {}", end.x, end.y);
     set_height(&mut heights, w, start, b'a');
     set_height(&mut heights, w, end, b'z');
-    println!("{} {}", get_height(&heights, w, start), get_height(&heights, w, end));
+    #[cfg(debug_assertions)]
+    {
+        println!("start: {} {}", start.x, start.y);
+        println!("end: {} {}", end.x, end.y);
+        println!("{} {}", get_height(&heights, w, start), get_height(&heights, w, end));
+    }
 
     let mut next_positions: HashSet<Pos> = HashSet::with_capacity(32);
     next_positions.insert(start);
     let mut distance = 0;
 
     while next_positions.len() > 0 {
+        #[cfg(debug_assertions)]
         println!("distance {}", distance);
-        println!("{:?}", next_positions);
         for p in next_positions.iter() {
             distances.set_val(*p, distance);
         }
         if next_positions.contains(&end) {
+            #[cfg(debug_assertions)]
             println!("end");
             break;
         }
         let new_positions: HashSet<Pos> = HashSet::from_iter(
             next_positions.iter().map(|p| {
-                println!("neighbors of {} {}: {:?}", p.x, p.y, distances.get_unset_neighbors(*p));
-                println!("height of {} {}: {}", p.x, p.y, get_height(&heights, w, *p));
+                // #[cfg(debug_assertions)]
+                // println!("neighbors of {} {}: {:?}", p.x, p.y, distances.get_unset_neighbors(*p));
+                #[cfg(debug_assertions)]
+                println!("*   height of [{}, {}]: {}", p.x, p.y, get_height(&heights, w, *p));
                 distances.get_unset_neighbors(*p).into_iter().filter(|p2| {
-                    println!("height of {} {}: {}", p2.x, p2.y, get_height(&heights, w, *p2));
+                    #[cfg(debug_assertions)]
+                    println!(" -> height of [{}, {}]: {}", p2.x, p2.y, get_height(&heights, w, *p2));
                     get_height(&heights, w, *p2) as i8 - get_height(&heights, w, *p) as i8 <= 1
                 })
             }).flatten());
         next_positions = new_positions;
         distance += 1;
     }
-    print!("{} ", distances.get_val(start));
     print!("{} ", distances.get_val(end));
 }
