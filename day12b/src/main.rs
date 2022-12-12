@@ -24,31 +24,22 @@ impl DistMap {
 
     pub fn get_unset_neighbors(&self, pos: Pos) -> Vec<Pos> {
         let mut output = Vec::with_capacity(4);
-        output.extend(
-            [
-                (-1, 0),
-                (0, -1),
-                (0, 1),
-                (1, 0),
-            ]
-            .iter()
-            .filter_map(|&p| {
-                let new_pos = Pos {
-                    x: pos.x + p.0,
-                    y: pos.y + p.1,
-                };
-                if new_pos.x >= 0
-                    && new_pos.x < self.w as i32
-                    && new_pos.y >= 0
-                    && new_pos.y < self.h as i32
-                    && self.get_val(new_pos) == -1
-                {
-                    Some(new_pos)
-                } else {
-                    None
-                }
-            }),
-        );
+        output.extend([(-1, 0), (0, -1), (0, 1), (1, 0)].iter().filter_map(|&p| {
+            let new_pos = Pos {
+                x: pos.x + p.0,
+                y: pos.y + p.1,
+            };
+            if new_pos.x >= 0
+                && new_pos.x < self.w as i32
+                && new_pos.y >= 0
+                && new_pos.y < self.h as i32
+                && self.get_val(new_pos) == -1
+            {
+                Some(new_pos)
+            } else {
+                None
+            }
+        }));
         output
     }
 }
@@ -65,7 +56,10 @@ pub fn main() {
     let s = include_bytes!("../input.txt");
     let w = s.iter().position(|&b| b == b'\n').unwrap();
     let h = s.split(|&b| b == b'\n').filter(|l| l.len() > 0).count();
-    let mut heights = Vec::from_iter(s.iter().filter_map(|b| if *b >= b'A' {Some(*b)} else {None}));
+    let mut heights = Vec::from_iter(
+        s.iter()
+            .filter_map(|b| if *b >= b'A' { Some(*b) } else { None }),
+    );
     #[cfg(debug_assertions)]
     eprintln!("w: {} h: {} l: {}", w, h, heights.len());
     let mut start = Pos { x: 0, y: 0 };
@@ -94,7 +88,11 @@ pub fn main() {
     {
         eprintln!("start: {} {}", start.x, start.y);
         eprintln!("end: {} {}", end.x, end.y);
-        eprintln!("{} {}", get_height(&heights, w, start), get_height(&heights, w, end));
+        eprintln!(
+            "{} {}",
+            get_height(&heights, w, start),
+            get_height(&heights, w, end)
+        );
     }
 
     let mut next_positions: HashSet<Pos> = HashSet::with_capacity(32);
@@ -107,7 +105,11 @@ pub fn main() {
         for p in next_positions.iter() {
             distances.set_val(*p, distance);
         }
-        match next_positions.iter().filter(|p| get_height(&heights, w, **p) == b'a').next() {
+        match next_positions
+            .iter()
+            .filter(|p| get_height(&heights, w, **p) == b'a')
+            .next()
+        {
             Some(p) => {
                 #[cfg(debug_assertions)]
                 eprintln!("end {}: {} {}", distance, p.x, p.y);
@@ -117,15 +119,29 @@ pub fn main() {
             _ => {}
         }
         let new_positions: HashSet<Pos> = HashSet::from_iter(
-            next_positions.iter().map(|p| {
-                #[cfg(debug_assertions)]
-                println!("*   height of [{}, {}]: {}", p.x, p.y, get_height(&heights, w, *p));
-                distances.get_unset_neighbors(*p).into_iter().filter(|p2| {
+            next_positions
+                .iter()
+                .map(|p| {
                     #[cfg(debug_assertions)]
-                    println!(" -> height of [{}, {}]: {}", p2.x, p2.y, get_height(&heights, w, *p2));
-                    get_height(&heights, w, *p2) as i8 - get_height(&heights, w, *p) as i8 >= -1
+                    println!(
+                        "*   height of [{}, {}]: {}",
+                        p.x,
+                        p.y,
+                        get_height(&heights, w, *p)
+                    );
+                    distances.get_unset_neighbors(*p).into_iter().filter(|p2| {
+                        #[cfg(debug_assertions)]
+                        println!(
+                            " -> height of [{}, {}]: {}",
+                            p2.x,
+                            p2.y,
+                            get_height(&heights, w, *p2)
+                        );
+                        get_height(&heights, w, *p2) as i8 - get_height(&heights, w, *p) as i8 >= -1
+                    })
                 })
-            }).flatten());
+                .flatten(),
+        );
         next_positions = new_positions;
         distance += 1;
     }
