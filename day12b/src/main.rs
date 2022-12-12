@@ -59,12 +59,12 @@ fn get_height(heights: &Vec<u8>, w: usize, pos: Pos) -> u8 {
 
 pub fn main() {
     let s = include_bytes!("../input.txt");
-    let w = s.iter().position(|&b| b == b'\n').unwrap();
-    let h = s.split(|&b| b == b'\n').filter(|l| l.len() > 0).count();
     let mut heights = Vec::from_iter(
         s.iter()
             .filter_map(|b| if *b >= b'A' { Some(*b) } else { None }),
     );
+    let w = s.iter().position(|&b| b == b'\n').unwrap();
+    let h = heights.len() / w;
     #[cfg(debug_assertions)]
     eprintln!("w: {} h: {} l: {}", w, h, heights.len());
     let mut start = Pos { x: 0, y: 0 };
