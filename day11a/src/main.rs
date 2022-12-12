@@ -93,8 +93,8 @@ pub fn main() {
             let monkey = unsafe { &mut *ptr.add(i_monkey) };
             #[cfg(debug_assertions)]
             eprintln!("{} {} {:?}", i_monkey, monkey.inspect_count, monkey.items);
+            monkey.inspect_count += monkey.items.len() as u32;
             for item in monkey.items.iter_mut() {
-                monkey.inspect_count += 1;
                 *item = match monkey.operation {
                     Op::Add(y) => *item + y,
                     Op::Mul(y) => *item * y,
