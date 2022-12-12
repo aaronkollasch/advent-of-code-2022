@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use rustc_hash::FxHashSet;
 
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 struct Pos {
@@ -100,8 +100,8 @@ pub fn main() {
         );
     }
 
-    let mut next_positions: HashSet<Pos> = HashSet::with_capacity(2);
-    let mut new_positions: HashSet<Pos> = HashSet::with_capacity(32);
+    let mut next_positions: FxHashSet<Pos> = Default::default();
+    let mut new_positions: FxHashSet<Pos> = Default::default();
     next_positions.insert(end);
     let mut distance = 0;
 
