@@ -14,29 +14,20 @@ struct DistMap {
 }
 
 impl DistMap {
+    #[inline]
     pub fn get_val(&self, pos: Pos) -> i32 {
         self.distances[(pos.y as usize) * self.w + (pos.x as usize)]
     }
 
+    #[inline]
     pub fn set_val(&mut self, pos: Pos, val: i32) {
         self.distances[(pos.y as usize) * self.w + (pos.x as usize)] = val;
     }
 
-    pub fn get_unset_neighbors(&self, pos: Pos) -> Vec<Pos> {
-        let mut output = Vec::with_capacity(4);
-        output.extend(
-            [
-                // (-1, -1),
-                (-1, 0),
-                // (-1, 1),
-                (0, -1),
-                (0, 1),
-                // (1, -1),
-                (1, 0),
-                // (1, 1),
-            ]
+    pub fn iter_unset_neighbors(&self, pos: Pos) -> impl Iterator<Item = Pos> + '_ {
+        [(-1, 0), (0, -1), (0, 1), (1, 0)]
             .iter()
-            .filter_map(|&p| {
+            .filter_map(move |&p| {
                 let new_pos = Pos {
                     x: pos.x + p.0,
                     y: pos.y + p.1,
@@ -51,16 +42,16 @@ impl DistMap {
                 } else {
                     None
                 }
-            }),
-        );
-        output
+            })
     }
 }
 
+#[inline]
 fn set_height(heights: &mut Vec<u8>, w: usize, pos: Pos, val: u8) {
     heights[(pos.y as usize) * w + (pos.x as usize)] = val;
 }
 
+#[inline]
 fn get_height(heights: &Vec<u8>, w: usize, pos: Pos) -> u8 {
     heights[(pos.y as usize) * w + (pos.x as usize)]
 }
@@ -108,7 +99,7 @@ pub fn main() {
         );
     }
 
-    let mut next_positions: HashSet<Pos> = HashSet::with_capacity(32);
+    let mut next_positions: HashSet<Pos> = HashSet::with_capacity(2);
     next_positions.insert(start);
     let mut distance = 0;
 
@@ -127,8 +118,6 @@ pub fn main() {
             next_positions
                 .iter()
                 .map(|p| {
-                    // #[cfg(debug_assertions)]
-                    // println!("neighbors of {} {}: {:?}", p.x, p.y, distances.get_unset_neighbors(*p));
                     #[cfg(debug_assertions)]
                     println!(
                         "*   height of [{}, {}]: {}",
@@ -136,7 +125,7 @@ pub fn main() {
                         p.y,
                         get_height(&heights, w, *p)
                     );
-                    distances.get_unset_neighbors(*p).into_iter().filter(|p2| {
+                    distances.iter_unset_neighbors(*p).filter(|p2| {
                         #[cfg(debug_assertions)]
                         println!(
                             " -> height of [{}, {}]: {}",

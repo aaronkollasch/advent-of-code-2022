@@ -22,25 +22,25 @@ impl DistMap {
         self.distances[(pos.y as usize) * self.w + (pos.x as usize)] = val;
     }
 
-    pub fn get_unset_neighbors(&self, pos: Pos) -> Vec<Pos> {
-        let mut output = Vec::with_capacity(4);
-        output.extend([(-1, 0), (0, -1), (0, 1), (1, 0)].iter().filter_map(|&p| {
-            let new_pos = Pos {
-                x: pos.x + p.0,
-                y: pos.y + p.1,
-            };
-            if new_pos.x >= 0
-                && new_pos.x < self.w as i32
-                && new_pos.y >= 0
-                && new_pos.y < self.h as i32
-                && self.get_val(new_pos) == -1
-            {
-                Some(new_pos)
-            } else {
-                None
-            }
-        }));
-        output
+    pub fn iter_unset_neighbors(&self, pos: Pos) -> impl Iterator<Item = Pos> + '_ {
+        [(-1, 0), (0, -1), (0, 1), (1, 0)]
+            .iter()
+            .filter_map(move |&p| {
+                let new_pos = Pos {
+                    x: pos.x + p.0,
+                    y: pos.y + p.1,
+                };
+                if new_pos.x >= 0
+                    && new_pos.x < self.w as i32
+                    && new_pos.y >= 0
+                    && new_pos.y < self.h as i32
+                    && self.get_val(new_pos) == -1
+                {
+                    Some(new_pos)
+                } else {
+                    None
+                }
+            })
     }
 }
 
@@ -95,7 +95,7 @@ pub fn main() {
         );
     }
 
-    let mut next_positions: HashSet<Pos> = HashSet::with_capacity(32);
+    let mut next_positions: HashSet<Pos> = HashSet::with_capacity(2);
     next_positions.insert(end);
     let mut distance = 0;
 
@@ -129,7 +129,7 @@ pub fn main() {
                         p.y,
                         get_height(&heights, w, *p)
                     );
-                    distances.get_unset_neighbors(*p).into_iter().filter(|p2| {
+                    distances.iter_unset_neighbors(*p).filter(|p2| {
                         #[cfg(debug_assertions)]
                         println!(
                             " -> height of [{}, {}]: {}",
