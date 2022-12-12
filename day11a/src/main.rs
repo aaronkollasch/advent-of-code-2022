@@ -1,3 +1,5 @@
+use itertools::Itertools;
+
 #[derive(Debug, Clone)]
 enum Op {
     Square,
@@ -110,10 +112,13 @@ pub fn main() {
         }
     }
 
-    let mut counts = monkeys
-        .iter()
-        .map(|m| m.inspect_count)
-        .collect::<Vec<u32>>();
-    counts.sort_unstable();
-    print!("{} ", counts.iter().rev().take(2).product::<u32>());
+    print!(
+        "{} ",
+        monkeys
+            .iter()
+            .map(|m| m.inspect_count)
+            .sorted_unstable_by(|a, b| b.cmp(a))
+            .take(2)
+            .product::<u32>()
+    );
 }

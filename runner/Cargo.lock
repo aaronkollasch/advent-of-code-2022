@@ -149,10 +149,16 @@ version = "0.1.0"
 [[package]]
 name = "day11a"
 version = "0.1.0"
+dependencies = [
+ "itertools",
+]
 
 [[package]]
 name = "day11b"
 version = "0.1.0"
+dependencies = [
+ "itertools",
+]
 
 [[package]]
 name = "day12a"

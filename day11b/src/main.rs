@@ -1,3 +1,5 @@
+use itertools::Itertools;
+
 #[derive(Debug, Clone)]
 enum Op {
     Square,
@@ -12,7 +14,7 @@ struct Monkey {
     pub operation: Op,
     pub target1: usize,
     pub target2: usize,
-    pub inspect_count: u64,
+    pub inspect_count: usize,
 }
 
 pub fn main() {
@@ -83,7 +85,7 @@ pub fn main() {
             let monkey = unsafe { &mut *ptr.add(i_monkey) };
             // #[cfg(debug_assertions)]
             // eprintln!("{} {} {:?}", i_monkey, monkey.inspect_count, monkey.items);
-            monkey.inspect_count += monkey.items.len() as u64;
+            monkey.inspect_count += monkey.items.len();
             for item in monkey.items.iter_mut() {
                 *item = match monkey.operation {
                     Op::Add(y) => item.wrapping_add(y),
@@ -100,10 +102,13 @@ pub fn main() {
         }
     }
 
-    let mut counts = monkeys
-        .iter()
-        .map(|m| m.inspect_count)
-        .collect::<Vec<u64>>();
-    counts.sort_unstable();
-    print!("{} ", counts.iter().rev().take(2).product::<u64>());
+    print!(
+        "{} ",
+        monkeys
+            .iter()
+            .map(|m| m.inspect_count)
+            .sorted_unstable_by(|a, b| b.cmp(a))
+            .take(2)
+            .product::<usize>()
+    );
 }
