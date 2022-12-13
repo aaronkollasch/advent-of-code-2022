@@ -113,7 +113,6 @@ pub fn main() {
     }
     print!(
         "{} ",
-        (result.iter().position(|s| *s == FIRST).unwrap() + 1)
-            * (result.iter().position(|s| *s == SECOND).unwrap() + 1)
+        result.len() * (result.into_iter().rposition(|s| s == FIRST).unwrap() + 1)
     );
 }
