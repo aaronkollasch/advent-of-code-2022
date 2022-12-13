@@ -35,9 +35,6 @@ pub fn main() {
         } else {
             crt.push(' ');
         }
-        if x == WIDTH - 1 {
-            crt.push('\n');
-        }
     }
 
     print!("{}", crt);
