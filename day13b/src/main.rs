@@ -1,5 +1,6 @@
 use itertools::Itertools;
 use std::cmp::Ordering;
+use std::cmp::Ordering::{Greater, Less, Equal};
 use std::str;
 
 #[inline]
@@ -15,7 +16,7 @@ fn compare_lists(left: &[u8], right: &[u8]) -> Ordering {
         println!("{}", str::from_utf8(&right).unwrap());
     }
     let (mut depth_l, mut depth_r) = (0, 0);
-    let left_iter = left[1..left.len() - 1]
+    let mut left = left
         .split(move |b| match *b {
             b',' => depth_l == 0,
             b'[' => {
@@ -29,8 +30,7 @@ fn compare_lists(left: &[u8], right: &[u8]) -> Ordering {
             _ => false,
         })
         .filter(|v| v.len() > 0);
-    let len_l = left_iter.clone().count();
-    let right_iter = right[1..right.len() - 1]
+    let mut right = right
         .split(move |b| match *b {
             b',' => depth_r == 0,
             b'[' => {
@@ -44,47 +44,33 @@ fn compare_lists(left: &[u8], right: &[u8]) -> Ordering {
             _ => false,
         })
         .filter(|v| v.len() > 0);
-    let len_r = right_iter.clone().count();
-    let mut result = left_iter.zip(right_iter).find_map(|(l, r)| {
+    loop {
+        let (l, r) = (left.next(), right.next());
+        if l.is_none() {
+            return Less;
+        }
+        if r.is_none() {
+            return Greater;
+        }
+        let (l, r) = (l.unwrap(), r.unwrap());
         #[cfg(debug_assertions)]
         println!("-- {:?} {:?}", l, r);
-        let r = match (l[0], r[0]) {
-            (b'[', b'[') => compare_lists(l, r),
-            (b'[', _) => compare_lists(l, &[b"[", r, b"]"].concat()),
-            (_, b'[') => compare_lists(&[b"[", l, b"]"].concat(), r),
+        let result = match (l[0], r[0]) {
+            (b'[', b'[') => compare_lists(&l[1..l.len()-1], &r[1..r.len()-1]),
+            (b'[', _) => compare_lists(&l[1..l.len()-1], r),
+            (_, b'[') => compare_lists(l, &r[1..r.len()-1]),
             _ => {
-                let (a, b) = (parse(l), parse(r));
-                b.cmp(&a)
+                parse(l).cmp(&parse(r))
             }
         };
-        match r {
-            Ordering::Equal => None,
-            _ => Some(r),
-        }
-    });
-    #[cfg(debug_assertions)]
-    println!("lengths {} {}", len_l, len_r);
-    if result == None {
-        result = if len_l != len_r {
-            Some(len_r.cmp(&len_l))
-        } else {
-            Some(Ordering::Equal)
-        }
+        #[cfg(debug_assertions)]
+        println!("{}", match result { Greater => "ordered", Less => "not ordered", Equal => "no decision" });
+        match result {
+            Greater => { return Greater }
+            Less => { return Less }
+            Equal => {}
+        };
     }
-    let result = result.unwrap();
-    #[cfg(debug_assertions)]
-    match result {
-        Ordering::Greater => {
-            println!("ordered");
-        }
-        Ordering::Less => {
-            println!("not ordered");
-        }
-        Ordering::Equal => {
-            println!("no decision");
-        }
-    }
-    result
 }
 
 pub fn main() {
@@ -96,7 +82,7 @@ pub fn main() {
     s.push("[[6]]");
     let result = s
         .iter()
-        .sorted_by(|left, right| compare_lists(right.as_bytes(), left.as_bytes()))
+        .sorted_by(|left, right| compare_lists(left[1..left.len()-1].as_bytes(), right[1..right.len()-1].as_bytes()))
         .collect::<Vec<&&str>>();
     #[cfg(debug_assertions)]
     {
