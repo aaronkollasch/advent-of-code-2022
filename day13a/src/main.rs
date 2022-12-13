@@ -1,3 +1,4 @@
+use itertools::Itertools;
 use std::cmp::Ordering;
 use std::cmp::Ordering::{Equal, Greater, Less};
 use std::str;
@@ -74,10 +75,10 @@ fn compare_lists(left: &[u8], right: &[u8], left_idx: usize, right_idx: usize) -
 pub fn main() {
     let s = include_str!("../input.txt");
     let result = s
-        .split("\n\n")
-        .filter(|g| g.len() > 0)
+        .lines()
+        .filter(|l| l.len() > 0)
+        .tuples()
         .enumerate()
-        .map(|(i, g)| (i, g.split_once("\n").unwrap()))
         .filter_map(|(i, (left, right))| {
             let ordering = compare_lists(left.as_bytes(), right.as_bytes(), 0, 0);
             #[cfg(debug_assertions)]
