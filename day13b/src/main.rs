@@ -15,8 +15,8 @@ fn compare_lists(left: &[u8], right: &[u8]) -> Ordering {
         println!("{}", str::from_utf8(&right).unwrap());
     }
     let (mut depth_l, mut depth_r) = (0, 0);
-    let left = left[1..left.len() - 1]
-        .split(|b| match *b {
+    let left_iter = left[1..left.len() - 1]
+        .split(move |b| match *b {
             b',' => depth_l == 0,
             b'[' => {
                 depth_l += 1;
@@ -28,10 +28,10 @@ fn compare_lists(left: &[u8], right: &[u8]) -> Ordering {
             }
             _ => false,
         })
-        .filter(|v| v.len() > 0)
-        .collect::<Vec<&[u8]>>();
-    let right = right[1..right.len() - 1]
-        .split(|b| match *b {
+        .filter(|v| v.len() > 0);
+    let len_l = left_iter.clone().count();
+    let right_iter = right[1..right.len() - 1]
+        .split(move |b| match *b {
             b',' => depth_r == 0,
             b'[' => {
                 depth_r += 1;
@@ -43,15 +43,15 @@ fn compare_lists(left: &[u8], right: &[u8]) -> Ordering {
             }
             _ => false,
         })
-        .filter(|v| v.len() > 0)
-        .collect::<Vec<&[u8]>>();
-    let mut result = left.iter().zip(right.iter()).find_map(|(l, r)| {
+        .filter(|v| v.len() > 0);
+    let len_r = right_iter.clone().count();
+    let mut result = left_iter.zip(right_iter).find_map(|(l, r)| {
         #[cfg(debug_assertions)]
         println!("-- {:?} {:?}", l, r);
         let r = match (l[0], r[0]) {
             (b'[', b'[') => compare_lists(l, r),
-            (b'[', _) => compare_lists(l, &[b"[", *r, b"]"].concat()),
-            (_, b'[') => compare_lists(&[b"[", *l, b"]"].concat(), r),
+            (b'[', _) => compare_lists(l, &[b"[", r, b"]"].concat()),
+            (_, b'[') => compare_lists(&[b"[", l, b"]"].concat(), r),
             _ => {
                 let (a, b) = (parse(l), parse(r));
                 b.cmp(&a)
@@ -62,9 +62,11 @@ fn compare_lists(left: &[u8], right: &[u8]) -> Ordering {
             _ => Some(r),
         }
     });
+    #[cfg(debug_assertions)]
+    println!("lengths {} {}", len_l, len_r);
     if result == None {
-        result = if left.len() != right.len() {
-            Some(right.len().cmp(&left.len()))
+        result = if len_l != len_r {
+            Some(len_r.cmp(&len_l))
         } else {
             Some(Ordering::Equal)
         }
