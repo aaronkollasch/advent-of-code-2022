@@ -72,16 +72,16 @@ fn compare_lists(left: &[u8], right: &[u8], left_idx: usize, right_idx: usize) -
 }
 
 pub fn main() {
-    let s = include_bytes!("../input.txt");
+    let s = include_str!("../input.txt");
     const FIRST: &[u8] = b"[[2]]";
     const SECOND: &[u8] = b"[[6]]";
     let (mut n_before_first, mut n_before_second) = (1, 2);
-    s.split(|b| *b == b'\n')
+    s.lines()
         .filter(|l| l.len() > 0)
         .for_each(|l| {
-            if compare_lists(&l, &SECOND, 0, 0) == Less {
+            if compare_lists(l.as_bytes(), &SECOND, 0, 0) == Less {
                 n_before_second += 1;
-                if compare_lists(&l, &FIRST, 0, 0) == Less {
+                if compare_lists(l.as_bytes(), &FIRST, 0, 0) == Less {
                     n_before_first += 1;
                 }
             }
