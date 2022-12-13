@@ -1,4 +1,3 @@
-use itertools::Itertools;
 use std::cmp::Ordering;
 use std::cmp::Ordering::{Equal, Greater, Less};
 use std::str;
@@ -76,23 +75,18 @@ pub fn main() {
     let s = include_bytes!("../input.txt");
     const FIRST: &[u8] = b"[[2]]";
     const SECOND: &[u8] = b"[[6]]";
-    let result = s
-        .split(|b| *b == b'\n')
+    let (mut n_before_first, mut n_before_second) = (1, 2);
+    s.split(|b| *b == b'\n')
         .filter(|l| l.len() > 0)
-        .filter(|l| compare_lists(&l, &SECOND, 0, 0) != Greater)
-        .chain(std::iter::once(FIRST))
-        .sorted_unstable_by(|left, right| compare_lists(&left, &right, 0, 0))
-        .collect::<Vec<&[u8]>>();
+        .for_each(|l| {
+            if compare_lists(&l, &SECOND, 0, 0) == Less {
+                n_before_second += 1;
+                if compare_lists(&l, &FIRST, 0, 0) == Less {
+                    n_before_first += 1;
+                }
+            }
+        });
     #[cfg(debug_assertions)]
-    {
-        println!("{}", str::from_utf8(s).unwrap());
-        println!(
-            "{}",
-            result.iter().map(|l| str::from_utf8(l).unwrap()).join("\n")
-        );
-    }
-    print!(
-        "{} ",
-        (result.len() + 1) * (result.into_iter().rposition(|s| s == FIRST).unwrap() + 1)
-    );
+    println!("{} {}", n_before_first, n_before_second);
+    print!("{} ", n_before_first * n_before_second);
 }
