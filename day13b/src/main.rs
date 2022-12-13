@@ -86,37 +86,34 @@ fn compare_lists(left: &[u8], right: &[u8]) -> Ordering {
 }
 
 pub fn main() {
-    let mut s = include_str!("../input.txt")
-        .lines()
-        .filter(|g| g.len() > 0)
-        .collect::<Vec<&str>>();
-    const FIRST: &str = "[[2]]";
-    const SECOND: &str = "[[6]]";
-    s.push(FIRST);
-    s.push(SECOND);
+    let s = include_bytes!("../input.txt");
+    const FIRST: &[u8] = b"[[2]]";
+    const SECOND: &[u8] = b"[[6]]";
     let result = s
-        .iter()
+        .split(|b| *b == b'\n')
+        .filter(|l| l.len() > 0)
         .filter(|l| {
             compare_lists(
-                l[1..l.len() - 1].as_bytes(),
-                SECOND[1..SECOND.len() - 1].as_bytes(),
+                &l[1..l.len() - 1],
+                &SECOND[1..SECOND.len() - 1],
             ) != Greater
         })
+        .chain([FIRST, SECOND].into_iter())
         .sorted_unstable_by(|left, right| {
             compare_lists(
-                left[1..left.len() - 1].as_bytes(),
-                right[1..right.len() - 1].as_bytes(),
+                &left[1..left.len() - 1],
+                &right[1..right.len() - 1],
             )
         })
-        .collect::<Vec<&&str>>();
+        .collect::<Vec<&[u8]>>();
     #[cfg(debug_assertions)]
     {
-        println!("{:?}", s);
-        println!("{:?}", result);
+        println!("{}", str::from_utf8(s).unwrap());
+        println!("{}", result.iter().map(|l| str::from_utf8(l).unwrap()).join("\n"));
     }
     print!(
         "{} ",
-        (result.iter().position(|s| **s == FIRST).unwrap() + 1)
-            * (result.iter().position(|s| **s == SECOND).unwrap() + 1)
+        (result.iter().position(|s| *s == FIRST).unwrap() + 1)
+            * (result.iter().position(|s| *s == SECOND).unwrap() + 1)
     );
 }
