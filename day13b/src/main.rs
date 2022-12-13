@@ -1,6 +1,7 @@
 use itertools::Itertools;
 use std::cmp::Ordering;
-use std::cmp::Ordering::{Greater, Less, Equal};
+use std::cmp::Ordering::{Equal, Greater, Less};
+#[cfg(debug_assertions)]
 use std::str;
 
 #[inline]
@@ -46,28 +47,33 @@ fn compare_lists(left: &[u8], right: &[u8]) -> Ordering {
         .filter(|v| v.len() > 0);
     loop {
         let (l, r) = (left.next(), right.next());
-        if l.is_none() {
-            return Less;
-        }
-        if r.is_none() {
-            return Greater;
+        match (l.is_none(), r.is_none()) {
+            (true, true) => { return Equal; }
+            (true, false) => { return Less; }
+            (false, true) => { return Greater; }
+            (false, false) => {}
         }
         let (l, r) = (l.unwrap(), r.unwrap());
         #[cfg(debug_assertions)]
         println!("-- {:?} {:?}", l, r);
         let result = match (l[0], r[0]) {
-            (b'[', b'[') => compare_lists(&l[1..l.len()-1], &r[1..r.len()-1]),
-            (b'[', _) => compare_lists(&l[1..l.len()-1], r),
-            (_, b'[') => compare_lists(l, &r[1..r.len()-1]),
-            _ => {
-                parse(l).cmp(&parse(r))
-            }
+            (b'[', b'[') => compare_lists(&l[1..l.len() - 1], &r[1..r.len() - 1]),
+            (b'[', _) => compare_lists(&l[1..l.len() - 1], r),
+            (_, b'[') => compare_lists(l, &r[1..r.len() - 1]),
+            _ => parse(l).cmp(&parse(r)),
         };
         #[cfg(debug_assertions)]
-        println!("{}", match result { Greater => "ordered", Less => "not ordered", Equal => "no decision" });
+        println!(
+            "{}",
+            match result {
+                Greater => "not ordered",
+                Less => "ordered",
+                Equal => "no decision",
+            }
+        );
         match result {
-            Greater => { return Greater }
-            Less => { return Less }
+            Greater => return Greater,
+            Less => return Less,
             Equal => {}
         };
     }
@@ -82,7 +88,12 @@ pub fn main() {
     s.push("[[6]]");
     let result = s
         .iter()
-        .sorted_by(|left, right| compare_lists(left[1..left.len()-1].as_bytes(), right[1..right.len()-1].as_bytes()))
+        .sorted_by(|left, right| {
+            compare_lists(
+                left[1..left.len() - 1].as_bytes(),
+                right[1..right.len() - 1].as_bytes(),
+            )
+        })
         .collect::<Vec<&&str>>();
     #[cfg(debug_assertions)]
     {
