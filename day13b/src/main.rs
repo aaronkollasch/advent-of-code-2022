@@ -48,9 +48,15 @@ fn compare_lists(left: &[u8], right: &[u8]) -> Ordering {
     loop {
         let (l, r) = (left.next(), right.next());
         match (l.is_none(), r.is_none()) {
-            (true, true) => { return Equal; }
-            (true, false) => { return Less; }
-            (false, true) => { return Greater; }
+            (true, true) => {
+                return Equal;
+            }
+            (true, false) => {
+                return Less;
+            }
+            (false, true) => {
+                return Greater;
+            }
             (false, false) => {}
         }
         let (l, r) = (l.unwrap(), r.unwrap());
@@ -84,11 +90,19 @@ pub fn main() {
         .lines()
         .filter(|g| g.len() > 0)
         .collect::<Vec<&str>>();
-    s.push("[[2]]");
-    s.push("[[6]]");
+    const FIRST: &str = "[[2]]";
+    const SECOND: &str = "[[6]]";
+    s.push(FIRST);
+    s.push(SECOND);
     let result = s
         .iter()
-        .sorted_by(|left, right| {
+        .filter(|l| {
+            compare_lists(
+                l[1..l.len() - 1].as_bytes(),
+                SECOND[1..SECOND.len() - 1].as_bytes(),
+            ) != Greater
+        })
+        .sorted_unstable_by(|left, right| {
             compare_lists(
                 left[1..left.len() - 1].as_bytes(),
                 right[1..right.len() - 1].as_bytes(),
@@ -102,7 +116,7 @@ pub fn main() {
     }
     print!(
         "{} ",
-        (result.iter().position(|s| **s == "[[2]]").unwrap() + 1)
-            * (result.iter().position(|s| **s == "[[6]]").unwrap() + 1)
+        (result.iter().position(|s| **s == FIRST).unwrap() + 1)
+            * (result.iter().position(|s| **s == SECOND).unwrap() + 1)
     );
 }

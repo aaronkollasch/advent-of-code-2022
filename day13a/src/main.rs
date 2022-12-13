@@ -47,9 +47,15 @@ fn compare_lists(left: &[u8], right: &[u8]) -> Ordering {
     loop {
         let (l, r) = (left.next(), right.next());
         match (l.is_none(), r.is_none()) {
-            (true, true) => { return Equal; }
-            (true, false) => { return Less; }
-            (false, true) => { return Greater; }
+            (true, true) => {
+                return Equal;
+            }
+            (true, false) => {
+                return Less;
+            }
+            (false, true) => {
+                return Greater;
+            }
             (false, false) => {}
         }
         let (l, r) = (l.unwrap(), r.unwrap());
