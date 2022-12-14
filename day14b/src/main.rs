@@ -17,12 +17,12 @@ struct Map {
 impl Map {
     #[inline]
     pub fn get_val(&self, pos: Pos) -> u8 {
-        self.contents[(pos.y as usize) * self.w + (pos.x as usize)]
+        self.contents[pos.y * self.w + pos.x]
     }
 
     #[inline]
     pub fn set_val(&mut self, pos: Pos, val: u8) {
-        self.contents[(pos.y as usize) * self.w + (pos.x as usize)] = val;
+        self.contents[pos.y * self.w + pos.x] = val;
     }
 
     #[inline]
@@ -82,8 +82,13 @@ const MAP_AIR: u8 = b' ';
 const MAP_ROCK: u8 = b'#';
 const MAP_SAND: u8 = b'o';
 const DROP_POS: Pos = Pos { x: 500, y: 0 };
-const MAX_WIDTH: usize = 800;
-const MAX_HEIGHT: usize = 256;
+const Y_MAX: usize = 157 + 2;
+#[cfg(debug_assertions)]
+const X_MIN_TRUE: usize = 491 - Y_MAX - 1;
+const X_MIN: usize = 0;
+const X_MAX: usize = 561 + Y_MAX + 1;
+const MAX_WIDTH: usize = X_MAX - X_MIN + 1;
+const MAX_HEIGHT: usize = Y_MAX + 1;
 
 pub fn main() {
     let w = MAX_WIDTH;
@@ -95,22 +100,29 @@ pub fn main() {
     };
     let s = include_str!("../input.txt");
     let mut y_max = 0;
+    #[cfg(debug_assertions)]
+    let (mut x_min, mut x_max) = (usize::MAX, 0);
     s.lines().for_each(|l| {
         for (prev, next) in l.split(" -> ").map(parse_point).tuple_windows() {
             map.fill_line(prev, next, MAP_ROCK);
             y_max = max(y_max, max(prev.y, next.y));
+            #[cfg(debug_assertions)]
+            {
+                x_min = min(x_min, min(prev.x, next.x));
+                x_max = max(x_max, max(prev.x, next.x));
+            }
         }
     });
     #[cfg(debug_assertions)]
-    println!("y_max: {}", y_max);
-    map.fill_line(Pos { x: 0, y: y_max + 2 }, Pos { x: MAX_WIDTH - 1, y: y_max + 2 }, MAP_ROCK);
+    println!("y_max: {}, x_min: {}, x_max: {}", y_max, x_min, x_max);
+    map.fill_line(Pos { x: X_MIN, y: y_max + 2 }, Pos { x: X_MAX, y: y_max + 2 }, MAP_ROCK);
     let mut i = 0;
     let mut drop_path: Vec<Pos> = Vec::with_capacity(MAX_HEIGHT);
     drop_path.push(DROP_POS);
     while map.drop_sand(&mut drop_path) { i += 1; }
     #[cfg(debug_assertions)]
-    for y in 0..h {
-        for x in 0..w {
+    for y in 0..Y_MAX {
+        for x in X_MIN_TRUE..X_MAX {
             print!("{}", char::from_u32(map.get_val(Pos { x, y: y }) as u32).unwrap());
         }
         println!();
