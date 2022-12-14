@@ -7,22 +7,37 @@ struct Pos {
     pub y: usize,
 }
 
+const MAP_AIR: u8 = b' ';
+const MAP_ROCK: u8 = b'#';
+const MAP_SAND: u8 = b'o';
+const DROP_POS: Pos = Pos { x: 500, y: 0 };
+const Y_MAX: usize = 157 + 2;
+#[cfg(debug_assertions)]
+const X_MIN_TRUE: usize = 491 - Y_MAX - 1;
+const X_MIN: usize = 0;
+const X_MAX: usize = 561 + Y_MAX + 1;
+const MAP_WIDTH: usize = X_MAX - X_MIN + 1;
+const MAP_HEIGHT: usize = Y_MAX + 1;
+const MAP_SIZE: usize = MAP_WIDTH * MAP_HEIGHT;
+
 #[derive(Debug, Clone)]
 struct Map {
-    contents: Vec<u8>,
-    w: usize,
-    h: usize,
+    contents: [u8; MAP_SIZE],
 }
 
 impl Map {
+    pub fn new() -> Self {
+        Self { contents: [MAP_AIR; MAP_SIZE] }
+    }
+
     #[inline]
     pub fn get_val(&self, pos: Pos) -> u8 {
-        self.contents[pos.y * self.w + pos.x]
+        self.contents[pos.y * MAP_WIDTH + pos.x]
     }
 
     #[inline]
     pub fn set_val(&mut self, pos: Pos, val: u8) {
-        self.contents[pos.y * self.w + pos.x] = val;
+        self.contents[pos.y * MAP_WIDTH + pos.x] = val;
     }
 
     #[inline]
@@ -43,7 +58,7 @@ impl Map {
         if drop_path.len() == 0 { return false; }
         loop {
             let pos = *drop_path.last().unwrap();
-            if pos.y >= self.h - 1 {
+            if pos.y >= MAP_HEIGHT - 1 {
                 return false;
             }
             let new_pos = Pos { x: pos.x, y: pos.y + 1};
@@ -78,26 +93,8 @@ fn parse_point(p: &str) -> Pos {
     }
 }
 
-const MAP_AIR: u8 = b' ';
-const MAP_ROCK: u8 = b'#';
-const MAP_SAND: u8 = b'o';
-const DROP_POS: Pos = Pos { x: 500, y: 0 };
-const Y_MAX: usize = 157 + 2;
-#[cfg(debug_assertions)]
-const X_MIN_TRUE: usize = 491 - Y_MAX - 1;
-const X_MIN: usize = 0;
-const X_MAX: usize = 561 + Y_MAX + 1;
-const MAX_WIDTH: usize = X_MAX - X_MIN + 1;
-const MAX_HEIGHT: usize = Y_MAX + 1;
-
 pub fn main() {
-    let w = MAX_WIDTH;
-    let h = MAX_HEIGHT;
-    let mut map = Map {
-        contents: vec![MAP_AIR; w * h],
-        w,
-        h,
-    };
+    let mut map = Map::new();
     let s = include_str!("../input.txt");
     let mut y_max = 0;
     #[cfg(debug_assertions)]
@@ -117,7 +114,7 @@ pub fn main() {
     println!("y_max: {}, x_min: {}, x_max: {}", y_max, x_min, x_max);
     map.fill_line(Pos { x: X_MIN, y: y_max + 2 }, Pos { x: X_MAX, y: y_max + 2 }, MAP_ROCK);
     let mut i = 0;
-    let mut drop_path: Vec<Pos> = Vec::with_capacity(MAX_HEIGHT);
+    let mut drop_path: Vec<Pos> = Vec::with_capacity(MAP_HEIGHT);
     drop_path.push(DROP_POS);
     while map.drop_sand(&mut drop_path) { i += 1; }
     #[cfg(debug_assertions)]
