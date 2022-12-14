@@ -29,12 +29,10 @@ impl Map {
     pub fn fill_line(&mut self, pos1: Pos, pos2: Pos, val: u8) {
         if pos1.x == pos2.x {
             for y in min(pos1.y, pos2.y)..=max(pos1.y, pos2.y) {
-                println!("set {} {}", pos1.x, y);
                 self.set_val(Pos { x: pos1.x, y }, val);
             }
         } else if pos1.y == pos2.y {
             for x in min(pos1.x, pos2.x)..=max(pos1.x, pos2.x) {
-                println!("set {} {}", x, pos1.y);
                 self.set_val(Pos { x, y: pos1.y }, val);
             }
         }
@@ -98,15 +96,16 @@ pub fn main() {
     let mut y_max = 0;
     s.lines().for_each(|l| {
         for (prev, next) in l.split(" -> ").map(parse_point).tuple_windows() {
-            println!("{} {} {} {}", prev.x, prev.y, next.x, next.y);
             map.fill_line(prev, next, MAP_ROCK);
             y_max = max(y_max, max(prev.y, next.y));
         }
     });
+    #[cfg(debug_assertions)]
     println!("y_max: {}", y_max);
     map.fill_line(Pos { x: 0, y: y_max + 2 }, Pos { x: MAX_WIDTH - 1, y: y_max + 2 }, MAP_ROCK);
     let mut i = 0;
     while map.drop_sand(DROP_POS).is_some() { i += 1; }
+    #[cfg(debug_assertions)]
     for y in 0..h {
         for x in 0..w {
             print!("{}", char::from_u32(map.get_val(Pos { x, y: y }) as u32).unwrap());
