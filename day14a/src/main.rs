@@ -1,108 +1,148 @@
 use itertools::Itertools;
-use std::cmp::{min, max};
+#[cfg(debug_assertions)]
+use std::cmp::max;
+use std::cmp::min;
 
-#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
-struct Pos {
-    pub x: usize,
-    pub y: usize,
+type Pos = usize;
+
+#[cfg(debug_assertions)]
+#[inline]
+fn pos(x: usize, y: usize) -> Pos {
+    y * MAP_WIDTH + x
 }
+
+#[inline]
+fn x(p: Pos) -> usize {
+    p % MAP_WIDTH
+}
+
+#[inline]
+fn y(p: Pos) -> usize {
+    p / MAP_WIDTH
+}
+
+const MAP_AIR: u8 = b' ';
+const MAP_ROCK: u8 = b'#';
+const MAP_SAND: u8 = b'o';
+const Y_MAX: usize = 157 + 2;
+#[cfg(debug_assertions)]
+const X_MIN_TRUE: usize = 491 - Y_MAX - 1;
+const X_MIN: usize = 0;
+const X_MAX: usize = 561 + Y_MAX + 1;
+const MAP_WIDTH: usize = X_MAX - X_MIN + 1;
+const MAP_HEIGHT: usize = Y_MAX + 1;
+const MAP_SIZE: usize = MAP_WIDTH * MAP_HEIGHT;
+const DROP_POS: Pos = 500 - X_MIN;
 
 #[derive(Debug, Clone)]
 struct Map {
-    contents: Vec<u8>,
-    w: usize,
-    h: usize,
+    contents: [u8; MAP_SIZE],
 }
 
 impl Map {
+    pub fn new() -> Self {
+        Self {
+            contents: [MAP_AIR; MAP_SIZE],
+        }
+    }
+
     #[inline]
     pub fn get_val(&self, pos: Pos) -> u8 {
-        self.contents[(pos.y as usize) * self.w + (pos.x as usize)]
+        self.contents[pos]
     }
 
     #[inline]
     pub fn set_val(&mut self, pos: Pos, val: u8) {
-        self.contents[(pos.y as usize) * self.w + (pos.x as usize)] = val;
+        self.contents[pos] = val;
     }
 
     #[inline]
     pub fn fill_line(&mut self, pos1: Pos, pos2: Pos, val: u8) {
-        if pos1.x == pos2.x {
-            for y in min(pos1.y, pos2.y)..=max(pos1.y, pos2.y) {
-                self.set_val(Pos { x: pos1.x, y }, val);
+        if x(pos1) == x(pos2) {
+            let pos = min(pos1, pos2);
+            for y in 0..=y(pos1.abs_diff(pos2)) {
+                self.set_val(pos + y * MAP_WIDTH, val);
             }
-        } else if pos1.y == pos2.y {
-            for x in min(pos1.x, pos2.x)..=max(pos1.x, pos2.x) {
-                self.set_val(Pos { x, y: pos1.y }, val);
+        } else if y(pos1) == y(pos2) {
+            let pos = min(pos1, pos2);
+            for x in 0..=pos1.abs_diff(pos2) {
+                self.set_val(pos + x, val);
             }
         }
     }
 
     #[inline]
-    pub fn drop_sand(&mut self, drop_pos: Pos) -> Option<Pos> {
-        let mut pos = drop_pos.clone();
+    pub fn drop_sand(&mut self, drop_path: &mut Vec<Pos>) -> bool {
+        if drop_path.len() == 0 {
+            return false;
+        }
         loop {
-            if pos.y >= MAX_HEIGHT - 1 {
-                return None;
+            let pos = *drop_path.last().unwrap();
+            if y(pos) >= MAP_HEIGHT - 1 {
+                return false;
             }
-            let new_pos = Pos { x: pos.x, y: pos.y + 1};
+            let mut new_pos = pos + MAP_WIDTH;
             if self.get_val(new_pos) == MAP_AIR {
-                pos = new_pos;
+                drop_path.push(new_pos);
                 continue;
             }
-            let new_pos = Pos { x: pos.x - 1, y: pos.y + 1};
+            new_pos -= 1;
             if self.get_val(new_pos) == MAP_AIR {
-                pos = new_pos;
+                drop_path.push(new_pos);
                 continue;
             }
-            let new_pos = Pos { x: pos.x + 1, y: pos.y + 1};
+            new_pos += 2;
             if self.get_val(new_pos) == MAP_AIR {
-                pos = new_pos;
+                drop_path.push(new_pos);
                 continue;
             }
             self.set_val(pos, MAP_SAND);
-            return Some(pos);
+            drop_path.pop();
+            return true;
         }
-
     }
 }
 
 #[inline]
 fn parse_point(p: &str) -> Pos {
     let (x, y) = p.split_once(',').unwrap();
-    Pos {
-        x: x.parse().unwrap_or_else(|_| panic!("parse failed x: {}", x)),
-        y: y.parse().unwrap_or_else(|_| panic!("parse failed y: {}", y)),
-    }
+    let x = x
+        .parse::<usize>()
+        .unwrap_or_else(|_| panic!("parse failed x: {}", x));
+    let y = y
+        .parse::<usize>()
+        .unwrap_or_else(|_| panic!("parse failed y: {}", y));
+    y * MAP_WIDTH + x
 }
 
-const MAP_AIR: u8 = b' ';
-const MAP_ROCK: u8 = b'#';
-const MAP_SAND: u8 = b'o';
-const DROP_POS: Pos = Pos { x: 500, y: 0 };
-const MAX_WIDTH: usize = 800;
-const MAX_HEIGHT: usize = 256;
-
 pub fn main() {
-    let w = MAX_WIDTH;
-    let h = MAX_HEIGHT;
-    let mut map = Map {
-        contents: vec![MAP_AIR; w * h],
-        w,
-        h,
-    };
+    let mut map = Map::new();
     let s = include_str!("../input.txt");
+    #[cfg(debug_assertions)]
+    let (mut y_max, mut x_min, mut x_max) = (0, usize::MAX, 0);
     s.lines().for_each(|l| {
         for (prev, next) in l.split(" -> ").map(parse_point).tuple_windows() {
             map.fill_line(prev, next, MAP_ROCK);
+            #[cfg(debug_assertions)]
+            {
+                y_max = max(y_max, max(y(prev), y(next)));
+                x_min = min(x_min, min(x(prev), x(next)));
+                x_max = max(x_max, max(x(prev), x(next)));
+            }
         }
     });
-    let mut i = 0;
-    while map.drop_sand(DROP_POS).is_some() { i += 1; }
     #[cfg(debug_assertions)]
-    for y in 0..h {
-        for x in 0..w {
-            print!("{}", char::from_u32(map.get_val(Pos { x, y: y }) as u32).unwrap());
+    println!("y_max: {}, x_min: {}, x_max: {}", y_max, x_min, x_max);
+    let mut i = 0;
+    let mut drop_path: Vec<Pos> = Vec::with_capacity(MAP_HEIGHT);
+    drop_path.push(DROP_POS);
+    while map.drop_sand(&mut drop_path) {
+        i += 1;
+    }
+    #[cfg(debug_assertions)]
+    for y in 0..Y_MAX {
+        for x in X_MIN_TRUE..X_MAX {
+            print!("{}", char::from_u32(map.get_val(pos(x, y)) as u32).unwrap());
         }
         println!();
     }
