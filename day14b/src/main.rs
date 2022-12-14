@@ -68,34 +68,26 @@ impl Map {
     }
 
     #[inline]
-    pub fn drop_sand(&mut self, drop_path: &mut Vec<Pos>) -> bool {
-        if drop_path.len() == 0 {
-            return false;
-        }
-        loop {
-            let pos = *drop_path.last().unwrap();
-            if y(pos) >= MAP_HEIGHT - 1 {
-                return false;
-            }
-            let mut new_pos = pos + MAP_WIDTH;
-            if self.get_val(new_pos) == MAP_AIR {
-                drop_path.push(new_pos);
+    pub fn fill_sand(&mut self, drop_pos: Pos) -> u32 {
+        let mut i = 0;
+        let mut drop_path: Vec<Pos> = Vec::with_capacity(MAP_SIZE / 2);
+        drop_path.push(drop_pos);
+        while drop_path.len() > 0 {
+            let pos = drop_path.pop().unwrap();
+            if y(pos) >= MAP_HEIGHT {
                 continue;
             }
-            new_pos -= 1;
-            if self.get_val(new_pos) == MAP_AIR {
-                drop_path.push(new_pos);
+            if self.get_val(pos) != MAP_AIR {
                 continue;
             }
-            new_pos += 2;
-            if self.get_val(new_pos) == MAP_AIR {
-                drop_path.push(new_pos);
-                continue;
-            }
+            let new_pos = pos + MAP_WIDTH;
+            drop_path.push(new_pos + 1);
+            drop_path.push(new_pos - 1);
+            drop_path.push(new_pos);
             self.set_val(pos, MAP_SAND);
-            drop_path.pop();
-            return true;
+            i += 1;
         }
+        i
     }
 }
 
@@ -153,12 +145,7 @@ pub fn main() {
     #[cfg(debug_assertions)]
     println!("y_max: {}, x_min: {}, x_max: {}", y_max, x_min, x_max);
     map.fill_line(pos(0, y_max + 2), pos(MAP_WIDTH-1, y_max + 2), MAP_ROCK);
-    let mut i = 0;
-    let mut drop_path: Vec<Pos> = Vec::with_capacity(MAP_HEIGHT);
-    drop_path.push(DROP_POS);
-    while map.drop_sand(&mut drop_path) {
-        i += 1;
-    }
+    let i = map.fill_sand(DROP_POS);
     #[cfg(debug_assertions)]
     {
         let (mut y_max, mut x_min, mut x_max) = (0, usize::MAX, 0);
