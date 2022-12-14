@@ -3,10 +3,10 @@
 pub fn main() {
     print!(
         "{} ",
-        include_bytes!("../input.txt")
-            .split(|b| *b == b'\n')
+        include_str!("../input.txt")
+            .lines()
             .filter(|l| l.len() > 0)
-            .map(|l| l.split_at(l.len() / 2))
+            .map(|l| l.as_bytes().split_at(l.len() / 2))
             .map(|(a, b)| {
                 // let mut a_set: HashSet<u8> = HashSet::with_capacity(a.len());
                 // for i in 0..a.len() {
