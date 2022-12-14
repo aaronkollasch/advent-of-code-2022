@@ -72,8 +72,8 @@ impl Map {
         let mut i = 0;
         let mut drop_path: Vec<Pos> = Vec::with_capacity(MAP_HEIGHT);
         drop_path.push(drop_pos);
-        while drop_path.len() > 0 {
-            let pos = *drop_path.last().unwrap();
+        while let Some(pos) = drop_path.last() {
+            let pos = *pos;
             if y(pos) >= MAP_HEIGHT - 1 {
                 break;
             }
@@ -168,7 +168,12 @@ pub fn main() {
             }
             println!();
         }
-        println!("y_max: {}, x_min: {}, x_max: {}", y_max, x_min + X_MIN, x_max + X_MIN);
+        println!(
+            "y_max: {}, x_min: {}, x_max: {}",
+            y_max,
+            x_min + X_MIN,
+            x_max + X_MIN
+        );
     }
     print!("{} ", i);
 }

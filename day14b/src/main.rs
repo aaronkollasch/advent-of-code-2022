@@ -70,23 +70,24 @@ impl Map {
     #[inline]
     pub fn fill_sand(&mut self, drop_pos: Pos) -> u32 {
         let mut i = 0;
-        let mut drop_path: Vec<Pos> = Vec::with_capacity(MAP_SIZE / 2);
+        let mut drop_path: Vec<Pos> = Vec::with_capacity(MAP_HEIGHT * 2);
         drop_path.push(drop_pos);
-        while drop_path.len() > 0 {
-            let pos = drop_path.pop().unwrap();
+        while let Some(pos) = drop_path.pop() {
             if y(pos) >= MAP_HEIGHT {
                 continue;
             }
             if self.get_val(pos) != MAP_AIR {
                 continue;
             }
+            self.set_val(pos, MAP_SAND);
+            i += 1;
             let new_pos = pos + MAP_WIDTH;
             drop_path.push(new_pos + 1);
             drop_path.push(new_pos - 1);
             drop_path.push(new_pos);
-            self.set_val(pos, MAP_SAND);
-            i += 1;
         }
+        #[cfg(debug_assertions)]
+        println!("{}", drop_path.capacity());
         i
     }
 }
@@ -161,7 +162,12 @@ pub fn main() {
             }
             println!();
         }
-        println!("y_max: {}, x_min: {}, x_max: {}", y_max, x_min + X_MIN, x_max + X_MIN);
+        println!(
+            "y_max: {}, x_min: {}, x_max: {}",
+            y_max,
+            x_min + X_MIN,
+            x_max + X_MIN
+        );
     }
     print!("{} ", i);
 }
