@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use std::cmp::{min, max};
+use std::cmp::{max, min};
 
 type Pos = usize;
 
@@ -38,7 +38,9 @@ struct Map {
 
 impl Map {
     pub fn new() -> Self {
-        Self { contents: [MAP_AIR; MAP_SIZE] }
+        Self {
+            contents: [MAP_AIR; MAP_SIZE],
+        }
     }
 
     #[inline]
@@ -68,7 +70,9 @@ impl Map {
 
     #[inline]
     pub fn drop_sand(&mut self, drop_path: &mut Vec<Pos>) -> bool {
-        if drop_path.len() == 0 { return false; }
+        if drop_path.len() == 0 {
+            return false;
+        }
         loop {
             let pos = *drop_path.last().unwrap();
             if y(pos) >= MAP_HEIGHT - 1 {
@@ -93,15 +97,18 @@ impl Map {
             drop_path.pop();
             return true;
         }
-
     }
 }
 
 #[inline]
 fn parse_point(p: &str) -> Pos {
     let (x, y) = p.split_once(',').unwrap();
-    let x = x.parse::<usize>().unwrap_or_else(|_| panic!("parse failed x: {}", x));
-    let y = y.parse::<usize>().unwrap_or_else(|_| panic!("parse failed y: {}", y));
+    let x = x
+        .parse::<usize>()
+        .unwrap_or_else(|_| panic!("parse failed x: {}", x));
+    let y = y
+        .parse::<usize>()
+        .unwrap_or_else(|_| panic!("parse failed y: {}", y));
     y * MAP_WIDTH + x
 }
 
@@ -128,7 +135,9 @@ pub fn main() {
     let mut i = 0;
     let mut drop_path: Vec<Pos> = Vec::with_capacity(MAP_HEIGHT);
     drop_path.push(DROP_POS);
-    while map.drop_sand(&mut drop_path) { i += 1; }
+    while map.drop_sand(&mut drop_path) {
+        i += 1;
+    }
     #[cfg(debug_assertions)]
     for y in 0..Y_MAX {
         for x in X_MIN_TRUE..X_MAX {
