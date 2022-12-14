@@ -1,11 +1,9 @@
-use itertools::Itertools;
 #[cfg(debug_assertions)]
 use std::cmp::max;
 use std::cmp::min;
 
 type Pos = usize;
 
-#[cfg(debug_assertions)]
 #[inline]
 fn pos(x: usize, y: usize) -> Pos {
     y * MAP_WIDTH + x
@@ -103,33 +101,55 @@ impl Map {
     }
 }
 
-#[inline]
-fn parse_point(p: &str) -> Pos {
-    let (x, y) = p.split_once(',').unwrap();
-    let x = x
-        .parse::<usize>()
-        .unwrap_or_else(|_| panic!("parse failed x: {}", x));
-    let y = y
-        .parse::<usize>()
-        .unwrap_or_else(|_| panic!("parse failed y: {}", y));
-    y * MAP_WIDTH + x
-}
-
 pub fn main() {
     let mut map = Map::new();
-    let s = include_str!("../input.txt");
     #[cfg(debug_assertions)]
     let (mut y_max, mut x_min, mut x_max) = (0, usize::MAX, 0);
-    s.lines().for_each(|l| {
-        for (prev, next) in l.split(" -> ").map(parse_point).tuple_windows() {
-            map.fill_line(prev, next, MAP_ROCK);
+    let mut prev: Option<Pos> = None;
+    let (mut pair_0, mut acc) = (0, 0);
+    let mut pair_idx: bool = false;
+    let s = include_bytes!("../input.txt");
+    s.into_iter().for_each(|b| match b {
+        b' ' if pair_idx => {
+            let next = pos(pair_0, acc);
+            if prev.is_some() {
+                map.fill_line(prev.unwrap(), next, MAP_ROCK);
+            }
+            prev = Some(next);
             #[cfg(debug_assertions)]
             {
-                y_max = max(y_max, max(y(prev), y(next)));
-                x_min = min(x_min, min(x(prev), x(next)));
-                x_max = max(x_max, max(x(prev), x(next)));
+                y_max = max(y_max, y(next));
+                x_min = min(x_min, x(next));
+                x_max = max(x_max, x(next));
             }
+            acc = 0;
+            pair_idx = false;
         }
+        b' ' => {}
+        b',' => {
+            pair_0 = acc;
+            acc = 0;
+            pair_idx = true;
+        }
+        b'\n' => {
+            let next = pos(pair_0, acc);
+            if prev.is_some() {
+                map.fill_line(prev.unwrap(), next, MAP_ROCK);
+            }
+            #[cfg(debug_assertions)]
+            {
+                y_max = max(y_max, y(next));
+                x_min = min(x_min, x(next));
+                x_max = max(x_max, x(next));
+            }
+            prev = None;
+            acc = 0;
+            pair_idx = false;
+        }
+        b'0'..=b'9' => {
+            acc = acc * 10 + (b - b'0') as Pos;
+        }
+        _ => {}
     });
     #[cfg(debug_assertions)]
     println!("y_max: {}, x_min: {}, x_max: {}", y_max, x_min, x_max);
