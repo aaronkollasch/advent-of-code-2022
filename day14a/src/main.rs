@@ -23,10 +23,8 @@ const MAP_AIR: u8 = b' ';
 const MAP_ROCK: u8 = b'#';
 const MAP_SAND: u8 = b'o';
 const Y_MAX: usize = 157 + 2;
-#[cfg(debug_assertions)]
-const X_MIN_TRUE: usize = 491 - Y_MAX - 1;
-const X_MIN: usize = 0;
-const X_MAX: usize = 561 + Y_MAX + 1;
+const X_MIN: usize = 491 - 1;
+const X_MAX: usize = 561 + 1;
 const MAP_WIDTH: usize = X_MAX - X_MIN + 1;
 const MAP_HEIGHT: usize = Y_MAX + 1;
 const MAP_SIZE: usize = MAP_WIDTH * MAP_HEIGHT;
@@ -111,7 +109,7 @@ pub fn main() {
     let s = include_bytes!("../input.txt");
     s.into_iter().for_each(|b| match b {
         b' ' if pair_idx => {
-            let next = pos(pair_0, acc);
+            let next = pos(pair_0 - X_MIN, acc);
             if prev.is_some() {
                 map.fill_line(prev.unwrap(), next, MAP_ROCK);
             }
@@ -132,7 +130,7 @@ pub fn main() {
             pair_idx = true;
         }
         b'\n' => {
-            let next = pos(pair_0, acc);
+            let next = pos(pair_0 - X_MIN, acc);
             if prev.is_some() {
                 map.fill_line(prev.unwrap(), next, MAP_ROCK);
             }
@@ -160,11 +158,21 @@ pub fn main() {
         i += 1;
     }
     #[cfg(debug_assertions)]
-    for y in 0..Y_MAX {
-        for x in X_MIN_TRUE..X_MAX {
-            print!("{}", char::from_u32(map.get_val(pos(x, y)) as u32).unwrap());
+    {
+        let (mut y_max, mut x_min, mut x_max) = (0, usize::MAX, 0);
+        for y in 0..MAP_HEIGHT {
+            for x in 0..MAP_WIDTH {
+                let v = map.get_val(pos(x, y));
+                print!("{}", char::from_u32(v as u32).unwrap());
+                if v != MAP_AIR {
+                    y_max = max(y_max, y);
+                    x_max = max(x_max, x);
+                    x_min = min(x_min, x);
+                }
+            }
+            println!();
         }
-        println!();
+        println!("y_max: {}, x_min: {}, x_max: {}", y_max, x_min + X_MIN, x_max + X_MIN);
     }
     print!("{} ", i);
 }
