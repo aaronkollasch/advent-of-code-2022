@@ -39,30 +39,31 @@ impl Map {
     }
 
     #[inline]
-    pub fn drop_sand(&mut self, drop_pos: Pos) -> Option<Pos> {
-        if self.get_val(drop_pos) != MAP_AIR { return None; }
-        let mut pos = drop_pos.clone();
+    pub fn drop_sand(&mut self, drop_path: &mut Vec<Pos>) -> bool {
+        if drop_path.len() == 0 { return false; }
         loop {
-            if pos.y >= MAX_HEIGHT - 1 {
-                return None;
+            let pos = *drop_path.last().unwrap();
+            if pos.y >= self.h - 1 {
+                return false;
             }
             let new_pos = Pos { x: pos.x, y: pos.y + 1};
             if self.get_val(new_pos) == MAP_AIR {
-                pos = new_pos;
+                drop_path.push(new_pos);
                 continue;
             }
             let new_pos = Pos { x: pos.x - 1, y: pos.y + 1};
             if self.get_val(new_pos) == MAP_AIR {
-                pos = new_pos;
+                drop_path.push(new_pos);
                 continue;
             }
             let new_pos = Pos { x: pos.x + 1, y: pos.y + 1};
             if self.get_val(new_pos) == MAP_AIR {
-                pos = new_pos;
+                drop_path.push(new_pos);
                 continue;
             }
             self.set_val(pos, MAP_SAND);
-            return Some(pos);
+            drop_path.pop();
+            return true;
         }
 
     }
@@ -104,7 +105,9 @@ pub fn main() {
     println!("y_max: {}", y_max);
     map.fill_line(Pos { x: 0, y: y_max + 2 }, Pos { x: MAX_WIDTH - 1, y: y_max + 2 }, MAP_ROCK);
     let mut i = 0;
-    while map.drop_sand(DROP_POS).is_some() { i += 1; }
+    let mut drop_path: Vec<Pos> = Vec::with_capacity(MAX_HEIGHT);
+    drop_path.push(DROP_POS);
+    while map.drop_sand(&mut drop_path) { i += 1; }
     #[cfg(debug_assertions)]
     for y in 0..h {
         for x in 0..w {
