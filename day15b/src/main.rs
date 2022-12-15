@@ -95,5 +95,5 @@ pub fn main() {
     });
     #[cfg(debug_assertions)]
     println!("{} {}", final_x, final_y);
-    print!("{} ", final_y + 4000000 * final_x + final_y);
+    print!("{} ", 4000000 * final_x + final_y);
 }
