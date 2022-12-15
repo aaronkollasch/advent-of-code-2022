@@ -32,7 +32,9 @@ pub fn main() {
                 }
             }
             result[i_num] = sign * acc;
-            result
+            let beacon_dist =
+                result[0].abs_diff(result[2]) as isize + result[1].abs_diff(result[3]) as isize;
+            (result[0], result[1], beacon_dist)
         })
         .collect::<Vec<_>>()
         .as_slice()
@@ -47,14 +49,12 @@ pub fn main() {
         let mut min_overlap = isize::MAX;
         for (start, end) in zones
             .iter()
-            .filter_map(|result| {
-                let beacon_dist =
-                    result[0].abs_diff(result[2]) as isize + result[1].abs_diff(result[3]) as isize;
-                let range_width = beacon_dist - result[1].abs_diff(y) as isize;
+            .filter_map(|(s_x, s_y, beacon_dist)| {
+                let range_width = beacon_dist - s_y.abs_diff(y) as isize;
                 if range_width < 0 {
                     None
                 } else {
-                    Some((result[0] - range_width, result[0] + range_width))
+                    Some((s_x - range_width, s_x + range_width))
                 }
             })
             .sorted_unstable()
