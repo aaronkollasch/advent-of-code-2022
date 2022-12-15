@@ -33,9 +33,10 @@ pub fn main() {
     }).collect::<Vec<_>>();
     let mut final_y = 0;
     let mut final_x = 0;
-    const Y_MAX: isize = 4000000;
-    for y in 0..=Y_MAX {
-        let mut ranges: Vec<(isize, isize)> = vec![(0, 0)];
+    const I_MAX: isize = 4000000;
+    let mut y = 0;
+    'outer: while y <= I_MAX {
+        let mut last_x = 0;
         for (start, end) in zones.iter().filter_map(|result| {
             let beacon_dist = result[0].abs_diff(result[2]) as isize + result[1].abs_diff(result[3]) as isize;
             let range_width = beacon_dist - result[1].abs_diff(y) as isize;
@@ -44,23 +45,16 @@ pub fn main() {
             } else {
                 Some((result[0] - range_width, result[0] + range_width))
             }
-        }).sorted() {
-            let last_range = ranges.last_mut().unwrap();
-            if start <= last_range.1 + 1 {
-                last_range.1 = min(max(last_range.1, end), Y_MAX);
-            } else if start <= Y_MAX {
-                ranges.push((min(start, Y_MAX), min(end, Y_MAX)));
+        }).sorted_unstable() {
+            if start <= last_x + 1 {
+                last_x = min(max(last_x, end), I_MAX);
+            } else {
+                final_y = y;
+                final_x = start - 1;
+                break 'outer;
             }
         }
-        if *ranges.last().unwrap() != (0isize, Y_MAX) {
-            final_y = y;
-            for range in ranges.iter() {
-                if final_x < range.0 {
-                    break;
-                }
-                final_x = range.1 + 1;
-            }
-        }
+        y += 1;
     }
     print!("{} ", final_y + 4000000 * final_x + final_y);
 }
