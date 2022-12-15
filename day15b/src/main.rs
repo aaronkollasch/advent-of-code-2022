@@ -3,7 +3,7 @@ use std::cmp::{min, max};
 
 pub fn main() {
     let s = include_bytes!("../input.txt");
-    let zones = s.split(|b| *b == b'\n').filter(|l| l.len() > 0).map(|l| {
+    let zones: [_; 32] = s.split(|b| *b == b'\n').filter(|l| l.len() > 0).map(|l| {
         let mut has_number = false;
         let mut i_num = 0;
         let mut acc = 0;
@@ -30,7 +30,7 @@ pub fn main() {
         }
         result[i_num] = sign * acc;
         result
-    }).collect::<Vec<_>>();
+    }).collect::<Vec<_>>().as_slice().try_into().unwrap();
     let mut final_y = 0;
     let mut final_x = 0;
     const I_MAX: isize = 4000000;
