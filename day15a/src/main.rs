@@ -40,11 +40,15 @@ pub fn main() {
     let mut ranges: Vec<(isize, isize)> = Vec::new();
     for (start, end) in zones
         .iter()
-        .map(|result| {
+        .filter_map(|result| {
             let beacon_dist =
                 result[0].abs_diff(result[2]) as isize + result[1].abs_diff(result[3]) as isize;
             let range_width = beacon_dist - result[1].abs_diff(y) as isize;
-            (result[0] - range_width, result[0] + range_width)
+            if range_width < 0 {
+                None
+            } else {
+                Some((result[0] - range_width, result[0] + range_width))
+            }
         })
         .sorted()
     {
