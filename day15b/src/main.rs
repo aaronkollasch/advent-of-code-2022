@@ -39,7 +39,7 @@ pub fn main() {
         })
         .collect::<Vec<_>>();
 
-    let s = zones
+    let mut s_iter = zones
         .iter()
         .map(|(_left, right, top, bottom)| {
             zones
@@ -49,10 +49,11 @@ pub fn main() {
                 })
                 .map(|zone| zone.0)
         })
-        .flatten()
-        .next()
-        .unwrap();
-    let r = zones
+        .flatten();
+    let s = s_iter.next().unwrap();
+    #[cfg(debug_assertions)]
+    println!("s matches: {}", s_iter.count() + 1);
+    let mut r_iter = zones
         .iter()
         .map(|(left, right, _top, bottom)| {
             zones
@@ -62,9 +63,10 @@ pub fn main() {
                 })
                 .map(|zone| zone.2)
         })
-        .flatten()
-        .next()
-        .unwrap();
+        .flatten();
+    let r = r_iter.next().unwrap();
+    #[cfg(debug_assertions)]
+    println!("r matches: {}", r_iter.count() + 1);
     #[cfg(debug_assertions)]
     println!("s: {} r: {}", s, r);
     let final_y = (s + r) / 2;
