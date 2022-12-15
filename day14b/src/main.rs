@@ -20,11 +20,14 @@ fn y(p: Pos) -> usize {
 const MAP_AIR: u8 = b' ';
 const MAP_ROCK: u8 = b'#';
 const MAP_SAND: u8 = b'o';
+// compact version (input-specific but faster and better output)
 const Y_MAX: usize = 157 + 2;
-// const X_MIN: usize = 491 - Y_MAX - 1;
-// const X_MAX: usize = 561 + Y_MAX + 1;
 const X_MIN: usize = 331 - 1;
 const X_MAX: usize = 721 + 1;
+// // general version (use in case of panic)
+// const Y_MAX: usize = 200 + 2;
+// const X_MIN: usize = 500 - Y_MAX - 100;
+// const X_MAX: usize = 500 + Y_MAX + 100;
 const MAP_WIDTH: usize = X_MAX - X_MIN + 1;
 const MAP_HEIGHT: usize = Y_MAX + 1;
 const MAP_SIZE: usize = MAP_WIDTH * MAP_HEIGHT;
