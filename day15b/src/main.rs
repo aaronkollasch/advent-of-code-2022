@@ -46,22 +46,26 @@ pub fn main() {
 
     let s = zones
         .iter()
-        .map(|(_left, right, _top, _bottom)| {
+        .map(|(_left, right, top, bottom)| {
             zones
                 .iter()
+                .filter(|(z_left, _z_right, z_top, z_bottom)| {
+                    *z_left == *right && (*top <= *z_bottom || *z_top <= *bottom)
+                })
                 .map(|zone| zone.0)
-                .filter(|z_left| *z_left == *right)
         })
         .flatten()
         .next()
         .unwrap();
     let r = zones
         .iter()
-        .map(|(_left, _right, _top, bottom)| {
+        .map(|(left, right, _top, bottom)| {
             zones
                 .iter()
+                .filter(|(z_left, z_right, z_top, _z_bottom)| {
+                    *z_top == *bottom && (*left <= *z_right || *z_left <= *right)
+                })
                 .map(|zone| zone.2)
-                .filter(|z_top| *z_top == *bottom)
         })
         .flatten()
         .next()
