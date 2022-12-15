@@ -1,8 +1,6 @@
-const NUM_ZONES: usize = 32;
-
 pub fn main() {
     let s = include_bytes!("../input.txt");
-    let zones: [_; NUM_ZONES] = s
+    let zones = s
         .split(|b| *b == b'\n')
         .filter(|l| l.len() > 0)
         .map(|l| {
@@ -39,10 +37,7 @@ pub fn main() {
             let (top, bottom) = (r - beacon_dist - 1, r + beacon_dist + 1);
             (left, right, top, bottom)
         })
-        .collect::<Vec<_>>()
-        .as_slice()
-        .try_into()
-        .unwrap();
+        .collect::<Vec<_>>();
 
     let s = zones
         .iter()
