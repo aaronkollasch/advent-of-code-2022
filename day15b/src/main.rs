@@ -1,48 +1,4 @@
-use itertools::Itertools;
-use std::cmp::{max, min};
-use std::thread;
-
 const NUM_ZONES: usize = 32;
-const I_MAX: isize = 4000000;
-const NUM_THREADS: isize = 16;
-const CHUNK_SIZE: isize = I_MAX / NUM_THREADS;
-
-fn find_indices(
-    zones: [(isize, isize, isize); NUM_ZONES],
-    y_min: isize,
-    y_max: isize,
-) -> (isize, isize) {
-    let mut final_y = isize::MIN;
-    let mut final_x = isize::MIN;
-    let mut y = y_min;
-    'outer: while y <= y_max {
-        let mut last_x = 0;
-        let mut min_overlap = isize::MAX;
-        for (start, end) in zones
-            .iter()
-            .filter_map(|(s_x, s_y, beacon_dist)| {
-                let range_width = beacon_dist - s_y.abs_diff(y) as isize;
-                if range_width < 0 {
-                    None
-                } else {
-                    Some((s_x - range_width, s_x + range_width))
-                }
-            })
-            .sorted_unstable()
-        {
-            if start <= last_x + 1 {
-                min_overlap = min(min_overlap, last_x - start + 1);
-                last_x = min(max(last_x, end), I_MAX);
-            } else {
-                final_y = y;
-                final_x = start - 1;
-                break 'outer;
-            }
-        }
-        y += (min_overlap + 1) / 2;
-    }
-    (final_x, final_y)
-}
 
 pub fn main() {
     let s = include_bytes!("../input.txt");
@@ -77,30 +33,44 @@ pub fn main() {
             result[i_num] = sign * acc;
             let beacon_dist =
                 result[0].abs_diff(result[2]) as isize + result[1].abs_diff(result[3]) as isize;
-            (result[0], result[1], beacon_dist)
+            let s = result[1] - result[0];
+            let r = result[0] + result[1];
+            let (left, right) = (s - beacon_dist - 1, s + beacon_dist + 1);
+            let (top, bottom) = (r - beacon_dist - 1, r + beacon_dist + 1);
+            (left, right, top, bottom)
         })
         .collect::<Vec<_>>()
         .as_slice()
         .try_into()
         .unwrap();
-    let mut final_y = 0;
-    let mut final_x = 0;
-    (0..NUM_THREADS)
-        .map(|i_thread| {
-            thread::spawn(move || {
-                let y_min = i_thread * CHUNK_SIZE;
-                let y_max = (i_thread + 1) * CHUNK_SIZE;
-                find_indices(zones, y_min, y_max)
-            })
+
+    let s = zones
+        .iter()
+        .map(|(_left, right, _top, _bottom)| {
+            zones
+                .iter()
+                .map(|zone| zone.0)
+                .filter(|z_left| *z_left == *right)
         })
-        .collect::<Vec<_>>()
-        .into_iter()
-        .for_each(|handle| {
-            let (x, y) = handle.join().unwrap();
-            final_x = max(final_x, x);
-            final_y = max(final_y, y);
-        });
+        .flatten()
+        .next()
+        .unwrap();
+    let r = zones
+        .iter()
+        .map(|(_left, _right, _top, bottom)| {
+            zones
+                .iter()
+                .map(|zone| zone.2)
+                .filter(|z_top| *z_top == *bottom)
+        })
+        .flatten()
+        .next()
+        .unwrap();
     #[cfg(debug_assertions)]
-    println!("{} {}", final_x, final_y);
+    println!("s: {} r: {}", s, r);
+    let final_y = (s + r) / 2;
+    let final_x = r - final_y;
+    #[cfg(debug_assertions)]
+    println!("x: {} y: {}", final_x, final_y);
     print!("{} ", 4000000 * final_x + final_y);
 }
