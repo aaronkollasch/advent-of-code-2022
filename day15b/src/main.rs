@@ -44,6 +44,7 @@ pub fn main() {
     let mut y = 0;
     'outer: while y <= I_MAX {
         let mut last_x = 0;
+        let mut min_overlap = isize::MAX;
         for (start, end) in zones
             .iter()
             .filter_map(|result| {
@@ -59,6 +60,7 @@ pub fn main() {
             .sorted_unstable()
         {
             if start <= last_x + 1 {
+                min_overlap = min(min_overlap, last_x - start + 1);
                 last_x = min(max(last_x, end), I_MAX);
             } else {
                 final_y = y;
@@ -66,7 +68,7 @@ pub fn main() {
                 break 'outer;
             }
         }
-        y += 1;
+        y += (min_overlap + 1) / 2;
     }
     print!("{} ", final_y + 4000000 * final_x + final_y);
 }
