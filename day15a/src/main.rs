@@ -37,8 +37,7 @@ pub fn main() {
         })
         .collect::<Vec<_>>();
     let y = 2000000;
-    let mut ranges: Vec<(isize, isize)> = Vec::new();
-    for (start, end) in zones
+    let mut ranges_iter = zones
         .iter()
         .filter_map(|result| {
             let beacon_dist =
@@ -50,23 +49,21 @@ pub fn main() {
                 Some((result[0] - range_width, result[0] + range_width))
             }
         })
-        .sorted()
-    {
-        if ranges.len() == 0 {
-            ranges.push((start, end));
+        .sorted_unstable();
+    let (start, end) = ranges_iter.next().unwrap();
+    let mut total = end - start + 1;
+    let mut last_x = end;
+    for (start, end) in ranges_iter {
+        if start <= last_x + 1 {
+            total += max(end - last_x, 0);
+            last_x = max(last_x, end);
         } else {
-            let last_range = ranges.last_mut().unwrap();
-            if start <= last_range.1 + 1 {
-                last_range.1 = max(last_range.1, end);
-            } else {
-                ranges.push((start, end));
-            }
+            total += end - start + 1;
+            last_x = end;
         }
     }
-    let mut total = 0;
-    for range in ranges.iter() {
-        total += range.1 - range.0 + 1;
-    }
+    #[cfg(debug_assertions)]
+    println!("pre-total: {}", total);
     total -= zones
         .iter()
         .filter_map(|zone| if zone[3] == y { Some(zone[2]) } else { None })
