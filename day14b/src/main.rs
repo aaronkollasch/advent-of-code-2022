@@ -48,6 +48,11 @@ impl Map {
     }
 
     #[inline]
+    pub fn get_mut_val(&mut self, pos: Pos) -> &mut u8 {
+        &mut self.contents[pos]
+    }
+
+    #[inline]
     pub fn set_val(&mut self, pos: Pos, val: u8) {
         self.contents[pos] = val;
     }
@@ -69,25 +74,35 @@ impl Map {
 
     #[inline]
     pub fn fill_sand(&mut self, drop_pos: Pos) -> u32 {
-        let mut i = 0;
-        let mut drop_path: Vec<Pos> = Vec::with_capacity(MAP_HEIGHT * 2);
-        drop_path.push(drop_pos);
-        while let Some(pos) = drop_path.pop() {
-            if y(pos) >= MAP_HEIGHT {
-                continue;
+        let mut i = 1;
+        let start_x = x(drop_pos);
+        *self.get_mut_val(drop_pos) = MAP_SAND;
+        for y in 0..MAP_HEIGHT - 2 {
+            let range = y * 2 + 1;
+            let min_x = start_x.saturating_sub(range / 2);
+            let max_x = min(start_x + range / 2, X_MAX);
+            for x in min_x..=max_x {
+                let mut pos = pos(x, y);
+                if let MAP_SAND = self.get_val(pos) {
+                    pos += MAP_WIDTH;
+                    let val = self.get_mut_val(pos - 1);
+                    if *val == MAP_AIR {
+                        *val = MAP_SAND;
+                        i += 1;
+                    }
+                    let val = self.get_mut_val(pos);
+                    if *val == MAP_AIR {
+                        *val = MAP_SAND;
+                        i += 1;
+                    }
+                    let val = self.get_mut_val(pos + 1);
+                    if *val == MAP_AIR {
+                        *val = MAP_SAND;
+                        i += 1;
+                    }
+                }
             }
-            if self.get_val(pos) != MAP_AIR {
-                continue;
-            }
-            self.set_val(pos, MAP_SAND);
-            i += 1;
-            let new_pos = pos + MAP_WIDTH;
-            drop_path.push(new_pos + 1);
-            drop_path.push(new_pos - 1);
-            drop_path.push(new_pos);
         }
-        #[cfg(debug_assertions)]
-        println!("{}", drop_path.capacity());
         i
     }
 }
@@ -128,9 +143,9 @@ pub fn main() {
             if prev.is_some() {
                 map.fill_line(prev.unwrap(), next, MAP_ROCK);
             }
+            y_max = max(y_max, y(next));
             #[cfg(debug_assertions)]
             {
-                y_max = max(y_max, y(next));
                 x_min = min(x_min, x(next));
                 x_max = max(x_max, x(next));
             }
