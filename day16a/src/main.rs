@@ -14,12 +14,10 @@ fn get_distance<'a>(
         return Some(0);
     } else if depth > 20 {
         return None;
-    } else if let Some(distance) = distance_memo.get(&(valve1, valve2)) {
-        return Some(*distance);
-    } else if let Some(distance) = distance_memo.get(&(valve2, valve1)) {
+    } else if let Some(distance) = distance_memo.get(&if valve1 < valve2 { (valve1, valve2) } else { (valve2, valve1) }) {
         return Some(*distance);
     } else if valve_map[&valve1].iter().contains(&valve2) {
-        distance_memo.insert((valve1, valve2), 1);
+        distance_memo.insert(if valve1 < valve2 { (valve1, valve2) } else { (valve2, valve1) }, 1);
         return Some(1);
     } else if let Some(distance) = valve_map[&valve1]
         .iter()
@@ -27,7 +25,7 @@ fn get_distance<'a>(
         .min()
     {
         let distance = distance.saturating_add(1);
-        distance_memo.insert((valve1, valve2), distance);
+        distance_memo.insert(if valve1 < valve2 { (valve1, valve2) } else { (valve2, valve1) }, distance);
         return Some(distance);
     } else {
         return None;
@@ -157,7 +155,10 @@ pub fn main() {
 
     let result1 = calc_opportunity(valve_indices["AA"], &valve_map, flow_rates, valve_values, 30, &mut distance_memo);
     #[cfg(debug_assertions)]
-    println!("{}\t{:?}", result1.0, result1.1);
+    {
+        println!("memoization map size: {}", distance_memo.len());
+        println!("{}\t{:?}", result1.0, result1.1);
+    }
     print!(
         "{} ", result1.0
     );
