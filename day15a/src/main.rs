@@ -4,10 +4,10 @@ use std::collections::HashSet;
 
 pub fn main() {
     let s = include_bytes!("../input.txt");
-    let zones = s
-        .split(|b| *b == b'\n')
+    let mut zones = Vec::with_capacity(32);
+    s.split(|b| *b == b'\n')
         .filter(|l| l.len() > 0)
-        .map(|l| {
+        .for_each(|l| {
             let mut has_number = false;
             let mut i_num = 0;
             let mut acc = 0;
@@ -33,9 +33,8 @@ pub fn main() {
                 }
             }
             result[i_num] = sign * acc;
-            result
-        })
-        .collect::<Vec<_>>();
+            zones.push(result);
+        });
     let y = 2000000;
     let mut ranges_iter = zones
         .iter()

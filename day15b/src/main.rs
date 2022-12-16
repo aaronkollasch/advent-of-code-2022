@@ -1,9 +1,9 @@
 pub fn main() {
     let s = include_bytes!("../input.txt");
-    let zones = s
-        .split(|b| *b == b'\n')
+    let mut zones = Vec::with_capacity(32);
+    s.split(|b| *b == b'\n')
         .filter(|l| l.len() > 0)
-        .map(|l| {
+        .for_each(|l| {
             let mut has_number = false;
             let mut i_num = 0;
             let mut acc = 0;
@@ -35,9 +35,8 @@ pub fn main() {
             let r = result[0] + result[1];
             let (left, right) = (s - beacon_dist - 1, s + beacon_dist + 1);
             let (top, bottom) = (r - beacon_dist - 1, r + beacon_dist + 1);
-            (left, right, top, bottom)
-        })
-        .collect::<Vec<_>>();
+            zones.push((left, right, top, bottom));
+        });
 
     let mut s_iter = zones
         .iter()
