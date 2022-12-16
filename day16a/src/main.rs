@@ -95,10 +95,10 @@ pub fn main() {
                     .collect::<Vec<_>>(),
                 _ => unreachable!(),
             };
-            println!("{}; {}", a, b);
             (valve, (flow_rate, valves))
         })
         .collect::<HashMap<_, _>>();
+    #[cfg(debug_assertions)]
     println!("{:?}", valve_map);
 
     let mut distance_memo = &mut HashMap::with_capacity(256);
@@ -109,6 +109,7 @@ pub fn main() {
         .map(|(key, _value)| *key)
         .sorted_unstable_by(|a, b| valve_map[*a].0.cmp(&valve_map[*b].0))
         .collect::<Vec<_>>();
+    #[cfg(debug_assertions)]
     println!("{:?}", open_valves);
     // for target_valve in open_valves.iter() {
     //     println!("AA - {}: {}", target_valve, get_distance(0, "AA", target_valve, &valve_map, &mut distance_memo).unwrap());

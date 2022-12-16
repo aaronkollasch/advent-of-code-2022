@@ -42,6 +42,7 @@ fn calc_opportunity<'a>(
     available_time: isize,
     mut distance_memo: &mut HashMap<(usize, usize), isize>,
 ) -> (isize, Option<[isize; NUM_LINES]>) {
+    #[cfg(debug_assertions)]
     if available_time >= 20 {
         println!("{} {}", current_valve, available_time);
     }
@@ -75,6 +76,7 @@ fn calc_opportunity<'a>(
             }
             let mut valve_values = valve_values.to_owned();
             valve_values[target_valve] = valve_value;
+            // #[cfg(debug_assertions)]
             // println!("opening {} at {}, {}", target_valve, 31 - time_after_open, flow_rate * time_after_open);
             let mut result = calc_opportunity(
                 target_valve,
@@ -111,7 +113,6 @@ pub fn main() {
                     .collect::<Vec<_>>(),
                 _ => unreachable!(),
             };
-            println!("{}; {}", a, b);
             (valve, flow_rate, valves)
         })
         .collect::<Vec<_>>();
@@ -122,6 +123,7 @@ pub fn main() {
         .enumerate()
         .map(|(i, (valve, _, _))| (valve, i))
         .collect::<HashMap<_, _>>();
+    #[cfg(debug_assertions)]
     println!("{:?}", valve_indices);
 
     let flow_rates = valve_map
@@ -132,6 +134,7 @@ pub fn main() {
         .as_slice()
         .try_into()
         .unwrap();
+    #[cfg(debug_assertions)]
     println!("{:?}", flow_rates);
 
     let valve_map = valve_map
@@ -146,17 +149,18 @@ pub fn main() {
             )
         })
         .collect::<HashMap<usize, Vec<usize>>>();
+    #[cfg(debug_assertions)]
     println!("{:?}", valve_map);
 
     let mut distance_memo = &mut HashMap::with_capacity(256);
     let valve_values: [isize; NUM_LINES] = [0; NUM_LINES];
 
     let result1 = calc_opportunity(valve_indices["AA"], &valve_map, flow_rates, valve_values, 26, &mut distance_memo);
-    println!("{}", result1.0);
-    println!("{:?}", result1.1);
     let result2 = calc_opportunity(valve_indices["AA"], &valve_map, flow_rates, result1.1.unwrap(), 26, &mut distance_memo);
-    println!("{}", result2.0);
-    println!("{:?}", result2.1);
+    #[cfg(debug_assertions)]
+    println!("{}\t{:?}", result1.0, result1.1);
+    #[cfg(debug_assertions)]
+    println!("{}\t{:?}", result2.0, result2.1);
     print!(
         "{} ", result1.0 + result2.0
     );
