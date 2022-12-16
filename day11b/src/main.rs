@@ -1,4 +1,6 @@
 use itertools::Itertools;
+#[cfg(debug_assertions)]
+use kdam::{tqdm, BarExt};
 
 #[derive(Debug, Clone)]
 enum Op {
@@ -79,6 +81,10 @@ pub fn main() {
     eprintln!("lcm: {}", lcm);
 
     // simulate rounds
+    #[cfg(debug_assertions)]
+    let mut pb = tqdm!(total = 10000);
+    #[cfg(debug_assertions)]
+    pb.set_description("simulating");
     for _round in 1..10001 {
         for i_monkey in 0..monkeys.len() {
             let ptr = monkeys.as_mut_ptr();
@@ -100,7 +106,11 @@ pub fn main() {
             }
             monkey.items.clear();
         }
+        #[cfg(debug_assertions)]
+        pb.update(1);
     }
+    #[cfg(debug_assertions)]
+    eprint!("\n");
 
     print!(
         "{} ",

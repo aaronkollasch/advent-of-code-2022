@@ -10,3 +10,4 @@ path = "src/main.rs"
 
 [dependencies]
 itertools = "0.10"
+kdam = "0.3.0"
