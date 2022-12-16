@@ -138,7 +138,6 @@ fn calc_opportunity<'a>(
                 &mut distance_memo,
             );
             result.0 += valve_value;
-            result.1 = result.1.to_owned();
             Some(result)
         })
         .max_by(|a, b| a.0.cmp(&b.0))
