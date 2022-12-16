@@ -1,16 +1,14 @@
 use itertools::Itertools;
-use std::cmp::max;
 use std::collections::HashMap;
-use std::cmp::Ordering;
-// use std::thread;
-// use std::sync::Arc;
+
+const NUM_LINES: usize = 60;
 
 fn get_distance<'a>(
     depth: usize,
-    valve1: &'a str,
-    valve2: &'a str,
-    valve_map: &HashMap<&'a str, (isize, Vec<&'a str>)>,
-    mut distance_memo: &mut HashMap<(&'a str, &'a str), isize>,
+    valve1: usize,
+    valve2: usize,
+    valve_map: &HashMap<usize, Vec<usize>>,
+    mut distance_memo: &mut HashMap<(usize, usize), isize>,
 ) -> Option<isize> {
     if valve1 == valve2 {
         return Some(0);
@@ -20,13 +18,12 @@ fn get_distance<'a>(
         return Some(*distance);
     } else if let Some(distance) = distance_memo.get(&(valve2, valve1)) {
         return Some(*distance);
-    } else if valve_map[valve1].1.iter().contains(&valve2) {
+    } else if valve_map[&valve1].iter().contains(&valve2) {
         distance_memo.insert((valve1, valve2), 1);
         return Some(1);
-    } else if let Some(distance) = valve_map[valve1]
-        .1
+    } else if let Some(distance) = valve_map[&valve1]
         .iter()
-        .filter_map(|valve| get_distance(depth + 1, valve, valve2, &valve_map, &mut distance_memo))
+        .filter_map(|valve| get_distance(depth + 1, *valve, valve2, &valve_map, &mut distance_memo))
         .min()
     {
         let distance = distance.saturating_add(1);
@@ -38,188 +35,63 @@ fn get_distance<'a>(
 }
 
 fn calc_opportunity<'a>(
-    my_valve: &'a str,
-    el_valve: &'a str,
-    valve_map: &HashMap<&'a str, (isize, Vec<&'a str>)>,
-    open_valves: &Vec<&'a str>,
-    my_available_time: isize,
-    el_available_time: isize,
-    mut distance_memo: &mut HashMap<(&'a str, &'a str), isize>,
-) -> isize {
-    if my_available_time >= 20 && el_available_time >= 20 {
-        println!("{} {} {} {}", my_valve, el_valve, my_available_time, el_available_time);
+    current_valve: usize,
+    valve_map: &HashMap<usize, Vec<usize>>,
+    flow_rates: [isize; NUM_LINES],
+    valve_values: [isize; NUM_LINES],
+    available_time: isize,
+    mut distance_memo: &mut HashMap<(usize, usize), isize>,
+) -> (isize, Option<[isize; NUM_LINES]>) {
+    if available_time >= 20 {
+        println!("{} {}", current_valve, available_time);
     }
-    if open_valves.len() == 0 {
-        return 0;
+    if available_time < 1 {
+        return (0, Some(valve_values));
     }
-    if el_available_time < 1 && my_available_time < 1 {
-        return 0;
-    }
-    return open_valves
+    let result = valve_values
         .iter()
         .enumerate()
-        .filter_map(|(i, target_valve)| {
-            let my_distance =
-                get_distance(0, my_valve, target_valve, &valve_map, &mut distance_memo);
-            let el_distance =
-                get_distance(0, el_valve, target_valve, &valve_map, &mut distance_memo);
-            let mut my_job;
-            if my_distance.is_none() && el_distance.is_none() {
+        .filter(|(target_valve, _is_open)| flow_rates[*target_valve] > 0)
+        .filter_map(|(target_valve, target_cur_value)| {
+            let distance = get_distance(
+                0,
+                current_valve,
+                target_valve,
+                &valve_map,
+                &mut distance_memo,
+            );
+            if distance.is_none() {
                 return None;
-            } else if my_distance.is_none() {
-                my_job = false;
-            } else if el_distance.is_none() {
-                my_job = true;
-            } else {
-                let my_distance = my_distance.unwrap();
-                let el_distance = el_distance.unwrap();
-                my_job = match (my_available_time - my_distance).cmp(&(el_available_time - el_distance)) {
-                    Ordering::Greater => true,
-                    Ordering::Equal => true,
-                    Ordering::Less => false,
-                }
             }
-            let mut result = isize::MIN;
-            let flow_rate = valve_map[target_valve].0;
-            let mut open_valves = open_valves.clone();
-            open_valves.remove(i);
-            if my_job {
-                let distance = my_distance.unwrap();
-                let time_after_open = my_available_time - distance - 1;
-                // println!("my opening {} at {}, {}", target_valve, 31 - time_after_open, flow_rate * time_after_open);
-                if time_after_open >= 0 {
-                    result = max(
-                        result,
-                        calc_opportunity(
-                            target_valve,
-                            el_valve,
-                            &valve_map,
-                            &open_valves,
-                            time_after_open,
-                            el_available_time,
-                            &mut distance_memo,
-                        ) + flow_rate * time_after_open,
-                    );
-                }
-            } else {
-                let distance = el_distance.unwrap();
-                let time_after_open = el_available_time - distance - 1;
-                // println!("el opening {} at {}, {}", target_valve, 31 - time_after_open, flow_rate * time_after_open);
-                if time_after_open >= 0 {
-                    result = max(
-                        result,
-                        calc_opportunity(
-                            my_valve,
-                            target_valve,
-                            &valve_map,
-                            &open_valves,
-                            my_available_time,
-                            time_after_open,
-                            &mut distance_memo,
-                        ) + flow_rate * time_after_open,
-                    );
-                }
+            let distance = distance.unwrap();
+            let time_after_open = available_time - distance - 1;
+            if time_after_open < 0 {
+                return None;
             }
-            if result < 0 {
-                None
-            } else {
-                Some(result)
+            let flow_rate = flow_rates[target_valve];
+            let valve_value = flow_rate * time_after_open;
+            if valve_value <= *target_cur_value {
+                return None;
             }
+            let mut valve_values = valve_values.to_owned();
+            valve_values[target_valve] = valve_value;
+            // println!("opening {} at {}, {}", target_valve, 31 - time_after_open, flow_rate * time_after_open);
+            let mut result = calc_opportunity(
+                target_valve,
+                &valve_map,
+                flow_rates,
+                valve_values,
+                time_after_open,
+                &mut distance_memo,
+            );
+            result.0 += valve_value - *target_cur_value;
+            result.1 = result.1.to_owned();
+            Some(result)
         })
-        .max()
-        .unwrap_or(0);
+        .max_by(|a, b| a.0.cmp(&b.0))
+        .unwrap_or((0, Some(valve_values)));
+    result
 }
-
-// fn calc_opportunity_par<'a>(
-//     my_valve: Arc<&str>,
-//     el_valve: Arc<&str>,
-//     valve_map: Arc<HashMap<&'a str, (isize, Vec<&'a str>)>>,
-//     open_valves: Arc<Vec<&'a str>>,
-//     my_available_time: isize,
-//     el_available_time: isize,
-// ) -> isize {
-//     if my_available_time >= 20 && el_available_time >= 20 {
-//         println!("{} {} {} {}", my_valve, el_valve, my_available_time, el_available_time);
-//     }
-//     if open_valves.len() == 0 {
-//         return 0;
-//     }
-//     if el_available_time < 1 && my_available_time < 1 {
-//         return 0;
-//     }
-//     let handles = open_valves
-//         .iter()
-//         .enumerate()
-//         .map(|(i, target_valve)| {
-//             let my_valve = my_valve.clone();
-//             let el_valve = el_valve.clone();
-//             let valve_map = valve_map.clone();
-//             let open_valves = open_valves.clone();
-//             thread::spawn({
-
-//                 move || {
-//                     let mut distance_memo = &mut HashMap::with_capacity(256);
-
-//                     let my_distance =
-//                         get_distance(0, &my_valve, &target_valve, &valve_map, &mut distance_memo);
-//                     let el_distance =
-//                         get_distance(0, &el_valve, &target_valve, &valve_map, &mut distance_memo);
-//                     if my_distance.is_none() && el_distance.is_none() {
-//                         return None;
-//                     }
-//                     let mut result = isize::MIN;
-//                     let flow_rate = valve_map[target_valve].0;
-//                     let mut open_valves = (*open_valves).clone();
-//                     open_valves.remove(i);
-//                     if let Some(distance) = my_distance {
-//                         let time_after_open = my_available_time - distance - 1;
-//                         // println!("my opening {} at {}, {}", target_valve, 31 - time_after_open, flow_rate * time_after_open);
-//                         if time_after_open >= 0 {
-//                             result = max(
-//                                 result,
-//                                 calc_opportunity(
-//                                     target_valve,
-//                                     &el_valve,
-//                                     &valve_map,
-//                                     &open_valves,
-//                                     time_after_open,
-//                                     el_available_time,
-//                                     &mut distance_memo,
-//                                 ) + flow_rate * time_after_open,
-//                             );
-//                         }
-//                     }
-//                     if let Some(distance) = el_distance {
-//                         let time_after_open = el_available_time - distance - 1;
-//                         // println!("el opening {} at {}, {}", target_valve, 31 - time_after_open, flow_rate * time_after_open);
-//                         if time_after_open >= 0 {
-//                             result = max(
-//                                 result,
-//                                 calc_opportunity(
-//                                     &my_valve,
-//                                     target_valve,
-//                                     &valve_map,
-//                                     &open_valves,
-//                                     my_available_time,
-//                                     time_after_open,
-//                                     &mut distance_memo,
-//                                 ) + flow_rate * time_after_open,
-//                             );
-//                         }
-//                     }
-//                     if result < 0 {
-//                         None
-//                     } else {
-//                         Some(result)
-//                     }
-//                 }
-//             })
-//         }).collect::<Vec<_>>();
-//     handles.into_iter()
-//         .filter_map(|handle| handle.join().unwrap())
-//         .max()
-//         .unwrap_or(0)
-// }
 
 pub fn main() {
     let s = include_str!("../input.txt");
@@ -240,49 +112,52 @@ pub fn main() {
                 _ => unreachable!(),
             };
             println!("{}; {}", a, b);
-            (valve, (flow_rate, valves))
+            (valve, flow_rate, valves)
         })
+        .collect::<Vec<_>>();
+    let valve_indices = valve_map
+        .to_owned()
+        .into_iter()
+        .sorted_unstable_by(|a, b| b.1.cmp(&a.1))
+        .enumerate()
+        .map(|(i, (valve, _, _))| (valve, i))
         .collect::<HashMap<_, _>>();
+    println!("{:?}", valve_indices);
+
+    let flow_rates = valve_map
+        .iter()
+        .sorted_unstable_by(|a, b| valve_indices[a.0].cmp(&valve_indices[b.0]))
+        .map(|(_valve, flow_rate, _valves)| *flow_rate)
+        .collect::<Vec<_>>()
+        .as_slice()
+        .try_into()
+        .unwrap();
+    println!("{:?}", flow_rates);
+
+    let valve_map = valve_map
+        .into_iter()
+        .map(|(valve, _flow_rate, valves)| {
+            (
+                *valve_indices.get(&valve).unwrap(),
+                valves
+                    .into_iter()
+                    .map(|v| *valve_indices.get(&v).unwrap())
+                    .collect::<Vec<usize>>(),
+            )
+        })
+        .collect::<HashMap<usize, Vec<usize>>>();
     println!("{:?}", valve_map);
 
     let mut distance_memo = &mut HashMap::with_capacity(256);
+    let valve_values: [isize; NUM_LINES] = [0; NUM_LINES];
 
-    let open_valves = valve_map
-        .iter()
-        .filter(|(valve, _state)| valve_map[*valve].0 > 0)
-        .map(|(key, _value)| *key)
-        .sorted_unstable_by(|a, b| valve_map[*a].0.cmp(&valve_map[*b].0))
-        .collect::<Vec<_>>();
-    println!("{:?}", open_valves);
-    // for target_valve in open_valves.iter() {
-    //     println!(
-    //         "AA - {}: {}",
-    //         target_valve,
-    //         get_distance(0, "AA", target_valve, &valve_map, &mut distance_memo).unwrap()
-    //     );
-    // }
-
+    let result1 = calc_opportunity(valve_indices["AA"], &valve_map, flow_rates, valve_values, 26, &mut distance_memo);
+    println!("{}", result1.0);
+    println!("{:?}", result1.1);
+    let result2 = calc_opportunity(valve_indices["AA"], &valve_map, flow_rates, result1.1.unwrap(), 26, &mut distance_memo);
+    println!("{}", result2.0);
+    println!("{:?}", result1.1);
     print!(
-        "{} ",
-        calc_opportunity(
-            "AA",
-            "AA",
-            &valve_map,
-            &open_valves,
-            26,
-            26,
-            &mut distance_memo,
-        )
+        "{} ", result1.0 + result2.0
     );
-    // print!(
-    //     "{} ",
-    //     calc_opportunity_par(
-    //         Arc::new("AA"),
-    //         Arc::new("AA"),
-    //         Arc::new(valve_map),
-    //         Arc::new(open_valves),
-    //         26,
-    //         26,
-    //     )
-    // );
 }
