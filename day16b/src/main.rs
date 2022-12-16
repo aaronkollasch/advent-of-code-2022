@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use std::collections::HashMap;
+use rustc_hash::FxHashMap;
 
 const NUM_LINES: usize = 60;
 
@@ -7,8 +7,8 @@ fn get_distance<'a>(
     depth: usize,
     valve1: usize,
     valve2: usize,
-    valve_map: &HashMap<usize, Vec<usize>>,
-    mut distance_memo: &mut HashMap<(usize, usize), isize>,
+    valve_map: &FxHashMap<usize, Vec<usize>>,
+    mut distance_memo: &mut FxHashMap<(usize, usize), isize>,
 ) -> Option<isize> {
     if valve1 == valve2 {
         return Some(0);
@@ -34,11 +34,11 @@ fn get_distance<'a>(
 
 fn calc_opportunity<'a>(
     current_valve: usize,
-    valve_map: &HashMap<usize, Vec<usize>>,
+    valve_map: &FxHashMap<usize, Vec<usize>>,
     flow_rates: [isize; NUM_LINES],
     valve_values: [isize; NUM_LINES],
     available_time: isize,
-    mut distance_memo: &mut HashMap<(usize, usize), isize>,
+    mut distance_memo: &mut FxHashMap<(usize, usize), isize>,
 ) -> (isize, Option<[isize; NUM_LINES]>) {
     #[cfg(debug_assertions)]
     if available_time >= 20 {
@@ -120,7 +120,7 @@ pub fn main() {
         .sorted_unstable_by(|a, b| b.1.cmp(&a.1))
         .enumerate()
         .map(|(i, (valve, _, _))| (valve, i))
-        .collect::<HashMap<_, _>>();
+        .collect::<FxHashMap<_, _>>();
     #[cfg(debug_assertions)]
     println!("{:?}", valve_indices);
 
@@ -146,11 +146,12 @@ pub fn main() {
                     .collect::<Vec<usize>>(),
             )
         })
-        .collect::<HashMap<usize, Vec<usize>>>();
+        .collect::<FxHashMap<usize, Vec<usize>>>();
     #[cfg(debug_assertions)]
     println!("{:?}", valve_map);
 
-    let mut distance_memo = &mut HashMap::with_capacity(1024);
+    let mut distance_memo: FxHashMap<(usize, usize), isize> = Default::default();
+    distance_memo.reserve(1024);
     let valve_values: [isize; NUM_LINES] = [0; NUM_LINES];
 
     let result1 = calc_opportunity(valve_indices["AA"], &valve_map, flow_rates, valve_values, 26, &mut distance_memo);

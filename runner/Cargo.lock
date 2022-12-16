@@ -225,6 +225,7 @@ name = "day16a"
 version = "0.1.0"
 dependencies = [
  "itertools",
+ "rustc-hash",
 ]
 
 [[package]]
@@ -232,6 +233,7 @@ name = "day16b"
 version = "0.1.0"
 dependencies = [
  "itertools",
+ "rustc-hash",
 ]
 
 [[package]]
