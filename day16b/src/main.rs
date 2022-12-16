@@ -156,7 +156,7 @@ pub fn main() {
     println!("{:?}", result1.1);
     let result2 = calc_opportunity(valve_indices["AA"], &valve_map, flow_rates, result1.1.unwrap(), 26, &mut distance_memo);
     println!("{}", result2.0);
-    println!("{:?}", result1.1);
+    println!("{:?}", result2.1);
     print!(
         "{} ", result1.0 + result2.0
     );
