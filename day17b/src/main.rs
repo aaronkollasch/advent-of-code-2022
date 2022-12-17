@@ -1,3 +1,4 @@
+#[cfg(debug_assertions)]
 use kdam::{tqdm, BarExt};
 
 // rocks:
@@ -68,7 +69,6 @@ struct Map {
     contents: [[u8; MAP_WIDTH]; MAP_HEIGHT],
     highest_rock: usize,
     map_height: usize,
-    map_repeats: usize,
 }
 
 impl Map {
@@ -77,7 +77,6 @@ impl Map {
             contents: [[AIR; MAP_WIDTH]; MAP_HEIGHT],
             highest_rock: 0,
             map_height: 20,
-            map_repeats: 0,
         }
     }
 
@@ -154,10 +153,12 @@ pub fn main() {
     let jet_len = s.len() - 1;
     let mut jet_i = 0;
     let mut map = Map::new();
+    #[cfg(debug_assertions)]
     println!("{}", jet_len);
 
-    let n = 10000;
-    let mut pb = tqdm!(total = n);
+    let n1 = 10000;
+    #[cfg(debug_assertions)]
+    let mut pb = tqdm!(total = n1);
     let mut heights = Vec::new();
     let mut last_highest = 0;
     let mut last_rock = 0;
@@ -165,7 +166,7 @@ pub fn main() {
     let mut first_height_delta = 0;
     let mut rock_delta = 0;
     let mut height_delta = 0;
-    for i_rock in 0..n {
+    for i_rock in 0..n1 {
         let mut rock = Rock {
             class: i_rock % ROCKS.len(),
             pos: Pos {
@@ -174,9 +175,7 @@ pub fn main() {
             },
         };
         let mut last_pos = rock.pos;
-        // println!("{} ({}, {}) {}", rock.class, rock.pos.x, rock.pos.y, map.highest_rock);
         while !map.collides_with(rock) {
-            // println!("{} ({}, {}) {}", rock.class, rock.pos.x, rock.pos.y, s[jet_i] as char);
             last_pos = rock.pos;
             if s[jet_i] == b'<' {
                 rock.pos.x = rock.pos.x.wrapping_sub(1);
@@ -207,6 +206,7 @@ pub fn main() {
                 }
                 height_delta = map.highest_rock - last_highest;
                 rock_delta = i_rock - last_rock;
+                #[cfg(debug_assertions)]
                 pb.write(format!(
                     "{} {} {}",
                     i_rock % ROCKS.len(),
@@ -219,64 +219,22 @@ pub fn main() {
             if map.collides_with(rock) {
                 rock.pos = last_pos;
             }
-            // println!("{} ({}, {}) v", rock.class, rock.pos.x, rock.pos.y);
             last_pos = rock.pos;
             rock.pos.y = rock.pos.y.wrapping_sub(1);
         }
         rock.pos = last_pos;
         map.add_rock(rock);
-        // println!("{} ({}, {}) {}", rock.class, rock.pos.x, rock.pos.y, map.highest_rock);
-        // {
-        //     for y in 0..map.highest_rock {
-        //         let y = map.highest_rock - y - 1;
-        //         print!("|");
-        //         for x in 0..MAP_WIDTH {
-        //             print!("{}", map.contents[y][x] as char);
-        //         }
-        //         println!("|");
-        //     }
-        // }
         heights.push(map.highest_rock);
+        #[cfg(debug_assertions)]
         pb.update(1);
     }
-    // for i in 0..10 {
-    //     print!("{}", (((heights[jet_len * 5 * (i + 1)] - heights[jet_len * 5 * i]) % 40) as u8 + b'A') as char);
-    // }
-    // println!();
-    let last_rock_delta = n - last_rock;
-    println!("{} {} {}", first_rock_delta, rock_delta, last_rock_delta);
-    let last_height_delta = map.highest_rock - last_highest;
-    println!(
-        "{} {} {}",
-        first_height_delta, height_delta, last_height_delta
-    );
-    println!("{} {}", last_highest, last_height_delta);
-    println!(
-        "{} {}",
-        map.highest_rock,
-        first_height_delta + last_highest + last_height_delta
-    );
-
     let n2 = 1000000000000;
     let last_rock_delta = (n2 - first_rock_delta - 1) % rock_delta;
     let n2_num_repeats = (n2 - first_rock_delta - last_rock_delta) / rock_delta;
     let n3 = last_rock + last_rock_delta;
-    println!("{} {}", last_rock_delta, n3);
-    println!(
-        "{} {}",
-        heights[n3],
-        heights[n3 - rock_delta] + height_delta
-    );
     let last_height_delta = heights[n3] - last_highest;
-    println!("{} {} {}", first_rock_delta, rock_delta, last_rock_delta);
-    println!(
-        "{} {} {}",
-        first_height_delta, height_delta, last_height_delta
-    );
     print!(
         "{} ",
         first_height_delta + n2_num_repeats * height_delta + last_height_delta
     );
-    // let last_overflow_height = first_height_delta + (n2 - first_rock_delta - last_rock_delta) / rock_delta * height_delta + last_height_delta;
-    // print!("{} ", first_height_delta + last_overflow_height + last_height_delta);
 }

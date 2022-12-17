@@ -141,11 +141,13 @@ pub fn main() {
             },
         };
         let mut last_pos = rock.pos;
+        #[cfg(debug_assertions)]
         println!(
             "{} ({}, {}) {}",
             rock.class, rock.pos.x, rock.pos.y, map.highest_rock
         );
         while !map.collides_with(rock) {
+            #[cfg(debug_assertions)]
             println!(
                 "{} ({}, {}) {}",
                 rock.class, rock.pos.x, rock.pos.y, s[jet_i] as char
@@ -160,12 +162,14 @@ pub fn main() {
             if map.collides_with(rock) {
                 rock.pos = last_pos;
             }
+            #[cfg(debug_assertions)]
             println!("{} ({}, {}) v", rock.class, rock.pos.x, rock.pos.y);
             last_pos = rock.pos;
             rock.pos.y = rock.pos.y.wrapping_sub(1);
         }
         rock.pos = last_pos;
         map.add_rock(rock);
+        #[cfg(debug_assertions)]
         println!(
             "{} ({}, {}) {}",
             rock.class, rock.pos.x, rock.pos.y, map.highest_rock
