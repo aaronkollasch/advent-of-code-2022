@@ -24,6 +24,7 @@ impl BitVec {
         self.vec |= 1 << pos;
     }
 
+    #[inline]
     pub fn get_bit(&self, pos: Index) -> u64 {
         (self.vec >> (pos as u64)) & 1
     }
