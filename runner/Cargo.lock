@@ -243,9 +243,6 @@ version = "0.1.0"
 [[package]]
 name = "day17b"
 version = "0.1.0"
-dependencies = [
- "kdam",
-]
 
 [[package]]
 name = "either"

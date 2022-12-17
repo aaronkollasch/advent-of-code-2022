@@ -1,6 +1,3 @@
-#[cfg(debug_assertions)]
-use kdam::{tqdm, BarExt};
-
 // rocks:
 // ####
 
@@ -156,17 +153,16 @@ pub fn main() {
     #[cfg(debug_assertions)]
     println!("{}", jet_len);
 
-    let n1 = 10000;
-    #[cfg(debug_assertions)]
-    let mut pb = tqdm!(total = n1);
     let mut heights = Vec::new();
     let mut last_highest = 0;
-    let mut last_rock = 0;
+    let mut last_rock = 1;
     let mut first_rock_delta = 0;
     let mut first_height_delta = 0;
     let mut rock_delta = 0;
     let mut height_delta = 0;
-    for i_rock in 0..n1 {
+    let mut i_rock = 0;
+    let mut num_wraps = 0;
+    loop {
         let mut rock = Rock {
             class: i_rock % ROCKS.len(),
             pos: Pos {
@@ -174,6 +170,7 @@ pub fn main() {
                 y: map.highest_rock + 3,
             },
         };
+        i_rock += 1;
         let mut last_pos = rock.pos;
         while !map.collides_with(rock) {
             last_pos = rock.pos;
@@ -184,9 +181,10 @@ pub fn main() {
             }
             jet_i = (jet_i + 1) % jet_len;
             if jet_i == 0 {
-                if first_height_delta == 0 {
+                num_wraps += 1;
+                if num_wraps == 1 {
                     first_height_delta = map.highest_rock - last_highest;
-                } else if height_delta != first_height_delta
+                } else if num_wraps > 2
                     && height_delta != map.highest_rock - last_highest
                 {
                     panic!(
@@ -195,9 +193,9 @@ pub fn main() {
                         map.highest_rock - last_highest
                     )
                 }
-                if first_rock_delta == 0 {
+                if num_wraps == 1 {
                     first_rock_delta = i_rock - last_rock;
-                } else if rock_delta != first_rock_delta && rock_delta != i_rock - last_rock {
+                } else if num_wraps > 2 && rock_delta != i_rock - last_rock {
                     panic!(
                         "mismatching rock deltas {} {}",
                         rock_delta,
@@ -206,13 +204,6 @@ pub fn main() {
                 }
                 height_delta = map.highest_rock - last_highest;
                 rock_delta = i_rock - last_rock;
-                #[cfg(debug_assertions)]
-                pb.write(format!(
-                    "{} {} {}",
-                    i_rock % ROCKS.len(),
-                    rock_delta,
-                    height_delta
-                ));
                 last_highest = map.highest_rock;
                 last_rock = i_rock;
             }
@@ -225,8 +216,7 @@ pub fn main() {
         rock.pos = last_pos;
         map.add_rock(rock);
         heights.push(map.highest_rock);
-        #[cfg(debug_assertions)]
-        pb.update(1);
+        if num_wraps >= 3 && i_rock >= last_rock + rock_delta - 1 { break; }
     }
     let n2 = 1000000000000;
     let last_rock_delta = (n2 - first_rock_delta - 1) % rock_delta;
