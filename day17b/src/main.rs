@@ -1,49 +1,46 @@
-// rocks:
-// ####
-
-// .#.
-// ###
-// .#.
-
-// ..#
-// ..#
-// ###
-
-// #
-// #
-// #
-// #
-
-// ##
-// ##
-//
+// chars:
 const AIR: u8 = b' ';
 const ROCK: u8 = b'#';
 
+// rocks:
+//
+// ####
 const ROCK_1: [[u8; 4]; 4] = [
     [ROCK, ROCK, ROCK, ROCK],
     [AIR, AIR, AIR, AIR],
     [AIR, AIR, AIR, AIR],
     [AIR, AIR, AIR, AIR],
 ];
+// .#.
+// ###
+// .#.
 const ROCK_2: [[u8; 4]; 4] = [
     [AIR, ROCK, AIR, AIR],
     [ROCK, ROCK, ROCK, AIR],
     [AIR, ROCK, AIR, AIR],
     [AIR, AIR, AIR, AIR],
 ];
+// ..#
+// ..#
+// ###
 const ROCK_3: [[u8; 4]; 4] = [
     [ROCK, ROCK, ROCK, AIR],
     [AIR, AIR, ROCK, AIR],
     [AIR, AIR, ROCK, AIR],
     [AIR, AIR, AIR, AIR],
 ];
+// #
+// #
+// #
+// #
 const ROCK_4: [[u8; 4]; 4] = [
     [ROCK, AIR, AIR, AIR],
     [ROCK, AIR, AIR, AIR],
     [ROCK, AIR, AIR, AIR],
     [ROCK, AIR, AIR, AIR],
 ];
+// ##
+// ##
 const ROCK_5: [[u8; 4]; 4] = [
     [ROCK, ROCK, AIR, AIR],
     [ROCK, ROCK, AIR, AIR],
@@ -52,8 +49,7 @@ const ROCK_5: [[u8; 4]; 4] = [
 ];
 const ROCKS: [[[u8; 4]; 4]; 5] = [ROCK_1, ROCK_2, ROCK_3, ROCK_4, ROCK_5];
 
-// const MAP_HEIGHT: usize = 2022 * 4;
-const MAP_HEIGHT: usize = 512;
+const MAP_HEIGHT: usize = 128;
 const MAP_WIDTH: usize = 7;
 
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]

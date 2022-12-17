@@ -1,49 +1,46 @@
-// rocks:
-// ####
-
-// .#.
-// ###
-// .#.
-
-// ..#
-// ..#
-// ###
-
-// #
-// #
-// #
-// #
-
-// ##
-// ##
-//
+// chars:
 const AIR: u8 = b' ';
 const ROCK: u8 = b'#';
 
+// rocks:
+//
+// ####
 const ROCK_1: [[u8; 4]; 4] = [
     [ROCK, ROCK, ROCK, ROCK],
     [AIR, AIR, AIR, AIR],
     [AIR, AIR, AIR, AIR],
     [AIR, AIR, AIR, AIR],
 ];
+// .#.
+// ###
+// .#.
 const ROCK_2: [[u8; 4]; 4] = [
     [AIR, ROCK, AIR, AIR],
     [ROCK, ROCK, ROCK, AIR],
     [AIR, ROCK, AIR, AIR],
     [AIR, AIR, AIR, AIR],
 ];
+// ..#
+// ..#
+// ###
 const ROCK_3: [[u8; 4]; 4] = [
     [ROCK, ROCK, ROCK, AIR],
     [AIR, AIR, ROCK, AIR],
     [AIR, AIR, ROCK, AIR],
     [AIR, AIR, AIR, AIR],
 ];
+// #
+// #
+// #
+// #
 const ROCK_4: [[u8; 4]; 4] = [
     [ROCK, AIR, AIR, AIR],
     [ROCK, AIR, AIR, AIR],
     [ROCK, AIR, AIR, AIR],
     [ROCK, AIR, AIR, AIR],
 ];
+// ##
+// ##
 const ROCK_5: [[u8; 4]; 4] = [
     [ROCK, ROCK, AIR, AIR],
     [ROCK, ROCK, AIR, AIR],
@@ -52,7 +49,7 @@ const ROCK_5: [[u8; 4]; 4] = [
 ];
 const ROCKS: [[[u8; 4]; 4]; 5] = [ROCK_1, ROCK_2, ROCK_3, ROCK_4, ROCK_5];
 
-const MAP_HEIGHT: usize = 2022 * 4;
+const MAP_HEIGHT: usize = 128;
 const MAP_WIDTH: usize = 7;
 
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
@@ -64,6 +61,7 @@ struct Pos {
 struct Map {
     contents: [[u8; MAP_WIDTH]; MAP_HEIGHT],
     highest_rock: usize,
+    map_height: usize,
 }
 
 impl Map {
@@ -71,12 +69,23 @@ impl Map {
         Self {
             contents: [[AIR; MAP_WIDTH]; MAP_HEIGHT],
             highest_rock: 0,
+            map_height: 20,
         }
     }
 
     #[inline]
+    pub fn get_contents(&self, pos: Pos) -> u8 {
+        self.contents[pos.y % MAP_HEIGHT][pos.x]
+    }
+
+    #[inline]
+    pub fn set_contents(&mut self, pos: Pos, val: u8) {
+        self.contents[pos.y % MAP_HEIGHT][pos.x] = val;
+    }
+
+    #[inline]
     pub fn check_bounds(&self, pos: Pos) -> bool {
-        pos.x < MAP_WIDTH && pos.y < MAP_HEIGHT
+        pos.x < MAP_WIDTH && pos.y < self.map_height
     }
 
     pub fn collides_with(&self, rock: Rock) -> bool {
@@ -91,7 +100,7 @@ impl Map {
                     y: pos.y.wrapping_add(y),
                 };
                 if self.check_bounds(map_pos) {
-                    rock[y][x] != AIR && self.contents[map_pos.y][map_pos.x] != AIR
+                    rock[y][x] != AIR && self.get_contents(map_pos) != AIR
                 } else {
                     rock[y][x] != AIR
                 }
@@ -108,15 +117,21 @@ impl Map {
                     y: pos.y.wrapping_add(y),
                 };
                 if rock[y][x] != AIR {
-                    self.contents[map_pos.y][map_pos.x] = rock[y][x];
+                    self.set_contents(map_pos, rock[y][x]);
                 }
             }
         }
         for y in self.highest_rock..self.highest_rock + 4 {
-            if (0..MAP_WIDTH).any(|x| self.contents[y][x] != AIR) {
+            if (0..MAP_WIDTH).any(|x| self.get_contents(Pos { x, y }) != AIR) {
                 self.highest_rock = y + 1;
             }
         }
+        for y in self.map_height..self.highest_rock + 20 {
+            for x in 0..MAP_WIDTH {
+                self.set_contents(Pos { x, y }, AIR);
+            }
+        }
+        self.map_height = self.highest_rock + 20;
     }
 }
 
