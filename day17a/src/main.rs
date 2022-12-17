@@ -82,11 +82,11 @@ impl Map {
     }
 
     pub fn add_rock(&mut self, rock: Rock, rock_y: usize) {
-        (rock_y..rock_y + rock.1)
+        rock.0.to_le_bytes().into_iter()
             .enumerate()
-            .for_each(|(i_rock, y)| {
-                let row = self.get_row_mut(y);
-                *row |= (rock.0.wrapping_shr(i_rock as u32 * 8)) as u8;
+            .for_each(|(y, b_rock)| {
+                let row = self.get_row_mut(rock_y + y);
+                *row |= b_rock;
             });
         for y in self.highest_rock..self.highest_rock + 4 {
             if self.get_row(y) > 0 {
