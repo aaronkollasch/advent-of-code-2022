@@ -108,7 +108,7 @@ pub fn main() {
     #[cfg(debug_assertions)]
     println!("{}", jet_len);
 
-    let mut heights = Vec::new();
+    let mut heights = Vec::with_capacity(16384);
     let mut last_highest = 0;
     let mut last_rock = 0;
     let mut first_rock_delta = 0;
