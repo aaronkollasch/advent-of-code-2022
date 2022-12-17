@@ -1,50 +1,42 @@
 type Row = u8;
-type Rock = ([Row; 4], usize);
+type Rock = (u32, usize);
 
 // rocks:
 //
 // ####
-const ROCK_1: Rock = ([0b0011110, 0, 0, 0], 1);
+const ROCK_1: Rock = (0x0000001E, 1);
 // .#.
 // ###
 // .#.
-const ROCK_2: Rock = ([0b0001000, 0b0011100, 0b0001000, 0], 3);
+const ROCK_2: Rock = (0x00081C08, 3);
 // ..#
 // ..#
 // ###
-const ROCK_3: Rock = ([0b0011100, 0b0000100, 0b0000100, 0], 3);
+const ROCK_3: Rock = (0x0004041C, 3);
 // #
 // #
 // #
 // #
-const ROCK_4: Rock = ([0b0010000, 0b0010000, 0b0010000, 0b0010000], 4);
+const ROCK_4: Rock = (0x10101010, 4);
 // ##
 // ##
-const ROCK_5: Rock = ([0b0011000, 0b0011000, 0, 0], 2);
+const ROCK_5: Rock = (0x00001818, 2);
 
 const ROCKS: [Rock; 5] = [ROCK_1, ROCK_2, ROCK_3, ROCK_4, ROCK_5];
 
 const MAP_HEIGHT: usize = 128;
 
+#[inline]
 fn shift_rock_left(rock: &mut Rock) {
-    if (0..rock.1).map(|i_rock| {
-        rock.0[i_rock] & 0b1000000
-    }).fold(0, |acc, x| acc | x as Row) > 0 {
-        return
-    }
-    for i_rock in 0..rock.1 {
-        rock.0[i_rock] <<= 1;
+    if rock.0 & 0x40404040 == 0 {
+        rock.0 <<= 1;
     }
 }
 
+#[inline]
 fn shift_rock_right(rock: &mut Rock) {
-    if (0..rock.1).map(|i_rock| {
-        rock.0[i_rock] & 0b0000001
-    }).fold(0, |acc, x| acc | x as Row) > 0 {
-        return
-    }
-    for i_rock in 0..rock.1 {
-        rock.0[i_rock] >>= 1;
+    if rock.0 & 0x01010101 == 0 {
+        rock.0 >>= 1;
     }
 }
 
@@ -81,11 +73,12 @@ impl Map {
     #[inline]
     pub fn collides_with(&self, rock: Rock, rock_y: usize) -> bool {
         if rock_y.saturating_add(rock.1) >= self.map_height { return true; }
-        (rock_y..rock_y + rock.1)
-            .enumerate()
-            .any(|(i_rock, y)| {
-                self.get_row(y) & rock.0[i_rock] > 0
-            })
+        let mask = (rock_y..rock_y + rock.1)
+            .rev()
+            .map(|y| self.get_row(y))
+            .fold(0, |acc, b| (acc << 8) | b as u32);
+
+        rock.0 & mask != 0
     }
 
     pub fn add_rock(&mut self, rock: Rock, rock_y: usize) {
@@ -93,7 +86,7 @@ impl Map {
             .enumerate()
             .for_each(|(i_rock, y)| {
                 let row = self.get_row_mut(y);
-                *row |= rock.0[i_rock];
+                *row |= (rock.0.wrapping_shr(i_rock as u32 * 8)) as u8;
             });
         for y in self.highest_rock..self.highest_rock + 4 {
             if self.get_row(y) > 0 {
@@ -106,6 +99,7 @@ impl Map {
         self.map_height = self.highest_rock + 20;
     }
 }
+
 pub fn main() {
     let s = include_bytes!("../input.txt");
     let jet_len = s.len() - 1;
