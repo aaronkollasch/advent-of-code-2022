@@ -117,7 +117,7 @@ pub fn main() {
 
     let mut heights = Vec::new();
     let mut last_highest = 0;
-    let mut last_rock = 1;
+    let mut last_rock = 0;
     let mut first_rock_delta = 0;
     let mut first_height_delta = 0;
     let mut rock_delta = 0;
