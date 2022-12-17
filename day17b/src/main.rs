@@ -23,42 +23,36 @@ const AIR: u8 = b' ';
 const ROCK: u8 = b'#';
 
 const ROCK_1: [[u8; 4]; 4] = [
-    [ ROCK, ROCK, ROCK, ROCK ],
-    [ AIR, AIR, AIR, AIR ],
-    [ AIR, AIR, AIR, AIR ],
-    [ AIR, AIR, AIR, AIR ],
+    [ROCK, ROCK, ROCK, ROCK],
+    [AIR, AIR, AIR, AIR],
+    [AIR, AIR, AIR, AIR],
+    [AIR, AIR, AIR, AIR],
 ];
 const ROCK_2: [[u8; 4]; 4] = [
-    [ AIR, ROCK, AIR, AIR ],
-    [ ROCK, ROCK, ROCK, AIR ],
-    [ AIR, ROCK, AIR, AIR ],
-    [ AIR, AIR, AIR, AIR ],
+    [AIR, ROCK, AIR, AIR],
+    [ROCK, ROCK, ROCK, AIR],
+    [AIR, ROCK, AIR, AIR],
+    [AIR, AIR, AIR, AIR],
 ];
 const ROCK_3: [[u8; 4]; 4] = [
-    [ ROCK, ROCK, ROCK, AIR ],
-    [ AIR, AIR, ROCK, AIR ],
-    [ AIR, AIR, ROCK, AIR ],
-    [ AIR, AIR, AIR, AIR ],
+    [ROCK, ROCK, ROCK, AIR],
+    [AIR, AIR, ROCK, AIR],
+    [AIR, AIR, ROCK, AIR],
+    [AIR, AIR, AIR, AIR],
 ];
 const ROCK_4: [[u8; 4]; 4] = [
-    [ ROCK, AIR, AIR, AIR ],
-    [ ROCK, AIR, AIR, AIR ],
-    [ ROCK, AIR, AIR, AIR ],
-    [ ROCK, AIR, AIR, AIR ],
+    [ROCK, AIR, AIR, AIR],
+    [ROCK, AIR, AIR, AIR],
+    [ROCK, AIR, AIR, AIR],
+    [ROCK, AIR, AIR, AIR],
 ];
 const ROCK_5: [[u8; 4]; 4] = [
-    [ ROCK, ROCK, AIR, AIR ],
-    [ ROCK, ROCK, AIR, AIR ],
-    [ AIR, AIR, AIR, AIR ],
-    [ AIR, AIR, AIR, AIR ],
+    [ROCK, ROCK, AIR, AIR],
+    [ROCK, ROCK, AIR, AIR],
+    [AIR, AIR, AIR, AIR],
+    [AIR, AIR, AIR, AIR],
 ];
-const ROCKS: [[[u8; 4]; 4]; 5] = [
-    ROCK_1,
-    ROCK_2,
-    ROCK_3,
-    ROCK_4,
-    ROCK_5,
-];
+const ROCKS: [[[u8; 4]; 4]; 5] = [ROCK_1, ROCK_2, ROCK_3, ROCK_4, ROCK_5];
 
 // const MAP_HEIGHT: usize = 2022 * 4;
 const MAP_HEIGHT: usize = 512;
@@ -109,7 +103,10 @@ impl Map {
             .map(|x| (0..4).map(move |y| (x, y)))
             .flatten()
             .any(|(x, y)| {
-                let map_pos: Pos = Pos { x: pos.x.wrapping_add(x), y: pos.y.wrapping_add(y) };
+                let map_pos: Pos = Pos {
+                    x: pos.x.wrapping_add(x),
+                    y: pos.y.wrapping_add(y),
+                };
                 if self.check_bounds(map_pos) {
                     rock[y][x] != AIR && self.get_contents(map_pos) != AIR
                 } else {
@@ -123,13 +120,16 @@ impl Map {
         let rock = ROCKS[rock.class];
         for x in 0..4 {
             for y in 0..4 {
-                let map_pos: Pos = Pos { x: pos.x.wrapping_add(x), y: pos.y.wrapping_add(y) };
+                let map_pos: Pos = Pos {
+                    x: pos.x.wrapping_add(x),
+                    y: pos.y.wrapping_add(y),
+                };
                 if rock[y][x] != AIR {
                     self.set_contents(map_pos, rock[y][x]);
                 }
             }
         }
-        for y in self.highest_rock..self.highest_rock+4 {
+        for y in self.highest_rock..self.highest_rock + 4 {
             if (0..MAP_WIDTH).any(|x| self.get_contents(Pos { x, y }) != AIR) {
                 self.highest_rock = y + 1;
             }
@@ -166,7 +166,13 @@ pub fn main() {
     let mut rock_delta = 0;
     let mut height_delta = 0;
     for i_rock in 0..n {
-        let mut rock = Rock { class: i_rock % ROCKS.len(), pos: Pos { x: 2, y: map.highest_rock + 3 } };
+        let mut rock = Rock {
+            class: i_rock % ROCKS.len(),
+            pos: Pos {
+                x: 2,
+                y: map.highest_rock + 3,
+            },
+        };
         let mut last_pos = rock.pos;
         // println!("{} ({}, {}) {}", rock.class, rock.pos.x, rock.pos.y, map.highest_rock);
         while !map.collides_with(rock) {
@@ -179,13 +185,34 @@ pub fn main() {
             }
             jet_i = (jet_i + 1) % jet_len;
             if jet_i == 0 {
-                if first_height_delta == 0 { first_height_delta = map.highest_rock - last_highest; }
-                else if height_delta != first_height_delta && height_delta != map.highest_rock - last_highest { panic!("mismatching height deltas {} {}", height_delta, map.highest_rock - last_highest) }
-                if first_rock_delta == 0 { first_rock_delta = i_rock - last_rock; }
-                else if rock_delta != first_rock_delta && rock_delta != i_rock - last_rock { panic!("mismatching rock deltas {} {}", rock_delta, i_rock - last_rock) }
+                if first_height_delta == 0 {
+                    first_height_delta = map.highest_rock - last_highest;
+                } else if height_delta != first_height_delta
+                    && height_delta != map.highest_rock - last_highest
+                {
+                    panic!(
+                        "mismatching height deltas {} {}",
+                        height_delta,
+                        map.highest_rock - last_highest
+                    )
+                }
+                if first_rock_delta == 0 {
+                    first_rock_delta = i_rock - last_rock;
+                } else if rock_delta != first_rock_delta && rock_delta != i_rock - last_rock {
+                    panic!(
+                        "mismatching rock deltas {} {}",
+                        rock_delta,
+                        i_rock - last_rock
+                    )
+                }
                 height_delta = map.highest_rock - last_highest;
                 rock_delta = i_rock - last_rock;
-                pb.write(format!("{} {} {}", i_rock % ROCKS.len(), rock_delta, height_delta));
+                pb.write(format!(
+                    "{} {} {}",
+                    i_rock % ROCKS.len(),
+                    rock_delta,
+                    height_delta
+                ));
                 last_highest = map.highest_rock;
                 last_rock = i_rock;
             }
@@ -219,20 +246,37 @@ pub fn main() {
     let last_rock_delta = n - last_rock;
     println!("{} {} {}", first_rock_delta, rock_delta, last_rock_delta);
     let last_height_delta = map.highest_rock - last_highest;
-    println!("{} {} {}", first_height_delta, height_delta, last_height_delta);
+    println!(
+        "{} {} {}",
+        first_height_delta, height_delta, last_height_delta
+    );
     println!("{} {}", last_highest, last_height_delta);
-    println!("{} {}", map.highest_rock, first_height_delta + last_highest + last_height_delta);
+    println!(
+        "{} {}",
+        map.highest_rock,
+        first_height_delta + last_highest + last_height_delta
+    );
 
     let n2 = 1000000000000;
     let last_rock_delta = (n2 - first_rock_delta - 1) % rock_delta;
     let n2_num_repeats = (n2 - first_rock_delta - last_rock_delta) / rock_delta;
     let n3 = last_rock + last_rock_delta;
     println!("{} {}", last_rock_delta, n3);
-    println!("{} {}", heights[n3], heights[n3 - rock_delta] + height_delta);
+    println!(
+        "{} {}",
+        heights[n3],
+        heights[n3 - rock_delta] + height_delta
+    );
     let last_height_delta = heights[n3] - last_highest;
     println!("{} {} {}", first_rock_delta, rock_delta, last_rock_delta);
-    println!("{} {} {}", first_height_delta, height_delta, last_height_delta);
-    print!("{} ", first_height_delta + n2_num_repeats * height_delta + last_height_delta);
+    println!(
+        "{} {} {}",
+        first_height_delta, height_delta, last_height_delta
+    );
+    print!(
+        "{} ",
+        first_height_delta + n2_num_repeats * height_delta + last_height_delta
+    );
     // let last_overflow_height = first_height_delta + (n2 - first_rock_delta - last_rock_delta) / rock_delta * height_delta + last_height_delta;
     // print!("{} ", first_height_delta + last_overflow_height + last_height_delta);
 }
