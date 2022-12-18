@@ -43,7 +43,6 @@ fn shift_rock_right(rock: &mut Rock) {
 struct Map {
     contents: [Row; MAP_HEIGHT],
     highest_rock: usize,
-    map_height: usize,
 }
 
 impl Map {
@@ -51,7 +50,6 @@ impl Map {
         Self {
             contents: [0; MAP_HEIGHT],
             highest_rock: 0,
-            map_height: 20,
         }
     }
 
@@ -72,9 +70,6 @@ impl Map {
 
     #[inline]
     pub fn collides_with(&self, rock: Rock, rock_y: usize) -> bool {
-        if rock_y.saturating_add(rock.1) >= self.map_height {
-            return true;
-        }
         let mask = (rock_y..rock_y + rock.1)
             .rev()
             .map(|y| self.get_row(y))
@@ -83,6 +78,7 @@ impl Map {
         rock.0 & mask != 0
     }
 
+    #[inline]
     pub fn add_rock(&mut self, rock: Rock, rock_y: usize) {
         rock.0
             .to_le_bytes()
@@ -93,14 +89,11 @@ impl Map {
                 *row |= b_rock;
             });
         for y in self.highest_rock..self.highest_rock + 4 {
-            if self.get_row(y) > 0 {
+            if self.get_row(y) != 0 {
                 self.highest_rock = y + 1;
+                self.set_row(y + 8, 0);
             }
         }
-        for y in self.map_height..self.highest_rock + 20 {
-            self.set_row(y, 0);
-        }
-        self.map_height = self.highest_rock + 20;
     }
 }
 
@@ -111,16 +104,15 @@ pub fn main() {
     let mut map = Map::new();
 
     for i_rock in 0..2022 {
-        let rock_i = i_rock % ROCKS.len();
-        let mut rock = ROCKS[rock_i];
+        let mut rock = ROCKS[i_rock % ROCKS.len()];
         let mut last_rock;
         let mut rock_y = map.highest_rock + 3;
         let mut last_y = rock_y;
         #[cfg(debug_assertions)]
-        println!("{} ({}) {}", rock_i, rock_y, map.highest_rock);
-        while !map.collides_with(rock, rock_y) {
+        println!("{} ({}) {}", i_rock % ROCKS.len(), rock_y, map.highest_rock);
+        while rock_y != usize::MAX && !map.collides_with(rock, rock_y) {
             #[cfg(debug_assertions)]
-            println!("{} ({}) {}", rock_i, rock_y, s[jet_i] as char);
+            println!("{} ({}) {}", i_rock % ROCKS.len(), rock_y, s[jet_i] as char);
             last_rock = rock;
             if s[jet_i] == b'<' {
                 shift_rock_left(&mut rock);
@@ -132,14 +124,14 @@ pub fn main() {
                 rock = last_rock;
             }
             #[cfg(debug_assertions)]
-            println!("{} ({}) v", rock_i, rock_y);
+            println!("{} ({}) v", i_rock % ROCKS.len(), rock_y);
             last_y = rock_y;
             rock_y = rock_y.wrapping_sub(1);
         }
         rock_y = last_y;
         map.add_rock(rock, rock_y);
         #[cfg(debug_assertions)]
-        println!("{} ({}) {}", rock_i, rock_y, map.highest_rock);
+        println!("{} ({}) {}", i_rock % ROCKS.len(), rock_y, map.highest_rock);
         #[cfg(debug_assertions)]
         {
             let highest_rock = map.highest_rock + 1;
