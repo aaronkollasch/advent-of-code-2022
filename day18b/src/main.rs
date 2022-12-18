@@ -56,38 +56,38 @@ pub fn main() {
     let (mut min_a, mut max_a) = (CubePos::MAX, CubePos::MIN);
     let (mut min_b, mut max_b) = (CubePos::MAX, CubePos::MIN);
     let (mut min_c, mut max_c) = (CubePos::MAX, CubePos::MIN);
-    let cubes = s
-        .lines()
-        .map(|l| {
-            let mut i_num = 0;
-            let mut acc = 0;
-            let mut result = [0; 3];
-            for b in l.as_bytes().iter() {
-                match *b {
-                    b'0'..=b'9' => {
-                        acc = acc * 10 + (b - b'0') as CubePos;
-                    }
-                    b',' => {
-                        result[i_num] = acc * 2;
-                        i_num += 1;
-                        acc = 0;
-                    }
-                    _ => {}
+    let mut cubes: FxHashSet<Pos3d> = Default::default();
+    cubes.reserve(2400);
+    s.lines().for_each(|l| {
+        let mut i_num = 0;
+        let mut acc = 0;
+        let mut result = [0; 3];
+        for b in l.as_bytes().iter() {
+            match *b {
+                b'0'..=b'9' => {
+                    acc = acc * 10 + (b - b'0') as CubePos;
                 }
+                b',' => {
+                    result[i_num] = acc * 2;
+                    i_num += 1;
+                    acc = 0;
+                }
+                _ => {}
             }
-            result[i_num] = acc * 2;
-            min_a = min(min_a, result[0]);
-            max_a = max(max_a, result[0]);
-            min_b = min(min_b, result[1]);
-            max_b = max(max_b, result[1]);
-            min_c = min(min_c, result[2]);
-            max_c = max(max_c, result[2]);
-            (result[0], result[1], result[2])
-        })
-        .collect::<Vec<_>>();
-    let sides = cubes
-        .iter()
-        .flat_map(|(a, b, c)| {
+        }
+        result[i_num] = acc * 2;
+        min_a = min(min_a, result[0]);
+        max_a = max(max_a, result[0]);
+        min_b = min(min_b, result[1]);
+        max_b = max(max_b, result[1]);
+        min_c = min(min_c, result[2]);
+        max_c = max(max_c, result[2]);
+        cubes.insert((result[0], result[1], result[2]));
+    });
+    let mut sides: FxHashSet<Pos3d> = Default::default();
+    sides.reserve(13000);
+    cubes.iter().for_each(|(a, b, c)| {
+        sides.extend(
             [
                 (a + 1, *b, *c),
                 (*a, *b + 1, *c),
@@ -96,9 +96,9 @@ pub fn main() {
                 (*a, b - 1, *c),
                 (*a, *b, *c - 1),
             ]
-            .into_iter()
-        })
-        .collect::<FxHashSet<_>>();
+            .into_iter(),
+        );
+    });
     let num_cubes = cubes.len();
     let num_neighbors = num_cubes * 6 - sides.len();
     let num_surface = num_cubes * 6 - num_neighbors * 2;
@@ -111,8 +111,6 @@ pub fn main() {
         println!("num contacting sides: {}", num_neighbors * 2);
         println!("num surface sides: {}", num_surface);
     }
-
-    let cubes = cubes.into_iter().collect::<FxHashSet<_>>();
 
     let cells: Vec<Vec<Vec<bool>>> = Vec::from_iter((min_c - 2..=max_c + 2).step_by(2).map(|c| {
         Vec::from_iter((min_b - 2..=max_b + 2).step_by(2).map(|b| {
@@ -137,7 +135,9 @@ pub fn main() {
     #[cfg(debug_assertions)]
     println!("w {} h {} d {}", w, h, d);
     let mut next_positions: FxHashSet<Pos3d> = Default::default();
+    next_positions.reserve(256);
     let mut new_positions: FxHashSet<Pos3d> = Default::default();
+    next_positions.reserve(256);
     let start: Pos3d = (1, 1, 1);
     next_positions.insert(start);
     let start: Pos3d = (w - 1, h - 1, d - 1);
@@ -177,9 +177,12 @@ pub fn main() {
         })
     });
 
-    let sides2 = contained_cube_iter
-        .clone()
-        .flat_map(|(a, b, c)| {
+    let mut sides2: FxHashSet<Pos3d> = Default::default();
+    let mut num_cubes2 = 0;
+    sides2.reserve(4096);
+    contained_cube_iter.for_each(|(a, b, c)| {
+        num_cubes2 += 1;
+        sides2.extend(
             [
                 (a + 1, b, c),
                 (a, b + 1, c),
@@ -188,18 +191,18 @@ pub fn main() {
                 (a, b - 1, c),
                 (a, b, c - 1),
             ]
-            .into_iter()
-        })
-        .collect::<FxHashSet<_>>();
-    let num_cubes2 = contained_cube_iter.clone().count();
+            .into_iter(),
+        );
+    });
     let num_neighbors2 = num_cubes2 * 6 - sides2.len();
     let num_surface2 = num_cubes2 * 6 - num_neighbors2 * 2;
 
     #[cfg(debug_assertions)]
     {
         println!("num cubes2: {}", num_cubes2);
+        println!("num sides2: {}", sides2.len());
         println!("num neighbors2: {}", num_neighbors2);
         println!("num surface sides2: {}", num_surface2);
     }
-    print!("{}", num_surface - num_surface2);
+    print!("{} ", num_surface - num_surface2);
 }
