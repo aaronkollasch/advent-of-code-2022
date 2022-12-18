@@ -43,7 +43,6 @@ fn shift_rock_right(rock: &mut Rock) {
 struct Map {
     contents: [Row; MAP_HEIGHT],
     highest_rock: usize,
-    map_height: usize,
 }
 
 impl Map {
@@ -51,7 +50,6 @@ impl Map {
         Self {
             contents: [0; MAP_HEIGHT],
             highest_rock: 0,
-            map_height: 8,
         }
     }
 
@@ -72,9 +70,6 @@ impl Map {
 
     #[inline]
     pub fn collides_with(&self, rock: Rock, rock_y: usize) -> bool {
-        if rock_y.saturating_add(rock.1) >= self.map_height {
-            return true;
-        }
         let mask = (rock_y..rock_y + rock.1)
             .rev()
             .map(|y| self.get_row(y))
@@ -94,14 +89,11 @@ impl Map {
                 *row |= b_rock;
             });
         for y in self.highest_rock..self.highest_rock + 4 {
-            if self.get_row(y) > 0 {
+            if self.get_row(y) != 0 {
                 self.highest_rock = y + 1;
+                self.set_row(y + 8, 0);
             }
         }
-        for y in self.map_height..self.highest_rock + 8 {
-            self.set_row(y, 0);
-        }
-        self.map_height = self.highest_rock + 8;
     }
 }
 
@@ -128,7 +120,7 @@ pub fn main() {
         let mut rock_y = map.highest_rock + 3;
         let mut last_y = rock_y;
         i_rock += 1;
-        while !map.collides_with(rock, rock_y) {
+        while rock_y != usize::MAX && !map.collides_with(rock, rock_y) {
             last_rock_pos = rock;
             if s[jet_i] == b'<' {
                 shift_rock_left(&mut rock);
@@ -199,7 +191,7 @@ pub fn main() {
             let mut last_rock_pos;
             let mut rock_y = map.highest_rock + 3;
             let mut last_y = rock_y;
-            while !map.collides_with(rock, rock_y) {
+            while rock_y != usize::MAX && !map.collides_with(rock, rock_y) {
                 last_rock_pos = rock;
                 if s[jet_i] == b'<' {
                     shift_rock_left(&mut rock);
