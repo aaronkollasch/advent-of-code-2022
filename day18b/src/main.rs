@@ -157,41 +157,20 @@ pub fn main() {
             .into_iter()
         })
         .collect::<FxHashSet<_>>();
-    println!("a_len: {}", a_pos.len());
-    println!("b_len: {}", b_pos.len());
-    println!("c_len: {}", c_pos.len());
     let num_cubes = cube_iter.clone().count();
-    println!("num cubes: {}", num_cubes);
-
     let num_neighbors = num_cubes * 6 - sides.len();
-    println!("num neighbors: {}", num_neighbors);
+    let num_surface = num_cubes * 6 - num_neighbors * 2;
 
-    println!("num sides: {}", num_cubes * 6);
-    println!("num contacting sides: {}", num_neighbors * 2);
-    println!(
-        "num non-contacting sides: {}",
-        num_cubes * 6 - num_neighbors * 2
-    );
+    #[cfg(debug_assertions)]
+    {
+        println!("num cubes: {}", num_cubes);
+        println!("num neighbors: {}", num_neighbors);
+        println!("num sides: {}", num_cubes * 6);
+        println!("num contacting sides: {}", num_neighbors * 2);
+        println!("num surface sides: {}", num_surface);
+    }
 
     let cubes = cube_iter.clone().collect::<FxHashSet<_>>();
-
-    let num_neighbors = sides
-        .iter()
-        .filter(|side| {
-            let (cube1, cube2) = match (
-                side.0.rem_euclid(2),
-                side.1.rem_euclid(2),
-                side.2.rem_euclid(2),
-            ) {
-                (1, 0, 0) => ((side.0 + 1, side.1, side.2), (side.0 - 1, side.1, side.2)),
-                (0, 1, 0) => ((side.0, side.1 + 1, side.2), (side.0, side.1 - 1, side.2)),
-                (0, 0, 1) => ((side.0, side.1, side.2 + 1), (side.0, side.1, side.2 - 1)),
-                _ => unreachable!(),
-            };
-            cubes.contains(&cube1) && cubes.contains(&cube2)
-        })
-        .count();
-    println!("num connected sides: {}", num_neighbors * 2);
 
     let cells: Vec<Vec<Vec<bool>>> = Vec::from_iter((min_c - 2..=max_c + 2).step_by(2).map(|c| {
         Vec::from_iter((min_b - 2..=max_b + 2).step_by(2).map(|b| {
@@ -213,6 +192,7 @@ pub fn main() {
         h,
         d,
     };
+    #[cfg(debug_assertions)]
     println!("w {} h {} d {}", w, h, d);
     let mut next_positions: FxHashSet<Pos3d> = Default::default();
     let mut new_positions: FxHashSet<Pos3d> = Default::default();
@@ -222,7 +202,6 @@ pub fn main() {
     next_positions.insert(start);
 
     while !next_positions.is_empty() {
-        println!("{:?}", next_positions);
         for p in next_positions.iter() {
             map.set_val(*p, true);
         }
@@ -233,6 +212,7 @@ pub fn main() {
         );
         (next_positions, new_positions) = (new_positions, next_positions);
     }
+    #[cfg(debug_assertions)]
     for (v12, v22) in cells.iter().zip(map.contents.iter()) {
         for (v11, v21) in v12.iter().zip(v22.iter()) {
             for b in v11.iter() {
@@ -255,7 +235,6 @@ pub fn main() {
         })
     });
     let contained_cube_count = contained_cube_iter.clone().count();
-    println!("contained cubes: {}", contained_cube_count);
 
     let sides2 = contained_cube_iter
         .clone()
@@ -272,40 +251,15 @@ pub fn main() {
         })
         .collect::<FxHashSet<_>>();
     let num_cubes2 = contained_cube_iter.clone().count();
-    println!("num cubes2: {}", num_cubes2);
-
     let num_neighbors2 = num_cubes2 * 6 - sides2.len();
-    println!("num neighbors2: {}", num_neighbors2);
+    let num_surface2 = num_cubes2 * 6 - num_neighbors2 * 2;
 
-    println!(
-        "num surface sides2: {}",
-        num_cubes2 * 6 - num_neighbors2 * 2
-    );
-    //
-    // println!("num sides: {}", num_cubes * 6);
-    // println!("num contacting sides: {}", num_neighbors * 2);
-    // println!(
-    //     "num non-contacting sides: {}",
-    //     num_cubes * 6 - num_neighbors * 2
-    // );
-    //
-    // let cubes = cube_iter.clone().collect::<FxHashSet<_>>();
-    //
-    // let num_neighbors = sides.iter().filter(|side| {
-    //     let (cube1, cube2) = match (side.0.rem_euclid(2), side.1.rem_euclid(2), side.2.rem_euclid(2)) {
-    //         (1, 0, 0) => ((side.0 + 1, side.1, side.2), (side.0 - 1, side.1, side.2)),
-    //         (0, 1, 0) => ((side.0, side.1 + 1, side.2), (side.0, side.1 - 1, side.2)),
-    //         (0, 0, 1) => ((side.0, side.1, side.2 + 1), (side.0, side.1, side.2 - 1)),
-    //         _ => unreachable!(),
-    //     };
-    //     cubes.contains(&cube1) && cubes.contains(&cube2)
-    // }).count();
-    // println!(
-    //     "num connected sides: {}",
-    //     num_neighbors * 2
-    // );
-    println!(
-        "num surface sides: {}",
-        num_cubes * 6 - num_neighbors * 2 - (num_cubes2 * 6 - num_neighbors2 * 2)
-    );
+    #[cfg(debug_assertions)]
+    {
+        println!("contained cubes: {}", contained_cube_count);
+        println!("num cubes2: {}", num_cubes2);
+        println!("num neighbors2: {}", num_neighbors2);
+        println!("num surface sides2: {}", num_surface2);
+    }
+    print!("{}", num_surface - num_surface2);
 }
