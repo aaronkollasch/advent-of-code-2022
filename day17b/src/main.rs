@@ -72,7 +72,9 @@ impl Map {
 
     #[inline]
     pub fn collides_with(&self, rock: Rock, rock_y: usize) -> bool {
-        if rock_y.saturating_add(rock.1) >= self.map_height { return true; }
+        if rock_y.saturating_add(rock.1) >= self.map_height {
+            return true;
+        }
         let mask = (rock_y..rock_y + rock.1)
             .rev()
             .map(|y| self.get_row(y))
@@ -83,7 +85,9 @@ impl Map {
 
     #[inline]
     pub fn add_rock(&mut self, rock: Rock, rock_y: usize) {
-        rock.0.to_le_bytes().into_iter()
+        rock.0
+            .to_le_bytes()
+            .into_iter()
             .enumerate()
             .for_each(|(y, b_rock)| {
                 let row = self.get_row_mut(rock_y + y);
@@ -136,9 +140,7 @@ pub fn main() {
                 num_wraps += 1;
                 if num_wraps == 1 {
                     first_height_delta = map.highest_rock - last_highest;
-                } else if num_wraps > 2
-                    && height_delta != map.highest_rock - last_highest
-                {
+                } else if num_wraps > 2 && height_delta != map.highest_rock - last_highest {
                     panic!(
                         "mismatching height deltas {} {}",
                         height_delta,
@@ -168,7 +170,9 @@ pub fn main() {
         rock_y = last_y;
         map.add_rock(rock, rock_y);
         heights.push(map.highest_rock);
-        if num_wraps >= 3 && i_rock >= last_rock + rock_delta - 1 { break; }
+        if num_wraps >= 3 && i_rock >= last_rock + rock_delta - 1 {
+            break;
+        }
     }
     let n2 = 1000000000000;
     let last_rock_delta = (n2 - first_rock_delta - 1) % rock_delta;
@@ -213,9 +217,6 @@ pub fn main() {
             map.add_rock(rock, rock_y);
             pb.update(1);
         }
-        print!(
-            "{} ",
-            map.highest_rock
-        );
+        print!("{} ", map.highest_rock);
     }
 }

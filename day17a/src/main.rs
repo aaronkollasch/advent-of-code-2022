@@ -72,7 +72,9 @@ impl Map {
 
     #[inline]
     pub fn collides_with(&self, rock: Rock, rock_y: usize) -> bool {
-        if rock_y.saturating_add(rock.1) >= self.map_height { return true; }
+        if rock_y.saturating_add(rock.1) >= self.map_height {
+            return true;
+        }
         let mask = (rock_y..rock_y + rock.1)
             .rev()
             .map(|y| self.get_row(y))
@@ -82,7 +84,9 @@ impl Map {
     }
 
     pub fn add_rock(&mut self, rock: Rock, rock_y: usize) {
-        rock.0.to_le_bytes().into_iter()
+        rock.0
+            .to_le_bytes()
+            .into_iter()
             .enumerate()
             .for_each(|(y, b_rock)| {
                 let row = self.get_row_mut(rock_y + y);
@@ -113,16 +117,10 @@ pub fn main() {
         let mut rock_y = map.highest_rock + 3;
         let mut last_y = rock_y;
         #[cfg(debug_assertions)]
-        println!(
-            "{} ({}) {}",
-            rock_i, rock_y, map.highest_rock
-        );
+        println!("{} ({}) {}", rock_i, rock_y, map.highest_rock);
         while !map.collides_with(rock, rock_y) {
             #[cfg(debug_assertions)]
-            println!(
-                "{} ({}) {}",
-                rock_i, rock_y, s[jet_i] as char
-            );
+            println!("{} ({}) {}", rock_i, rock_y, s[jet_i] as char);
             last_rock = rock;
             if s[jet_i] == b'<' {
                 shift_rock_left(&mut rock);
@@ -141,15 +139,16 @@ pub fn main() {
         rock_y = last_y;
         map.add_rock(rock, rock_y);
         #[cfg(debug_assertions)]
-        println!(
-            "{} ({}) {}",
-            rock_i, rock_y, map.highest_rock
-        );
+        println!("{} ({}) {}", rock_i, rock_y, map.highest_rock);
         #[cfg(debug_assertions)]
         {
             let highest_rock = map.highest_rock + 1;
             for y in (highest_rock.saturating_sub(16)..=highest_rock).rev() {
-                println!("|{}| {}", format!("{:07b}", map.get_row(y)).replace("0", " "), y + 1);
+                println!(
+                    "|{}| {}",
+                    format!("{:07b}", map.get_row(y)).replace("0", " "),
+                    y + 1
+                );
             }
         }
     }
