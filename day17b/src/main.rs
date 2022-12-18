@@ -24,7 +24,8 @@ const ROCK_5: Rock = (0x00001818, 2);
 
 const ROCKS: [Rock; 5] = [ROCK_1, ROCK_2, ROCK_3, ROCK_4, ROCK_5];
 
-const MAP_HEIGHT: usize = 128;
+const MAP_HEIGHT: usize = 1024;
+const MAP_CHUNKSIZE: usize = MAP_HEIGHT / 4;
 
 #[inline]
 fn shift_rock_left(rock: &mut Rock) {
@@ -40,9 +41,18 @@ fn shift_rock_right(rock: &mut Rock) {
     }
 }
 
+#[inline]
+#[no_mangle]
+pub fn memzero(data: &mut [Row]) {
+    for i in 0..data.len() {
+        data[i] = 0;
+    }
+}
+
 struct Map {
     contents: [Row; MAP_HEIGHT],
     highest_rock: usize,
+    last_reset: usize,
 }
 
 impl Map {
@@ -50,6 +60,7 @@ impl Map {
         Self {
             contents: [0; MAP_HEIGHT],
             highest_rock: 0,
+            last_reset: 0,
         }
     }
 
@@ -88,11 +99,17 @@ impl Map {
                 let row = self.get_row_mut(rock_y + y);
                 *row |= b_rock;
             });
+
         for y in self.highest_rock..self.highest_rock + 4 {
             if self.get_row(y) != 0 {
                 self.highest_rock = y + 1;
-                self.set_row(y + 8, 0);
             }
+        }
+
+        if self.highest_rock - self.last_reset > MAP_CHUNKSIZE * 2 {
+            let start_idx = self.last_reset % MAP_HEIGHT;
+            memzero(&mut self.contents[start_idx..start_idx + MAP_CHUNKSIZE]);
+            self.last_reset += MAP_CHUNKSIZE;
         }
     }
 }
