@@ -1,4 +1,5 @@
 use rustc_hash::FxHashSet;
+use std::cmp::{max, min};
 
 type CubePos = i32;
 type Pos3d = (CubePos, CubePos, CubePos);
@@ -51,32 +52,39 @@ impl Map {
 }
 
 pub fn main() {
-    // let s = include_bytes!("../input.txt");
-    // s.split(|b| *b == b'\n').for_each(|l| {
-    // });
     let s = include_str!("../input.txt");
-    let cubes = s.lines().filter(|l| !l.is_empty()).map(|l| {
-        let result: Vec<CubePos> = l
-            .split(',')
-            .map(|w| w.parse::<CubePos>().unwrap() * 2)
-            .collect();
-        (result[0], result[1], result[2])
-    }).collect::<Vec<_>>();
-    let a_pos = cubes
-        .iter()
-        .map(|(a, _, _)| a)
-        .collect::<FxHashSet<_>>();
-    let (min_a, max_a) = (a_pos.iter().min().unwrap(), a_pos.iter().max().unwrap());
-    let b_pos = cubes
-        .iter()
-        .map(|(_, b, _)| b)
-        .collect::<FxHashSet<_>>();
-    let (min_b, max_b) = (b_pos.iter().min().unwrap(), b_pos.iter().max().unwrap());
-    let c_pos = cubes
-        .iter()
-        .map(|(_, _, c)| c)
-        .collect::<FxHashSet<_>>();
-    let (min_c, max_c) = (c_pos.iter().min().unwrap(), c_pos.iter().max().unwrap());
+    let (mut min_a, mut max_a) = (CubePos::MAX, CubePos::MIN);
+    let (mut min_b, mut max_b) = (CubePos::MAX, CubePos::MIN);
+    let (mut min_c, mut max_c) = (CubePos::MAX, CubePos::MIN);
+    let cubes = s
+        .lines()
+        .map(|l| {
+            let mut i_num = 0;
+            let mut acc = 0;
+            let mut result = [0; 3];
+            for b in l.as_bytes().iter() {
+                match *b {
+                    b'0'..=b'9' => {
+                        acc = acc * 10 + (b - b'0') as CubePos;
+                    }
+                    b',' => {
+                        result[i_num] = acc * 2;
+                        i_num += 1;
+                        acc = 0;
+                    }
+                    _ => {}
+                }
+            }
+            result[i_num] = acc * 2;
+            min_a = min(min_a, result[0]);
+            max_a = max(max_a, result[0]);
+            min_b = min(min_b, result[1]);
+            max_b = max(max_b, result[1]);
+            min_c = min(min_c, result[2]);
+            max_c = max(max_c, result[2]);
+            (result[0], result[1], result[2])
+        })
+        .collect::<Vec<_>>();
     let sides = cubes
         .iter()
         .flat_map(|(a, b, c)| {
@@ -104,12 +112,12 @@ pub fn main() {
         println!("num surface sides: {}", num_surface);
     }
 
-    let cubes = cubes.iter().collect::<FxHashSet<_>>();
+    let cubes = cubes.into_iter().collect::<FxHashSet<_>>();
 
-    let cells: Vec<Vec<Vec<bool>>> = Vec::from_iter((*min_c - 2..=*max_c + 2).step_by(2).map(|c| {
-        Vec::from_iter((*min_b - 2..=*max_b + 2).step_by(2).map(|b| {
+    let cells: Vec<Vec<Vec<bool>>> = Vec::from_iter((min_c - 2..=max_c + 2).step_by(2).map(|c| {
+        Vec::from_iter((min_b - 2..=max_b + 2).step_by(2).map(|b| {
             Vec::from_iter(
-                (*min_a - 2..=*max_a + 2)
+                (min_a - 2..=max_a + 2)
                     .step_by(2)
                     .map(|a| cubes.contains(&(a, b, c))),
             )

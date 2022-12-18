@@ -3,37 +3,42 @@ use rustc_hash::FxHashSet;
 type CubePos = i8;
 
 pub fn main() {
-    // let s = include_bytes!("../input.txt");
-    // s.split(|b| *b == b'\n').for_each(|l| {
-    // });
     let s = include_str!("../input.txt");
-    let cubes = s
+    let mut num_cubes = 0;
+    let sides = s
         .lines()
-        .filter(|l| !l.is_empty())
-        .map(|l| {
-            let result: Vec<CubePos> = l
-                .split(',')
-                .map(|w| w.parse::<CubePos>().unwrap() * 2)
-                .collect();
-            (result[0], result[1], result[2])
-        })
-        .collect::<Vec<_>>();
-    let moved_cubes = cubes
-        .iter()
-        .flat_map(|(a, b, c)| {
+        .flat_map(|l| {
+            num_cubes += 1;
+            let mut i_num = 0;
+            let mut acc = 0;
+            let mut result = [0; 3];
+            for b in l.as_bytes().iter() {
+                match *b {
+                    b'0'..=b'9' => {
+                        acc = acc * 10 + (b - b'0') as CubePos;
+                    }
+                    b',' => {
+                        result[i_num] = acc * 2;
+                        i_num += 1;
+                        acc = 0;
+                    }
+                    _ => {}
+                }
+            }
+            result[i_num] = acc * 2;
+            let (a, b, c) = (result[0], result[1], result[2]);
             [
-                (a + 1, *b, *c),
-                (*a, b + 1, *c),
-                (*a, *b, c + 1),
-                (a - 1, *b, *c),
-                (*a, b - 1, *c),
-                (*a, *b, c - 1),
+                (a + 1, b, c),
+                (a, b + 1, c),
+                (a, b, c + 1),
+                (a - 1, b, c),
+                (a, b - 1, c),
+                (a, b, c - 1),
             ]
             .into_iter()
         })
         .collect::<FxHashSet<_>>();
-    let num_cubes = cubes.len();
-    let num_neighbors = num_cubes * 6 - moved_cubes.len();
+    let num_neighbors = num_cubes * 6 - sides.len();
     let num_surface = num_cubes * 6 - num_neighbors * 2;
 
     #[cfg(debug_assertions)]
