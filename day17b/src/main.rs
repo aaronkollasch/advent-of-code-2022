@@ -51,7 +51,7 @@ impl Map {
         Self {
             contents: [0; MAP_HEIGHT],
             highest_rock: 0,
-            map_height: 20,
+            map_height: 8,
         }
     }
 
@@ -81,6 +81,7 @@ impl Map {
         rock.0 & mask != 0
     }
 
+    #[inline]
     pub fn add_rock(&mut self, rock: Rock, rock_y: usize) {
         rock.0.to_le_bytes().into_iter()
             .enumerate()
@@ -93,21 +94,21 @@ impl Map {
                 self.highest_rock = y + 1;
             }
         }
-        for y in self.map_height..self.highest_rock + 20 {
+        for y in self.map_height..self.highest_rock + 8 {
             self.set_row(y, 0);
         }
-        self.map_height = self.highest_rock + 20;
+        self.map_height = self.highest_rock + 8;
     }
 }
 
 pub fn main() {
     let s = include_bytes!("../input.txt");
     let jet_len = s.len() - 1;
-    let mut jet_i = 0;
-    let mut map = Map::new();
     #[cfg(debug_assertions)]
     println!("{}", jet_len);
 
+    let mut map = Map::new();
+    let mut jet_i = 0;
     let mut heights = Vec::with_capacity(16384);
     let mut last_highest = 0;
     let mut last_rock = 0;
@@ -178,4 +179,43 @@ pub fn main() {
         "{} ",
         first_height_delta + n2_num_repeats * height_delta + last_height_delta
     );
+
+    // run indefinitely for fun
+    #[cfg(feature = "full_simulation")]
+    {
+        use kdam::{tqdm, BarExt};
+
+        println!();
+        let mut pb = tqdm!(total = n2);
+        pb.set_description("simulating");
+        let mut map = Map::new();
+        let mut jet_i = 0;
+        for i_rock in 0..n2 {
+            let mut rock = ROCKS[i_rock % ROCKS.len()];
+            let mut last_rock_pos;
+            let mut rock_y = map.highest_rock + 3;
+            let mut last_y = rock_y;
+            while !map.collides_with(rock, rock_y) {
+                last_rock_pos = rock;
+                if s[jet_i] == b'<' {
+                    shift_rock_left(&mut rock);
+                } else {
+                    shift_rock_right(&mut rock);
+                }
+                jet_i = (jet_i + 1) % jet_len;
+                if map.collides_with(rock, rock_y) {
+                    rock = last_rock_pos;
+                }
+                last_y = rock_y;
+                rock_y = rock_y.wrapping_sub(1);
+            }
+            rock_y = last_y;
+            map.add_rock(rock, rock_y);
+            pb.update(1);
+        }
+        print!(
+            "{} ",
+            map.highest_rock
+        );
+    }
 }
