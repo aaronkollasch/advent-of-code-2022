@@ -1,3 +1,5 @@
+use std::cmp::max;
+
 type Row = u8;
 type Rock = (u32, usize);
 
@@ -74,6 +76,7 @@ impl Map {
         &mut self.contents[y % MAP_HEIGHT]
     }
 
+    #[allow(dead_code)]
     #[inline]
     pub fn set_row(&mut self, y: usize, val: Row) {
         self.contents[y % MAP_HEIGHT] = val;
@@ -100,11 +103,7 @@ impl Map {
                 *row |= b_rock;
             });
 
-        for y in self.highest_rock..self.highest_rock + 4 {
-            if self.get_row(y) != 0 {
-                self.highest_rock = y + 1;
-            }
-        }
+        self.highest_rock = max(self.highest_rock, rock_y + rock.1);
 
         if self.highest_rock - self.last_reset > MAP_CHUNKSIZE * 2 {
             let start_idx = self.last_reset % MAP_HEIGHT;

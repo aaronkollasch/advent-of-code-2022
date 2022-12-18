@@ -1,3 +1,5 @@
+use std::cmp::max;
+
 type Row = u8;
 type Rock = (u32, usize);
 
@@ -24,7 +26,7 @@ const ROCK_5: Rock = (0x00001818, 2);
 
 const ROCKS: [Rock; 5] = [ROCK_1, ROCK_2, ROCK_3, ROCK_4, ROCK_5];
 
-const MAP_HEIGHT: usize = 128;
+const MAP_HEIGHT: usize = 4096;
 
 #[inline]
 fn shift_rock_left(rock: &mut Rock) {
@@ -63,6 +65,7 @@ impl Map {
         &mut self.contents[y % MAP_HEIGHT]
     }
 
+    #[allow(dead_code)]
     #[inline]
     pub fn set_row(&mut self, y: usize, val: Row) {
         self.contents[y % MAP_HEIGHT] = val;
@@ -88,12 +91,7 @@ impl Map {
                 let row = self.get_row_mut(rock_y + y);
                 *row |= b_rock;
             });
-        for y in self.highest_rock..self.highest_rock + 4 {
-            if self.get_row(y) != 0 {
-                self.highest_rock = y + 1;
-                self.set_row(y + 8, 0);
-            }
-        }
+        self.highest_rock = max(self.highest_rock, rock_y + rock.1);
     }
 }
 
