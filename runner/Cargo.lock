@@ -245,6 +245,17 @@ name = "day17b"
 version = "0.1.0"
 
 [[package]]
+name = "day18a"
+version = "0.1.0"
+
+[[package]]
+name = "day18b"
+version = "0.1.0"
+dependencies = [
+ "rustc-hash",
+]
+
+[[package]]
 name = "either"
 version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -401,6 +412,8 @@ dependencies = [
  "day16b",
  "day17a",
  "day17b",
+ "day18a",
+ "day18b",
  "rayon",
  "took",
 ]
