@@ -195,6 +195,7 @@ fn sim_blueprint(init_state: SimState, minutes: usize, costs: [Cost; 4]) -> SimS
             }
         }
     }
+    #[cfg(debug_assertions)]
     println!("min: {}, {}", minutes, prev_states.len());
     prev_states
         .into_sorted_iter()
