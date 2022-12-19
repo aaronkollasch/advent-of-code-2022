@@ -48,7 +48,7 @@ impl PartialOrd for SimState {
 }
 
 fn sim_blueprint(init_state: SimState, minutes: usize, costs: [Cost; 4]) -> SimState {
-    let queue_size = 2 << 11;
+    let queue_size = 2 << 8;
     let mut prev_states = DoublePriorityQueue::<SimState, SimType>::with_capacity(queue_size);
     prev_states.push(init_state, init_state.priority());
     let mut new_states = DoublePriorityQueue::<SimState, SimType>::with_capacity(queue_size);
