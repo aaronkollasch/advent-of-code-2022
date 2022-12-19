@@ -1,7 +1,7 @@
 use priority_queue::DoublePriorityQueue;
 use std::cmp::Ordering;
 
-type SimType = u64;
+type SimType = u32;
 type CostVal = SimType;
 
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
@@ -26,14 +26,11 @@ struct SimState {
 impl SimState {
     #[inline]
     fn priority(&self) -> SimType {
-        self.geo.wrapping_shl(56)
-            + self.rob_geo.wrapping_shl(48)
-            + self.obs.wrapping_shl(40)
-            + self.rob_obs.wrapping_shl(32)
-            + self.clay.wrapping_shl(24)
-            + self.rob_clay.wrapping_shl(16)
-            + self.ore.wrapping_shl(8)
-            + self.rob_ore
+        self.geo.wrapping_shl(24)
+            + self.rob_geo.wrapping_shl(16)
+            + self.obs
+            + self.rob_obs
+            + self.rob_clay
     }
 }
 
@@ -50,12 +47,13 @@ impl PartialOrd for SimState {
 }
 
 fn sim_blueprint(init_state: SimState, minutes: usize, costs: [Cost; 4]) -> SimState {
-    let queue_size = 2 << 15;
+    let queue_size = 2 << 11;
     let mut prev_states = DoublePriorityQueue::<SimState, SimType>::with_capacity(queue_size);
     prev_states.push(init_state, init_state.priority());
     let mut new_states = DoublePriorityQueue::<SimState, SimType>::with_capacity(queue_size);
-    for min in 1..minutes {
-        println!("min: {}, {}", min, prev_states.len());
+    for _min in 1..minutes {
+        #[cfg(debug_assertions)]
+        println!("min: {}, {}", _min, prev_states.len());
         for (state, _priority) in prev_states.iter() {
             for i in 0..=costs.len() {
                 // continue sim as if robot i was purchased
@@ -103,8 +101,9 @@ fn sim_blueprint(init_state: SimState, minutes: usize, costs: [Cost; 4]) -> SimS
         }
         prev_states.clear();
         (new_states, prev_states) = (prev_states, new_states);
+        #[cfg(debug_assertions)]
         for (state, priority) in prev_states.iter() {
-            if min == 1
+            if _min == 1
                 && *state
                     == (SimState {
                         ore: 1,
@@ -119,7 +118,7 @@ fn sim_blueprint(init_state: SimState, minutes: usize, costs: [Cost; 4]) -> SimS
             {
                 println!("    {}: {:?}", priority, state);
             }
-            if min == 4
+            if _min == 4
                 && *state
                     == (SimState {
                         ore: 4,
@@ -134,7 +133,7 @@ fn sim_blueprint(init_state: SimState, minutes: usize, costs: [Cost; 4]) -> SimS
             {
                 println!("    {}: {:?}", priority, state);
             }
-            if min == 8
+            if _min == 8
                 && *state
                     == (SimState {
                         ore: 3,
@@ -149,7 +148,7 @@ fn sim_blueprint(init_state: SimState, minutes: usize, costs: [Cost; 4]) -> SimS
             {
                 println!("    {}: {:?}", priority, state);
             }
-            if min == 16
+            if _min == 16
                 && *state
                     == (SimState {
                         ore: 3,
@@ -164,7 +163,7 @@ fn sim_blueprint(init_state: SimState, minutes: usize, costs: [Cost; 4]) -> SimS
             {
                 println!("    {}: {:?}", priority, state);
             }
-            if min == 20
+            if _min == 20
                 && *state
                     == (SimState {
                         ore: 3,
@@ -179,7 +178,7 @@ fn sim_blueprint(init_state: SimState, minutes: usize, costs: [Cost; 4]) -> SimS
             {
                 println!("    {}: {:?}", priority, state);
             }
-            if min == 24
+            if _min == 24
                 && *state
                     == (SimState {
                         ore: 2,
@@ -205,6 +204,7 @@ fn sim_blueprint(init_state: SimState, minutes: usize, costs: [Cost; 4]) -> SimS
             state.clay += state.rob_clay;
             state.obs += state.rob_obs;
             state.geo += state.rob_geo;
+            #[cfg(debug_assertions)]
             if state
                 == (SimState {
                     ore: 6,
@@ -271,11 +271,7 @@ pub fn main() {
                 ],
             )
         })
-        .take(3)
-        .collect::<Vec<_>>();
-    for blueprint in blueprints.iter() {
-        println!("{:?}", blueprint);
-    }
+        .take(3);
 
     let state = SimState {
         // time: 0,
@@ -289,19 +285,15 @@ pub fn main() {
         rob_geo: 0,
     };
     let results = blueprints
-        .into_iter()
-        .map(|(i, costs)| {
-            println!("testing blueprint {}", i);
-            // let mut cache: FxHashMap<SimState, SimState> = Default::default();
-            // cache.reserve(1024);
-            // let state = sim_blueprint_recursive(state, costs, &mut cache);
+        .map(|(_i, costs)| {
             let state = sim_blueprint(state, 32, costs);
-            println!("{:?}", state);
-            println!("blueprint {} had at most {} geodes", i, state.geo);
-            // println!("cache len: {}", cache.len());
+            #[cfg(debug_assertions)]
+            {
+                println!("{:?}", state);
+                println!("blueprint {} had at most {} geodes", _i, state.geo);
+            }
             state.geo
         })
-        // .take(1)
         .collect::<Vec<_>>();
     let result = results.iter().product::<SimType>();
     print!("{} ", result);
