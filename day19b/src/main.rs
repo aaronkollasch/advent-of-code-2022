@@ -1,5 +1,5 @@
-use std::cmp::Ordering;
 use priority_queue::DoublePriorityQueue;
+use std::cmp::Ordering;
 
 type SimType = u64;
 type CostVal = SimType;
@@ -26,26 +26,15 @@ struct SimState {
 impl SimState {
     #[inline]
     fn priority(&self) -> SimType {
-        self.geo.wrapping_shl(56) +
-            self.rob_geo.wrapping_shl(48) +
-            self.obs.wrapping_shl(40) +
-            self.rob_obs.wrapping_shl(32) +
-            self.clay.wrapping_shl(24) +
-            self.rob_clay.wrapping_shl(16) +
-            self.ore.wrapping_shl(8) +
-            self.rob_ore
+        self.geo.wrapping_shl(56)
+            + self.rob_geo.wrapping_shl(48)
+            + self.obs.wrapping_shl(40)
+            + self.rob_obs.wrapping_shl(32)
+            + self.clay.wrapping_shl(24)
+            + self.rob_clay.wrapping_shl(16)
+            + self.ore.wrapping_shl(8)
+            + self.rob_ore
     }
-    // #[inline]
-    // fn priority(&self) -> SimType {
-    //     self.geo.wrapping_shl(56) +
-    //         self.rob_geo.wrapping_shl(48) +
-    //         self.obs.wrapping_shl(24) +
-    //         self.rob_obs.wrapping_shl(40) +
-    //         self.clay.wrapping_shl(4) +
-    //         self.rob_clay.wrapping_shl(16) +
-    //         self.ore +
-    //         self.rob_ore.wrapping_shl(8)
-    // }
 }
 
 impl Ord for SimState {
@@ -106,83 +95,103 @@ fn sim_blueprint(init_state: SimState, minutes: usize, costs: [Cost; 4]) -> SimS
                     new_states.push(state, state.priority());
                 }
                 if new_states.len() > queue_size - 10 {
-                    for _ in 0..10 { new_states.pop_min(); }
+                    for _ in 0..10 {
+                        new_states.pop_min();
+                    }
                 }
             }
         }
         prev_states.clear();
         (new_states, prev_states) = (prev_states, new_states);
         for (state, priority) in prev_states.iter() {
-            if min == 1 && *state == (SimState {
-                ore: 1,
-                clay: 0,
-                obs: 0,
-                geo: 0,
-                rob_ore: 1,
-                rob_clay: 0,
-                rob_obs: 0,
-                rob_geo: 0,
-            }) {
+            if min == 1
+                && *state
+                    == (SimState {
+                        ore: 1,
+                        clay: 0,
+                        obs: 0,
+                        geo: 0,
+                        rob_ore: 1,
+                        rob_clay: 0,
+                        rob_obs: 0,
+                        rob_geo: 0,
+                    })
+            {
                 println!("    {}: {:?}", priority, state);
             }
-            if min == 4 && *state == (SimState {
-                ore: 4,
-                clay: 0,
-                obs: 0,
-                geo: 0,
-                rob_ore: 1,
-                rob_clay: 0,
-                rob_obs: 0,
-                rob_geo: 0,
-            }) {
+            if min == 4
+                && *state
+                    == (SimState {
+                        ore: 4,
+                        clay: 0,
+                        obs: 0,
+                        geo: 0,
+                        rob_ore: 1,
+                        rob_clay: 0,
+                        rob_obs: 0,
+                        rob_geo: 0,
+                    })
+            {
                 println!("    {}: {:?}", priority, state);
             }
-            if min == 8 && *state == (SimState {
-                ore: 3,
-                clay: 1,
-                obs: 0,
-                geo: 0,
-                rob_ore: 2,
-                rob_clay: 2,
-                rob_obs: 0,
-                rob_geo: 0,
-            }) {
+            if min == 8
+                && *state
+                    == (SimState {
+                        ore: 3,
+                        clay: 1,
+                        obs: 0,
+                        geo: 0,
+                        rob_ore: 2,
+                        rob_clay: 2,
+                        rob_obs: 0,
+                        rob_geo: 0,
+                    })
+            {
                 println!("    {}: {:?}", priority, state);
             }
-            if min == 16 && *state == (SimState {
-                ore: 3,
-                clay: 14,
-                obs: 2,
-                geo: 0,
-                rob_ore: 2,
-                rob_clay: 7,
-                rob_obs: 2,
-                rob_geo: 0,
-            }) {
+            if min == 16
+                && *state
+                    == (SimState {
+                        ore: 3,
+                        clay: 14,
+                        obs: 2,
+                        geo: 0,
+                        rob_ore: 2,
+                        rob_clay: 7,
+                        rob_obs: 2,
+                        rob_geo: 0,
+                    })
+            {
                 println!("    {}: {:?}", priority, state);
             }
-            if min == 20 && *state == (SimState {
-                ore: 3,
-                clay: 14,
-                obs: 7,
-                geo: 0,
-                rob_ore: 2,
-                rob_clay: 7,
-                rob_obs: 4,
-                rob_geo: 1,
-            }) {
+            if min == 20
+                && *state
+                    == (SimState {
+                        ore: 3,
+                        clay: 14,
+                        obs: 7,
+                        geo: 0,
+                        rob_ore: 2,
+                        rob_clay: 7,
+                        rob_obs: 4,
+                        rob_geo: 1,
+                    })
+            {
                 println!("    {}: {:?}", priority, state);
             }
-            if min == 24 && *state == (SimState {
-                ore: 2,
-                clay: 28,
-                obs: 5,
-                geo: 7,
-                rob_ore: 2,
-                rob_clay: 7,
-                rob_obs: 5,
-                rob_geo: 4,
-            }) {
+            if min == 24
+                && *state
+                    == (SimState {
+                        ore: 2,
+                        clay: 28,
+                        obs: 5,
+                        geo: 7,
+                        rob_ore: 2,
+                        rob_clay: 7,
+                        rob_obs: 5,
+                        rob_geo: 4,
+                    })
+            {
                 println!("    {}: {:?}", priority, state);
             }
         }
@@ -196,16 +205,18 @@ fn sim_blueprint(init_state: SimState, minutes: usize, costs: [Cost; 4]) -> SimS
             state.clay += state.rob_clay;
             state.obs += state.rob_obs;
             state.geo += state.rob_geo;
-            if state == (SimState {
-                ore: 6,
-                clay: 41,
-                obs: 8,
-                geo: 9,
-                rob_ore: 1,
-                rob_clay: 4,
-                rob_obs: 2,
-                rob_geo: 2,
-            }) {
+            if state
+                == (SimState {
+                    ore: 6,
+                    clay: 41,
+                    obs: 8,
+                    geo: 9,
+                    rob_ore: 1,
+                    rob_clay: 4,
+                    rob_obs: 2,
+                    rob_geo: 2,
+                })
+            {
                 println!("    {:?}", state);
             }
             state
