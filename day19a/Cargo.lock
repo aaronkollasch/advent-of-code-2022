@@ -58,7 +58,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "day14a"
+name = "day19a"
 version = "0.1.0"
 dependencies = [
  "priority-queue",
