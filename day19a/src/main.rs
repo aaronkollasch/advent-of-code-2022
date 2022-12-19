@@ -1,5 +1,6 @@
 use priority_queue::DoublePriorityQueue;
 use std::cmp::Ordering;
+use rayon::prelude::*;
 
 type SimType = u32;
 type CostVal = SimType;
@@ -271,7 +272,8 @@ pub fn main() {
                     },
                 ],
             )
-        });
+        })
+        .collect::<Vec<_>>();
 
     let state = SimState {
         // time: 0,
@@ -285,14 +287,15 @@ pub fn main() {
         rob_geo: 0,
     };
     let results = blueprints
+        .par_iter()
         .map(|(i, costs)| {
-            let state = sim_blueprint(state, 24, costs);
+            let state = sim_blueprint(state, 24, *costs);
             #[cfg(debug_assertions)]
             {
                 println!("{:?}", state);
                 println!("blueprint {} had at most {} geodes", i, state.geo);
             }
-            (i, state.geo)
+            (*i, state.geo)
         })
         .collect::<Vec<_>>();
     let result = results.iter().map(|(i, geo)| i * geo).sum::<SimType>();

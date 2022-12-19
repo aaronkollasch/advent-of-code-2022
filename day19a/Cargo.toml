@@ -10,3 +10,4 @@ path = "src/main.rs"
 
 [dependencies]
 priority-queue = "1.3.0"
+rayon = "1.5"

@@ -1,5 +1,6 @@
 use priority_queue::DoublePriorityQueue;
 use std::cmp::Ordering;
+use rayon::prelude::*;
 
 type SimType = u32;
 type CostVal = SimType;
@@ -272,7 +273,8 @@ pub fn main() {
                 ],
             )
         })
-        .take(3);
+        .take(3)
+        .collect::<Vec<_>>();
 
     let state = SimState {
         // time: 0,
@@ -286,8 +288,9 @@ pub fn main() {
         rob_geo: 0,
     };
     let results = blueprints
+        .par_iter()
         .map(|(_i, costs)| {
-            let state = sim_blueprint(state, 32, costs);
+            let state = sim_blueprint(state, 32, *costs);
             #[cfg(debug_assertions)]
             {
                 println!("{:?}", state);
