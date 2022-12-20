@@ -1,3 +1,4 @@
+#[cfg(debug_assertions)]
 use std::collections::HashSet;
 
 type Number = isize;
@@ -21,6 +22,7 @@ pub fn main() {
         }
         numbers.push((sign * acc * 811589153, i));
     });
+    #[cfg(debug_assertions)]
     let numbers_unique: HashSet<Number> = HashSet::from_iter(numbers.iter().map(|(a, _)| *a));
     #[cfg(debug_assertions)]
     println!("num numbers {}, unique {}", numbers.len(), numbers_unique.len());

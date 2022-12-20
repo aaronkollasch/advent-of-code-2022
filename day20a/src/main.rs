@@ -21,6 +21,7 @@ pub fn main() {
         }
         numbers.push((sign * acc, false));
     });
+    #[cfg(debug_assertions)]
     let numbers_unique: HashSet<Number> = HashSet::from_iter(numbers.iter().map(|(a, _)| *a));
     #[cfg(debug_assertions)]
     println!("num numbers {}, unique {}", numbers.len(), numbers_unique.len());
@@ -34,13 +35,7 @@ pub fn main() {
         #[cfg(debug_assertions)]
         println!("{:?} {index}", numbers.iter().map(|t| t.0).collect::<Vec<_>>());
         let (amount, _) = numbers[index];
-        let mut new_index = index as Number + amount;
-        // if new_index <= 0 {
-        //     new_index -= 1;
-        // } else if new_index >= len as Number - 1 {
-        //     new_index += 1;
-        // }
-        let new_index = new_index.rem_euclid((len - 1) as Number) as usize;
+        let new_index = (index as Number + amount).rem_euclid((len - 1) as Number) as usize;
         #[cfg(debug_assertions)]
         println!("move {} ({}) -> {}", index, amount, new_index);
         numbers.remove(index);
