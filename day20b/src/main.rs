@@ -22,6 +22,7 @@ pub fn main() {
         numbers.push((sign * acc * 811589153, i));
     });
     let numbers_unique: HashSet<Number> = HashSet::from_iter(numbers.iter().map(|(a, _)| *a));
+    #[cfg(debug_assertions)]
     println!("num numbers {}, unique {}", numbers.len(), numbers_unique.len());
     let len = numbers.len();
     for _round in 0..10 {
@@ -39,6 +40,7 @@ pub fn main() {
         }
     }
     let zpos = numbers.iter().position(|(n, _i)| *n == 0).unwrap();
+    #[cfg(debug_assertions)]
     println!("{} {} {}", numbers[(zpos + 1000) % len].0, numbers[(zpos + 2000) % len].0, numbers[(zpos + 3000) % len].0);
     let result = [
         zpos + 1000, zpos + 2000, zpos + 3000

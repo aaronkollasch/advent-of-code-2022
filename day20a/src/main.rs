@@ -22,6 +22,7 @@ pub fn main() {
         numbers.push((sign * acc, false));
     });
     let numbers_unique: HashSet<Number> = HashSet::from_iter(numbers.iter().map(|(a, _)| *a));
+    #[cfg(debug_assertions)]
     println!("num numbers {}, unique {}", numbers.len(), numbers_unique.len());
     let mut num_moves = 0;
     let mut index = 0;
@@ -49,11 +50,11 @@ pub fn main() {
         // }
         num_moves += 1;
     }
-    println!("{:?} {index}", numbers.iter().map(|t| t.0).collect::<Vec<_>>());
     // let s = include_str!("../input.txt");
     // s.lines().for_each(|l| {
     // });
-    let zpos = numbers.iter().position(|(n, _)| *n == 0).unwrap();
+    let zpos = numbers.iter().position(|(n, _i)| *n == 0).unwrap();
+    #[cfg(debug_assertions)]
     println!("{} {} {}", numbers[(zpos + 1000) % len].0, numbers[(zpos + 2000) % len].0, numbers[(zpos + 3000) % len].0);
     let result = [
         zpos + 1000, zpos + 2000, zpos + 3000
