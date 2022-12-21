@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-type Number = isize;
+type Number = i128;
 
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 enum Operation {
@@ -31,7 +31,7 @@ pub fn main() {
         let mut ref2 = "";
         let mut val = None;
         let mut op = Operation::Nop;
-        if l.len() > 10 {
+        if l[6..].contains(' ') {
             ref1 = &l[6..10];
             ref2 = &l[13..17];
             op = match &l[11..12] {
@@ -79,6 +79,11 @@ pub fn main() {
             }
         }
         i += 1;
+    }
+    #[cfg(debug_assertions)]
+    {
+        let (branch1, branch2) = (monkeys["root"].ref1, monkeys["root"].ref2);
+        println!("{}: {}, {}: {}", branch1, monkeys[branch1].val.unwrap(), branch2, monkeys[branch2].val.unwrap());
     }
     print!("{} ", monkeys["root"].val.unwrap_or(Number::MAX));
 }

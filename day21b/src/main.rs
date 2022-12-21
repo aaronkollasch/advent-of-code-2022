@@ -57,8 +57,7 @@ pub fn main() {
         #[cfg(debug_assertions)]
         println!("{}", i);
         if i > 100 {
-            println!("root still none");
-            break;
+            panic!("root still none");
         }
         for name in monkey_names.iter() {
             let monkey = monkeys[name];
@@ -82,6 +81,7 @@ pub fn main() {
         i += 1;
     }
     let target_val = monkeys[branch2].val.unwrap_or(Number::MAX);
+    #[cfg(debug_assertions)]
     println!("target value: {} ", target_val);
     let monkeys_to_reset = monkeys.iter().filter_map(|(name, m)| if m.val.is_none() { Some(*name) } else { None }).collect::<Vec<_>>();
     let mut low = 0;
@@ -89,6 +89,7 @@ pub fn main() {
     let mut humn_val: Number;
     loop {
         let mid = low + (high - low) / 2;
+        #[cfg(debug_assertions)]
         println!("{} {} {}", low, mid, high);
         humn_val = mid;
         for name in monkeys_to_reset.iter() {
@@ -98,6 +99,7 @@ pub fn main() {
         i = 0;
         while monkeys[branch1].val.is_none() {
             if i > 100 {
+                #[cfg(debug_assertions)]
                 println!("root still none");
                 break;
             }
@@ -121,6 +123,7 @@ pub fn main() {
             i += 1;
         }
         let diff = monkeys[branch1].val.unwrap_or(Number::MAX) - target_val;
+        #[cfg(debug_assertions)]
         println!("{} {}", humn_val, diff);
         match diff.cmp(&0) {
             std::cmp::Ordering::Greater => {
@@ -129,11 +132,16 @@ pub fn main() {
             std::cmp::Ordering::Less => {
                 high = mid;
             }
-            std::cmp::Ordering::Equal => { println!("humn val: {}", humn_val); break; }
+            std::cmp::Ordering::Equal => {
+                #[cfg(debug_assertions)]
+                println!("humn val: {}", humn_val);
+                break;
+            }
         }
     }
     loop {
         let next_humn_val = humn_val - 1;
+        #[cfg(debug_assertions)]
         println!("{}", next_humn_val);
         for name in monkeys_to_reset.iter() {
             monkeys.get_mut(name).unwrap().val = None;
@@ -142,8 +150,7 @@ pub fn main() {
         i = 0;
         while monkeys[branch1].val.is_none() {
             if i > 100 {
-                println!("root still none");
-                break;
+                panic!("root still none");
             }
             for name in monkey_names.iter() {
                 let monkey = monkeys[name];
@@ -165,12 +172,14 @@ pub fn main() {
             i += 1;
         }
         let diff = monkeys[branch1].val.unwrap_or(Number::MAX) - target_val;
+        #[cfg(debug_assertions)]
         println!("{} {}", humn_val, diff);
         match diff.cmp(&0) {
             std::cmp::Ordering::Equal => { humn_val = next_humn_val; }
             _ => { break; }
         }
     }
+    #[cfg(debug_assertions)]
     println!("{}: {}, {}: {}", branch1, monkeys[branch1].val.unwrap(), branch2, monkeys[branch2].val.unwrap());
     print!("{} ", humn_val);
 }
