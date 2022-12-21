@@ -19,6 +19,51 @@ struct Monkey<'a> {
     val: Option<Number>,
 }
 
+fn find_monkey_value<'a>(
+    target: &str,
+    monkeys: &mut HashMap<&'a str, Monkey>,
+    unknown_monkeys: &mut Vec<&'a str>,
+) -> Number {
+    let mut i = 0;
+    while monkeys[target].val.is_none() {
+        #[cfg(debug_assertions)]
+        println!("{}", i);
+        if i > 100 {
+            panic!("{} still none", target);
+        }
+        unknown_monkeys.retain(|name| {
+            let monkey = monkeys[name];
+            if monkey.op == Operation::Nop {
+                return false;
+            }
+            #[cfg(debug_assertions)]
+            println!("{} -> {}, {}", name, monkey.ref1, monkey.ref2);
+            let (val1, val2) = (monkeys[monkey.ref1].val, monkeys[monkey.ref2].val);
+            if let (None, Some(val1), Some(val2)) = (monkey.val, val1, val2) {
+                let mut monkey = monkeys.get_mut(name).unwrap();
+                match monkey.op {
+                    Operation::Add => {
+                        monkey.val = Some(val1 + val2);
+                    }
+                    Operation::Sub => {
+                        monkey.val = Some(val1 - val2);
+                    }
+                    Operation::Mul => {
+                        monkey.val = Some(val1 * val2);
+                    }
+                    Operation::Div => {
+                        monkey.val = Some(val1 / val2);
+                    }
+                    _ => {}
+                }
+            }
+            monkey.val.is_none()
+        });
+        i += 1;
+    }
+    monkeys[target].val.unwrap_or(Number::MAX)
+}
+
 pub fn main() {
     let s = include_str!("../input.txt");
     let mut monkeys = s
@@ -57,46 +102,18 @@ pub fn main() {
             )
         })
         .collect::<HashMap<&str, Monkey>>();
-    let mut i = 0;
-    let mut monkey_names = monkeys.iter().map(|(name, _)| *name).collect::<Vec<&str>>();
+    let mut monkey_names = monkeys
+        .iter()
+        .filter_map(|(name, monkey)| {
+            if monkey.val.is_none() {
+                Some(*name)
+            } else {
+                None
+            }
+        })
+        .collect::<Vec<&str>>();
     let (branch1, branch2) = (monkeys["root"].ref1, monkeys["root"].ref2);
-    while monkeys[branch2].val.is_none() {
-        #[cfg(debug_assertions)]
-        println!("{}", i);
-        if i > 100 {
-            panic!("{} still none", branch2);
-        }
-        monkey_names.retain(|name| {
-            let monkey = monkeys[name];
-            if monkey.op == Operation::Nop {
-                return false;
-            }
-            #[cfg(debug_assertions)]
-            println!("{} -> {}, {}", name, monkey.ref1, monkey.ref2);
-            let (val1, val2) = (monkeys[monkey.ref1].val, monkeys[monkey.ref2].val);
-            if let (None, Some(val1), Some(val2)) = (monkey.val, val1, val2) {
-                let mut monkey = monkeys.get_mut(name).unwrap();
-                match monkey.op {
-                    Operation::Add => {
-                        monkey.val = Some(val1 + val2);
-                    }
-                    Operation::Sub => {
-                        monkey.val = Some(val1 - val2);
-                    }
-                    Operation::Mul => {
-                        monkey.val = Some(val1 * val2);
-                    }
-                    Operation::Div => {
-                        monkey.val = Some(val1 / val2);
-                    }
-                    _ => {}
-                }
-            }
-            monkey.val.is_none()
-        });
-        i += 1;
-    }
-    let target_val = monkeys[branch2].val.unwrap_or(Number::MAX);
+    let target_val = find_monkey_value(branch2, &mut monkeys, &mut monkey_names);
     #[cfg(debug_assertions)]
     println!("target value: {} ", target_val);
     let monkeys_to_reset = monkey_names.clone();
@@ -113,44 +130,7 @@ pub fn main() {
         }
         monkeys.get_mut("humn").unwrap().val = Some(humn_val);
         let mut monkey_names = monkeys_to_reset.clone();
-        i = 0;
-        while monkeys[branch1].val.is_none() {
-            if i > 100 {
-                #[cfg(debug_assertions)]
-                panic!("{} still none", branch1);
-                break;
-            }
-            monkey_names.retain(|name| {
-                let monkey = monkeys[name];
-                if monkey.op == Operation::Nop {
-                    return false;
-                }
-                #[cfg(debug_assertions)]
-                println!("{} -> {}, {}", name, monkey.ref1, monkey.ref2);
-                let (val1, val2) = (monkeys[monkey.ref1].val, monkeys[monkey.ref2].val);
-                if let (None, Some(val1), Some(val2)) = (monkey.val, val1, val2) {
-                    let mut monkey = monkeys.get_mut(name).unwrap();
-                    match monkey.op {
-                        Operation::Add => {
-                            monkey.val = Some(val1 + val2);
-                        }
-                        Operation::Sub => {
-                            monkey.val = Some(val1 - val2);
-                        }
-                        Operation::Mul => {
-                            monkey.val = Some(val1 * val2);
-                        }
-                        Operation::Div => {
-                            monkey.val = Some(val1 / val2);
-                        }
-                        _ => {}
-                    }
-                }
-                monkey.val.is_none()
-            });
-            i += 1;
-        }
-        let diff = monkeys[branch1].val.unwrap_or(Number::MAX) - target_val;
+        let diff = find_monkey_value(branch1, &mut monkeys, &mut monkey_names) - target_val;
         #[cfg(debug_assertions)]
         println!("{} {}", humn_val, diff);
         match diff.cmp(&0) {
@@ -176,42 +156,7 @@ pub fn main() {
         }
         monkeys.get_mut("humn").unwrap().val = Some(next_humn_val);
         let mut monkey_names = monkeys_to_reset.clone();
-        i = 0;
-        while monkeys[branch1].val.is_none() {
-            if i > 100 {
-                panic!("{} still none", branch1);
-            }
-            monkey_names.retain(|name| {
-                let monkey = monkeys[name];
-                if monkey.op == Operation::Nop {
-                    return false;
-                }
-                #[cfg(debug_assertions)]
-                println!("{} -> {}, {}", name, monkey.ref1, monkey.ref2);
-                let (val1, val2) = (monkeys[monkey.ref1].val, monkeys[monkey.ref2].val);
-                if let (None, Some(val1), Some(val2)) = (monkey.val, val1, val2) {
-                    let mut monkey = monkeys.get_mut(name).unwrap();
-                    match monkey.op {
-                        Operation::Add => {
-                            monkey.val = Some(val1 + val2);
-                        }
-                        Operation::Sub => {
-                            monkey.val = Some(val1 - val2);
-                        }
-                        Operation::Mul => {
-                            monkey.val = Some(val1 * val2);
-                        }
-                        Operation::Div => {
-                            monkey.val = Some(val1 / val2);
-                        }
-                        _ => {}
-                    }
-                }
-                monkey.val.is_none()
-            });
-            i += 1;
-        }
-        let diff = monkeys[branch1].val.unwrap_or(Number::MAX) - target_val;
+        let diff = find_monkey_value(branch1, &mut monkeys, &mut monkey_names) - target_val;
         #[cfg(debug_assertions)]
         println!("{} {}", humn_val, diff);
         match diff.cmp(&0) {
