@@ -1,11 +1,10 @@
-#[cfg(debug_assertions)]
-use std::collections::HashSet;
+use std::collections::VecDeque;
 
 type Number = isize;
 
 pub fn main() {
     let s = include_bytes!("../input.txt");
-    let mut numbers: Vec<(Number, usize)> = Vec::with_capacity(32);
+    let mut numbers: VecDeque<(Number, usize)> = VecDeque::with_capacity(32);
     s.split(|b| *b == b'\n').filter(|l| !l.is_empty()).enumerate().for_each(|(i, l)| {
         let mut acc = 0;
         let mut sign = 1;
@@ -20,12 +19,8 @@ pub fn main() {
                 _ => {}
             }
         }
-        numbers.push((sign * acc * 811589153, i));
+        numbers.push_back((sign * acc * 811589153, i));
     });
-    #[cfg(debug_assertions)]
-    let numbers_unique: HashSet<Number> = HashSet::from_iter(numbers.iter().map(|(a, _)| *a));
-    #[cfg(debug_assertions)]
-    println!("num numbers {}, unique {}", numbers.len(), numbers_unique.len());
     let len = numbers.len();
     for _round in 0..10 {
         for idx in 0..len {
@@ -37,7 +32,7 @@ pub fn main() {
             let new_index = new_index.rem_euclid((len - 1) as Number) as usize;
             #[cfg(debug_assertions)]
             println!("move {} ({}) -> {}", index, amount, new_index);
-            let v = numbers.remove(index);
+            let v = numbers.remove(index).unwrap();
             numbers.insert(new_index, v);
         }
     }

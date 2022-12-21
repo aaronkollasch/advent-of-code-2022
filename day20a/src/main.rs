@@ -1,10 +1,10 @@
-use std::{collections::HashSet, cmp::Ordering};
+use std::collections::VecDeque;
 
 type Number = isize;
 
 pub fn main() {
     let s = include_bytes!("../input.txt");
-    let mut numbers: Vec<(Number, bool)> = Vec::with_capacity(32);
+    let mut numbers: VecDeque<(Number, bool)> = VecDeque::with_capacity(8192);
     s.split(|b| *b == b'\n').filter(|l| !l.is_empty()).for_each(|l| {
         let mut acc = 0;
         let mut sign = 1;
@@ -19,12 +19,8 @@ pub fn main() {
                 _ => {}
             }
         }
-        numbers.push((sign * acc, false));
+        numbers.push_back((sign * acc, false));
     });
-    #[cfg(debug_assertions)]
-    let numbers_unique: HashSet<Number> = HashSet::from_iter(numbers.iter().map(|(a, _)| *a));
-    #[cfg(debug_assertions)]
-    println!("num numbers {}, unique {}", numbers.len(), numbers_unique.len());
     let mut num_moves = 0;
     let mut index = 0;
     let len = numbers.len();
@@ -40,14 +36,8 @@ pub fn main() {
         println!("move {} ({}) -> {}", index, amount, new_index);
         numbers.remove(index);
         numbers.insert(new_index, (amount, true));
-        // if new_index <= index {
-        //     index = (index + 1) % len;
-        // }
         num_moves += 1;
     }
-    // let s = include_str!("../input.txt");
-    // s.lines().for_each(|l| {
-    // });
     let zpos = numbers.iter().position(|(n, _i)| *n == 0).unwrap();
     #[cfg(debug_assertions)]
     println!("{} {} {}", numbers[(zpos + 1000) % len].0, numbers[(zpos + 2000) % len].0, numbers[(zpos + 3000) % len].0);
