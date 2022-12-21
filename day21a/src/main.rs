@@ -1,6 +1,6 @@
-use std::collections::HashMap;
+use rustc_hash::FxHashMap as HashMap;
 
-type Number = i128;
+type Number = isize;
 
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 enum Operation {
@@ -20,10 +20,6 @@ struct Monkey<'a> {
 }
 
 pub fn main() {
-    // let s = include_bytes!("../input.txt");
-    // s.split(|b| *b == b'\n').filter(|l| !l.is_empty()).for_each(|l| {
-    // });
-    // print!("{} ", s[0]);
     let s = include_str!("../input.txt");
     let mut monkeys = s
         .lines()
@@ -62,41 +58,41 @@ pub fn main() {
         println!("{:?}", monkey);
     }
     let mut i = 0;
-    let monkey_names = monkeys.iter().map(|(name, _)| *name).collect::<Vec<&str>>();
+    let mut monkey_names = monkeys.iter().map(|(name, _)| *name).collect::<Vec<&str>>();
     while monkeys["root"].val.is_none() {
         #[cfg(debug_assertions)]
         println!("{}", i);
         if i > 100 {
-            println!("root still none");
-            break;
+            panic!("root still none");
         }
-        for name in monkey_names.iter() {
+        monkey_names.retain(|name| {
             let monkey = monkeys[name];
             if monkey.op == Operation::Nop {
-                continue;
+                return false;
             }
             #[cfg(debug_assertions)]
             println!("{} -> {}, {}", name, monkey.ref1, monkey.ref2);
             let (val1, val2) = (monkeys[monkey.ref1].val, monkeys[monkey.ref2].val);
-            if monkey.val.is_none() && val1.is_some() && val2.is_some() {
+            if let (None, Some(val1), Some(val2)) = (monkey.val, val1, val2) {
                 let mut monkey = monkeys.get_mut(name).unwrap();
                 match monkey.op {
                     Operation::Add => {
-                        monkey.val = Some(val1.unwrap() + val2.unwrap());
+                        monkey.val = Some(val1 + val2);
                     }
                     Operation::Sub => {
-                        monkey.val = Some(val1.unwrap() - val2.unwrap());
+                        monkey.val = Some(val1 - val2);
                     }
                     Operation::Mul => {
-                        monkey.val = Some(val1.unwrap() * val2.unwrap());
+                        monkey.val = Some(val1 * val2);
                     }
                     Operation::Div => {
-                        monkey.val = Some(val1.unwrap() / val2.unwrap());
+                        monkey.val = Some(val1 / val2);
                     }
                     _ => {}
                 }
             }
-        }
+            monkey.val.is_none()
+        });
         i += 1;
     }
     #[cfg(debug_assertions)]
