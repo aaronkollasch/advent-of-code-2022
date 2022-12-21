@@ -12,7 +12,7 @@ enum Operation {
 }
 
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
-struct Monkey <'a> {
+struct Monkey<'a> {
     ref1: &'a str,
     ref2: &'a str,
     op: Operation,
@@ -25,27 +25,38 @@ pub fn main() {
     // });
     // print!("{} ", s[0]);
     let s = include_str!("../input.txt");
-    let mut monkeys = s.lines().map(|l| {
-        let name = &l[0..4];
-        let mut ref1 = "";
-        let mut ref2 = "";
-        let mut val = None;
-        let mut op = Operation::Nop;
-        if l[6..].contains(' ') {
-            ref1 = &l[6..10];
-            ref2 = &l[13..17];
-            op = match &l[11..12] {
-                "+" => Operation::Add,
-                "-" => Operation::Sub,
-                "*" => Operation::Mul,
-                "/" => Operation::Div,
-                _ => unreachable!(),
+    let mut monkeys = s
+        .lines()
+        .map(|l| {
+            let name = &l[0..4];
+            let mut ref1 = "";
+            let mut ref2 = "";
+            let mut val = None;
+            let mut op = Operation::Nop;
+            if l[6..].contains(' ') {
+                ref1 = &l[6..10];
+                ref2 = &l[13..17];
+                op = match &l[11..12] {
+                    "+" => Operation::Add,
+                    "-" => Operation::Sub,
+                    "*" => Operation::Mul,
+                    "/" => Operation::Div,
+                    _ => unreachable!(),
+                }
+            } else {
+                val = Some(l[6..].parse::<Number>().unwrap());
             }
-        } else {
-            val = Some(l[6..].parse::<Number>().unwrap());
-        }
-        (name, Monkey { ref1, ref2, op, val })
-    }).collect::<HashMap<&str, Monkey>>();
+            (
+                name,
+                Monkey {
+                    ref1,
+                    ref2,
+                    op,
+                    val,
+                },
+            )
+        })
+        .collect::<HashMap<&str, Monkey>>();
     #[cfg(debug_assertions)]
     for monkey in monkeys.iter() {
         println!("{:?}", monkey);
@@ -70,10 +81,18 @@ pub fn main() {
             if monkey.val.is_none() && val1.is_some() && val2.is_some() {
                 let mut monkey = monkeys.get_mut(name).unwrap();
                 match monkey.op {
-                    Operation::Add => { monkey.val = Some(val1.unwrap() + val2.unwrap()); }
-                    Operation::Sub => { monkey.val = Some(val1.unwrap() - val2.unwrap()); }
-                    Operation::Mul => { monkey.val = Some(val1.unwrap() * val2.unwrap()); }
-                    Operation::Div => { monkey.val = Some(val1.unwrap() / val2.unwrap()); }
+                    Operation::Add => {
+                        monkey.val = Some(val1.unwrap() + val2.unwrap());
+                    }
+                    Operation::Sub => {
+                        monkey.val = Some(val1.unwrap() - val2.unwrap());
+                    }
+                    Operation::Mul => {
+                        monkey.val = Some(val1.unwrap() * val2.unwrap());
+                    }
+                    Operation::Div => {
+                        monkey.val = Some(val1.unwrap() / val2.unwrap());
+                    }
                     _ => {}
                 }
             }
@@ -83,7 +102,13 @@ pub fn main() {
     #[cfg(debug_assertions)]
     {
         let (branch1, branch2) = (monkeys["root"].ref1, monkeys["root"].ref2);
-        println!("{}: {}, {}: {}", branch1, monkeys[branch1].val.unwrap(), branch2, monkeys[branch2].val.unwrap());
+        println!(
+            "{}: {}, {}: {}",
+            branch1,
+            monkeys[branch1].val.unwrap(),
+            branch2,
+            monkeys[branch2].val.unwrap()
+        );
     }
     print!("{} ", monkeys["root"].val.unwrap_or(Number::MAX));
 }
