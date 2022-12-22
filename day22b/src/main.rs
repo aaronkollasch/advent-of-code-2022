@@ -28,19 +28,44 @@ fn facing_angle_to_axes(facing: isize) -> Pos {
     }
 }
 
-fn next_pos_facing(pos: Pos, facing: Pos, map: &Vec<Vec<u8>>, edges: &Vec<(Vec<Pos>, Vec<Pos>, isize, isize, isize)>) -> (Pos, Pos) {
+fn next_pos_facing(
+    pos: Pos,
+    facing: Pos,
+    map: &Vec<Vec<u8>>,
+    edges: &Vec<(Vec<Pos>, Vec<Pos>, isize, isize)>,
+) -> (Pos, Pos) {
     let mut next_pos = (pos.0 + facing.0, pos.1 + facing.1);
     let mut next_facing = facing;
     for edge in edges.iter() {
         if let Some(i) = edge.0.iter().position(|p| *p == pos) {
-            if facing_angle_to_axes(edge.3) == facing {
-                (next_pos, next_facing) = (edge.1[i], rotate(facing, (edge.4 + 2) - edge.3));
-                println!("cross edge: {} {} ({} {}) -> {} {} ({} {})", pos.0, pos.1, facing.0, facing.1, next_pos.0, next_pos.1, next_facing.0, next_facing.1);
+            if facing_angle_to_axes(edge.2) == facing {
+                (next_pos, next_facing) = (edge.1[i], rotate(facing, (edge.3 + 2) - edge.2));
+                println!(
+                    "cross edge: {} {} ({} {}) -> {} {} ({} {})",
+                    pos.0,
+                    pos.1,
+                    facing.0,
+                    facing.1,
+                    next_pos.0,
+                    next_pos.1,
+                    next_facing.0,
+                    next_facing.1
+                );
             }
         } else if let Some(i) = edge.1.iter().position(|p| *p == pos) {
-            if facing_angle_to_axes(edge.4) == facing {
-                (next_pos, next_facing) = (edge.0[i], rotate(facing, (edge.3 + 2) - edge.4));
-                println!("cross edge: {} {} ({} {}) -> {} {} ({} {})", pos.0, pos.1, facing.0, facing.1, next_pos.0, next_pos.1, next_facing.0, next_facing.1);
+            if facing_angle_to_axes(edge.3) == facing {
+                (next_pos, next_facing) = (edge.0[i], rotate(facing, (edge.2 + 2) - edge.3));
+                println!(
+                    "cross edge: {} {} ({} {}) -> {} {} ({} {})",
+                    pos.0,
+                    pos.1,
+                    facing.0,
+                    facing.1,
+                    next_pos.0,
+                    next_pos.1,
+                    next_facing.0,
+                    next_facing.1
+                );
             }
         }
     }
@@ -68,26 +93,29 @@ pub fn main() {
                 .collect::<Vec<_>>()
         })
         .collect::<Vec<_>>();
-    let h = map.len();
+    // // edges: stored as (Edge1, Edge2, facing1, facing2)
     // let l = 4isize;
-    // let edges: Vec<(Vec<Pos>, Vec<Pos>, isize, isize, isize)> = vec![
-    //     (repeat(0).take(l as usize).zip(l*2..l*3).collect(), repeat(l).take(l as usize).zip((0..l).rev()).collect(), 2, 3, 3),
-    //     ((l..l*2).zip(repeat(l).take(l as usize)).collect(), repeat(l*2).take(l as usize).zip(0..l).collect(), 1, 3, 1),
-    //     (repeat(l*3-1).take(l as usize).zip(l..l*2).collect(), (l*3..l*4).rev().zip(repeat(l*2).take(l as usize)).collect(), 1, 0, 3),
-    //     (repeat(l*3-1).take(l as usize).zip(0..l).collect(), repeat(l*4-1).take(l as usize).zip(l*3..l*4).collect(), 2, 0, 2),
-    //     (repeat(0).take(l as usize).zip(l..l*2).collect(), (l*3..l*4).rev().zip(repeat(l*3-1).take(l as usize)).collect(), 3, 2, 1),
-    //     ((0..l).zip(repeat(l*2-1).take(l as usize)).collect(), (l*2..l*3).rev().zip(repeat(l*3-1).take(l as usize)).collect(), 2, 1, 1),
-    //     ((l..l*2).zip(repeat(l*2-1).take(l as usize)).collect(), repeat(l*2).take(l as usize).zip((l*2..l*3).rev()).collect(), 1, 1, 2),
+    // #[rustfmt::skip]
+    // let edges: Vec<(Vec<Pos>, Vec<Pos>, isize, isize)> = vec![
+    //     (repeat(0).take(l as usize).zip(l*2..l*3).collect(), repeat(l).take(l as usize).zip((0..l).rev()).collect(), 3, 3),
+    //     ((l..l*2).zip(repeat(l).take(l as usize)).collect(), repeat(l*2).take(l as usize).zip(0..l).collect(), 3, 1),
+    //     (repeat(l*3-1).take(l as usize).zip(l..l*2).collect(), (l*3..l*4).rev().zip(repeat(l*2).take(l as usize)).collect(), 0, 3),
+    //     (repeat(l*3-1).take(l as usize).zip(0..l).collect(), repeat(l*4-1).take(l as usize).zip(l*3..l*4).collect(), 0, 2),
+    //     (repeat(0).take(l as usize).zip(l..l*2).collect(), (l*3..l*4).rev().zip(repeat(l*3-1).take(l as usize)).collect(), 2, 1),
+    //     ((0..l).zip(repeat(l*2-1).take(l as usize)).collect(), (l*2..l*3).rev().zip(repeat(l*3-1).take(l as usize)).collect(), 1, 1),
+    //     ((l..l*2).zip(repeat(l*2-1).take(l as usize)).collect(), repeat(l*2).take(l as usize).zip((l*2..l*3).rev()).collect(), 1, 2),
     // ];
+    // edges: stored as (Edge1, Edge2, facing1, facing2)
     let l = 50isize;
-    let edges: Vec<(Vec<Pos>, Vec<Pos>, isize, isize, isize)> = vec![
-        ((0..l).zip(repeat(l*2).take(l as usize)).collect(), repeat(l).take(l as usize).zip(l..l*2).collect(), 3, 3, 2),
-        (repeat(0).take(l as usize).zip(l*2..l*3).collect(), repeat(l).take(l as usize).zip((0..l).rev()).collect(), 2, 2, 2),
-        (repeat(0).take(l as usize).zip(l*3..l*4).collect(), (l..l*2).zip(repeat(0).take(l as usize)).collect(), 1, 2, 3),
-        ((0..l).zip(repeat(l*4-1).take(l as usize)).collect(), (l*2..l*3).zip(repeat(0).take(l as usize)).collect(), 0, 1, 3),
-        (repeat(l-1).take(l as usize).zip(l*3..l*4).collect(), (l..l*2).zip(repeat(l*3-1).take(l as usize)).collect(), 1, 0, 1),
-        (repeat(l*2-1).take(l as usize).zip(l*2..l*3).collect(), repeat(l*3-1).take(l as usize).zip((0..l).rev()).collect(), 2, 0, 0),
-        (repeat(l*2-1).take(l as usize).zip(l..l*2).collect(), (l*2..l*3).zip(repeat(l-1).take(l as usize)).collect(), 1, 0, 1),
+    #[rustfmt::skip]
+    let edges: Vec<(Vec<Pos>, Vec<Pos>, isize, isize)> = vec![
+        ((0..l).zip(repeat(l*2).take(l as usize)).collect(), repeat(l).take(l as usize).zip(l..l*2).collect(), 3, 2),
+        (repeat(0).take(l as usize).zip(l*2..l*3).collect(), repeat(l).take(l as usize).zip((0..l).rev()).collect(), 2, 2),
+        (repeat(0).take(l as usize).zip(l*3..l*4).collect(), (l..l*2).zip(repeat(0).take(l as usize)).collect(), 2, 3),
+        ((0..l).zip(repeat(l*4-1).take(l as usize)).collect(), (l*2..l*3).zip(repeat(0).take(l as usize)).collect(), 1, 3),
+        (repeat(l-1).take(l as usize).zip(l*3..l*4).collect(), (l..l*2).zip(repeat(l*3-1).take(l as usize)).collect(), 0, 1),
+        (repeat(l*2-1).take(l as usize).zip(l*2..l*3).collect(), repeat(l*3-1).take(l as usize).zip((0..l).rev()).collect(), 0, 0),
+        (repeat(l*2-1).take(l as usize).zip(l..l*2).collect(), (l*2..l*3).zip(repeat(l-1).take(l as usize)).collect(), 0, 1),
     ];
     let mut path: Vec<Instruction> = Vec::new();
     let mut acc = 0;
@@ -141,16 +169,22 @@ pub fn main() {
                     let (next_pos, next_facing) = next_pos_facing(pos, facing, &map, &edges);
                     // println!("next_pos: {} {}, next_facing: {} {}", next_pos.0, next_pos.1, next_facing.0, next_facing.1);
                     match map[next_pos.1 as usize][next_pos.0 as usize] {
-                        b'#' => { break; }
-                        b'.' => { (pos, facing) = (next_pos, next_facing); }
-                        _ => { panic!("unexpected wall as next character"); }
+                        b'#' => {
+                            break;
+                        }
+                        b'.' => {
+                            (pos, facing) = (next_pos, next_facing);
+                        }
+                        _ => {
+                            panic!("unexpected wall as next character");
+                        }
                     }
                     // println!("pos: {} {}, facing: {} {}", pos.0, pos.1, facing.0, facing.1);
                 }
             }
             (None, Some(rot)) => {
-               (facing.0, facing.1) = rotate((facing.0, facing.1), rot);
-            },
+                (facing.0, facing.1) = rotate((facing.0, facing.1), rot);
+            }
             _ => unreachable!(),
         }
         println!(
@@ -161,7 +195,11 @@ pub fn main() {
     let facing_dir = facing.0.abs() * (1 - facing.0) + facing.1.abs() * (2 - facing.1);
     println!(
         "pos: ({}, {}), facing ({} {}) = {}",
-        pos.0 + 1, pos.1 + 1, facing.0, facing.1, facing_dir
+        pos.0 + 1,
+        pos.1 + 1,
+        facing.0,
+        facing.1,
+        facing_dir
     );
     print!("{} ", 1000 * (pos.1 + 1) + 4 * (pos.0 + 1) + facing_dir);
 }

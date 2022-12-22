@@ -27,9 +27,6 @@ pub fn main() {
                 .collect::<Vec<_>>()
         })
         .collect::<Vec<_>>();
-    for line in map.iter() {
-        println!("{:?}", line);
-    }
     let h = map.len();
     let mut path: Vec<Instruction> = Vec::new();
     let mut acc = 0;
@@ -70,7 +67,6 @@ pub fn main() {
         dist: Some(acc),
         rotation: None,
     });
-    println!("{:?}", path);
     println!("{} {}", map.len(), map[0].len());
     println!(
         "pos: ({}, {}), facing ({} {})",
@@ -132,7 +128,11 @@ pub fn main() {
     let facing_dir = facing.0.abs() * (1 - facing.0) + facing.1.abs() * (1 - facing.1);
     println!(
         "pos: ({}, {}), facing ({} {}) = {}",
-        pos.0 + 1, pos.1 + 1, facing.0, facing.1, facing_dir
+        pos.0 + 1,
+        pos.1 + 1,
+        facing.0,
+        facing.1,
+        facing_dir
     );
     print!("{} ", 1000 * (pos.1 + 1) + 4 * (pos.0 + 1) + facing_dir);
 }
