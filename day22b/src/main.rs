@@ -40,6 +40,7 @@ fn next_pos_facing(
         if let Some(i) = edge.0.iter().position(|p| *p == pos) {
             if facing_angle_to_axes(edge.2) == facing {
                 (next_pos, next_facing) = (edge.1[i], rotate(facing, (edge.3 + 2) - edge.2));
+                #[cfg(debug_assertions)]
                 println!(
                     "cross edge: {} {} ({} {}) -> {} {} ({} {})",
                     pos.0,
@@ -55,6 +56,7 @@ fn next_pos_facing(
         } else if let Some(i) = edge.1.iter().position(|p| *p == pos) {
             if facing_angle_to_axes(edge.3) == facing {
                 (next_pos, next_facing) = (edge.0[i], rotate(facing, (edge.2 + 2) - edge.3));
+                #[cfg(debug_assertions)]
                 println!(
                     "cross edge: {} {} ({} {}) -> {} {} ({} {})",
                     pos.0,
@@ -156,18 +158,20 @@ pub fn main() {
         dist: Some(acc),
         rotation: None,
     });
+    #[cfg(debug_assertions)]
     println!("{} {}", map.len(), map[0].len());
+    #[cfg(debug_assertions)]
     println!(
         "pos: ({}, {}), facing ({} {})",
         pos.0, pos.1, facing.0, facing.1
     );
     for ins in path.iter() {
+        #[cfg(debug_assertions)]
         println!("{:?}", ins);
         match (ins.dist, ins.rotation) {
             (Some(dist), None) => {
                 for _step in 0..dist {
                     let (next_pos, next_facing) = next_pos_facing(pos, facing, &map, &edges);
-                    // println!("next_pos: {} {}, next_facing: {} {}", next_pos.0, next_pos.1, next_facing.0, next_facing.1);
                     match map[next_pos.1 as usize][next_pos.0 as usize] {
                         b'#' => {
                             break;
@@ -179,7 +183,6 @@ pub fn main() {
                             panic!("unexpected wall as next character");
                         }
                     }
-                    // println!("pos: {} {}, facing: {} {}", pos.0, pos.1, facing.0, facing.1);
                 }
             }
             (None, Some(rot)) => {
@@ -187,12 +190,14 @@ pub fn main() {
             }
             _ => unreachable!(),
         }
+        #[cfg(debug_assertions)]
         println!(
             "pos: ({}, {}), facing ({} {})",
             pos.0, pos.1, facing.0, facing.1
         );
     }
     let facing_dir = facing.0.abs() * (1 - facing.0) + facing.1.abs() * (2 - facing.1);
+    #[cfg(debug_assertions)]
     println!(
         "pos: ({}, {}), facing ({} {}) = {}",
         pos.0 + 1,

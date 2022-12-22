@@ -67,17 +67,21 @@ pub fn main() {
         dist: Some(acc),
         rotation: None,
     });
+    #[cfg(debug_assertions)]
     println!("{} {}", map.len(), map[0].len());
+    #[cfg(debug_assertions)]
     println!(
         "pos: ({}, {}), facing ({} {})",
         pos.0, pos.1, facing.0, facing.1
     );
     for ins in path.iter() {
+        #[cfg(debug_assertions)]
         println!("{:?}", ins);
         match (ins.dist, ins.rotation) {
             (Some(dist), None) => {
                 for step in 0..dist {
                     let mut next_pos = (pos.0 + facing.0, pos.1 + facing.1);
+                    #[cfg(debug_assertions)]
                     println!("next_pos: {} {}", next_pos.0, next_pos.1);
                     let next_char = if next_pos.0 >= 0
                         && next_pos.0 < w as isize
@@ -104,10 +108,12 @@ pub fn main() {
                         if map[next_pos.1 as usize][next_pos.0 as usize] != b'#' {
                             pos = next_pos;
                         } else {
+                            #[cfg(debug_assertions)]
                             println!("pos: {} {}", pos.0, pos.1);
                             break;
                         }
                     } else {
+                        #[cfg(debug_assertions)]
                         println!("pos: {} {}", pos.0, pos.1);
                         break;
                     }
@@ -120,12 +126,14 @@ pub fn main() {
             },
             _ => unreachable!(),
         }
+        #[cfg(debug_assertions)]
         println!(
             "pos: ({}, {}), facing ({} {})",
             pos.0, pos.1, facing.0, facing.1
         );
     }
     let facing_dir = facing.0.abs() * (1 - facing.0) + facing.1.abs() * (1 - facing.1);
+    #[cfg(debug_assertions)]
     println!(
         "pos: ({}, {}), facing ({} {}) = {}",
         pos.0 + 1,
