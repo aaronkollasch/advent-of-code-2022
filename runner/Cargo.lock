@@ -313,6 +313,7 @@ name = "day23b"
 version = "0.1.0"
 dependencies = [
  "kdam",
+ "rustc-hash",
 ]
 
 [[package]]

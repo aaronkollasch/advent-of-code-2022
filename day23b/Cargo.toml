@@ -10,3 +10,4 @@ path = "src/main.rs"
 
 [dependencies]
 kdam = "0.3.0"
+rustc-hash = "1.1"

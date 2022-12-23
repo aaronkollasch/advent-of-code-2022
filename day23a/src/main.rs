@@ -15,6 +15,7 @@ fn get_directions(dir: usize) -> [Pos; 3] {
     }
 }
 
+#[cfg(debug_assertions)]
 fn print_elves(elves: &Vec<Elf>) {
     println!("{:?}", elves);
     let (mut min_x, mut max_x, mut min_y, mut max_y) = (isize::MAX, isize::MIN, isize::MAX, isize::MIN);
@@ -79,7 +80,6 @@ pub fn main() {
                 }
                 if let Some(p) = p {
                     let p = (elf.0 + p.0, elf.1 + p.1);
-                    println!("{:?}", p);
                     proposed_elves.insert(i_elf, p);
                     proposed_pos
                         .entry(p)

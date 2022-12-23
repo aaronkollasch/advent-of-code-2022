@@ -1,22 +1,20 @@
-use std::{collections::HashMap, cmp::{min, max}};
+use rustc_hash::{FxHashMap as HashMap, FxHashSet as HashSet};
+#[cfg(debug_assertions)]
+use std::cmp::{min, max};
 use kdam::tqdm;
 
 type Number = isize;
 type Pos = (Number, Number);
 
-type Elf = Pos;
+const DIRECTIONS: [[Pos; 3]; 4] = [
+    [(1, -1), (0, -1), (-1, -1)],
+    [(1, 1), (0, 1), (-1, 1)],
+    [(-1, 1), (-1, 0), (-1, -1)],
+    [(1, 1), (1, 0), (1, -1)],
+];
 
-fn get_directions(dir: usize) -> [Pos; 3] {
-    match dir % 4 {
-        0 => [(1, -1), (0, -1), (-1, -1)],
-        1 => [(1, 1), (0, 1), (-1, 1)],
-        2 => [(-1, 1), (-1, 0), (-1, -1)],
-        3 => [(1, 1), (1, 0), (1, -1)],
-        _ => unreachable!(),
-    }
-}
-
-fn print_elves(elves: &Vec<Elf>) {
+#[cfg(debug_assertions)]
+fn print_elves(elves: &HashSet<Pos>) {
     println!("{:?}", elves);
     let (mut min_x, mut max_x, mut min_y, mut max_y) = (isize::MAX, isize::MIN, isize::MAX, isize::MIN);
     for elf in elves.iter() {
@@ -40,53 +38,49 @@ fn print_elves(elves: &Vec<Elf>) {
 pub fn main() {
     let s = include_bytes!("../input.txt");
 
-    let mut elves: Vec<Elf> = Vec::with_capacity(256);
+    let mut elves: HashSet<Pos> = Default::default();
+    elves.reserve(s.len());
     s.split(|b| *b == b'\n')
         .filter(|l| !l.is_empty())
         .enumerate()
         .for_each(|(y, l)| {
             for (x, b) in l.iter().enumerate() {
                 if *b == b'#' {
-                    elves.push((x as Number, y as Number));
+                    elves.insert((x as Number, y as Number));
                 }
             }
         });
-    let mut proposed_pos: HashMap<Pos, usize> = HashMap::new();
-    let mut proposed_elves: HashMap<usize, Pos> = HashMap::new();
+    let mut proposed_pos: HashMap<Pos, usize> = Default::default();
+    proposed_pos.reserve(elves.len());
+    let mut proposed_elves: HashMap<Pos, Pos> = Default::default();
+    proposed_elves.reserve(elves.len());
     #[cfg(debug_assertions)]
     print_elves(&elves);
     for i_round in tqdm!(0..) {
         // first half
-        for (i_elf, elf) in elves.iter().enumerate() {
-            let neighbors = elves
-                .iter()
-                .filter_map(|e| {
-                    let d = (e.0 - elf.0, e.1 - elf.1);
-                    if d.0.abs() <= 1 && d.1.abs() <= 1 && !(d.0 == 0 && d.1 == 0) {
-                        Some(d)
-                    } else {
-                        None
-                    }
-                })
-                .collect::<Vec<_>>();
-            if !neighbors.is_empty() {
-                let mut p: Option<Pos> = None;
-                for dir in i_round..i_round + 4 {
-                    let dirs = get_directions(dir);
-                    if !dirs.into_iter().any(|d| neighbors.contains(&d)) {
-                        p = Some(dirs[1]);
-                        break;
-                    }
-                }
-                if let Some(p) = p {
-                    let p = (elf.0 + p.0, elf.1 + p.1);
-                    proposed_elves.insert(i_elf, p);
-                    proposed_pos
-                        .entry(p)
-                        .and_modify(|counter| *counter += 1)
-                        .or_insert(1);
+        proposed_elves.extend(elves.iter().filter_map(|elf| {
+            let mut num_clear: u8 = 0;
+            let mut p: Option<Pos> = None;
+            for dir in (i_round..i_round + 4).rev() {
+                let dirs = DIRECTIONS[dir % 4];
+                if !dirs.iter().any(|d| elves.contains(&(elf.0 + d.0, elf.1 + d.1))) {
+                    p = Some(dirs[1]);
+                    num_clear += 1;
                 }
             }
+            match p {
+                Some(p) if num_clear < 4 => {
+                    let p = (elf.0 + p.0, elf.1 + p.1);
+                    Some((*elf, p))
+                }
+                _ => { None }
+            }
+        }));
+        for (_, new_pos) in proposed_elves.iter() {
+            proposed_pos
+                .entry(*new_pos)
+                .and_modify(|counter| *counter += 1)
+                .or_insert(1);
         }
         #[cfg(debug_assertions)]
         println!("{:?}", proposed_pos);
@@ -95,10 +89,12 @@ pub fn main() {
             break;
         }
         // second half
-        for (i_elf, new_pos) in proposed_elves.drain() {
+        for (elf, new_pos) in proposed_elves.drain() {
             if proposed_pos[&new_pos] == 1 {
-                if elves.contains(&new_pos) { panic!("overwriting elf at {:?}!", new_pos); }
-                elves[i_elf] = new_pos;
+                // extra check for debugging purposes:
+                // if elves.contains(&new_pos) { panic!("overwriting elf at {:?}!", new_pos); }
+                elves.remove(&elf);
+                elves.insert(new_pos);
             }
         }
         // reset
