@@ -307,6 +307,10 @@ version = "0.1.0"
 [[package]]
 name = "day23a"
 version = "0.1.0"
+dependencies = [
+ "kdam",
+ "rustc-hash",
+]
 
 [[package]]
 name = "day23b"
