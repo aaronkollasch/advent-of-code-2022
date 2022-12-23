@@ -1,6 +1,7 @@
 use rustc_hash::{FxHashMap as HashMap, FxHashSet as HashSet};
 #[cfg(debug_assertions)]
 use std::cmp::{min, max};
+use std::collections::hash_map;
 #[cfg(debug_assertions)]
 use kdam::{tqdm, BarExt};
 
@@ -57,8 +58,6 @@ pub fn main() {
                 }
             }
         });
-    let mut proposed_pos: HashMap<Pos, usize> = Default::default();
-    proposed_pos.reserve(elves.len());
     let mut proposed_elves: HashMap<Pos, Pos> = Default::default();
     proposed_elves.reserve(elves.len());
     #[cfg(debug_assertions)]
@@ -67,44 +66,35 @@ pub fn main() {
     let mut pb = tqdm!();
     for i_round in 0.. {
         // first half
-        proposed_elves.extend(elves.iter().filter_map(|elf| {
+        for elf in elves.iter() {
             if SURROUND.iter().any(|d| elves.contains(&(elf.0 + d.0, elf.1 + d.1))) {
                 for dir in i_round..i_round + 4 {
                     let dirs = DIRECTIONS[dir % 4];
                     if !dirs.iter().any(|d| elves.contains(&(elf.0 + d.0, elf.1 + d.1))) {
                         let dir = dirs[1];
                         let p = (elf.0 + dir.0, elf.1 + dir.1);
-                        return Some((*elf, p))
+                        if let hash_map::Entry::Vacant(e) = proposed_elves.entry(p) {
+                            e.insert(*elf);
+                        } else {
+                            proposed_elves.remove(&p);
+                        }
+                        break;
                     }
                 }
-                None
-            } else {
-                None
             }
-        }));
-        for (_, new_pos) in proposed_elves.iter() {
-            proposed_pos
-                .entry(*new_pos)
-                .and_modify(|counter| *counter += 1)
-                .or_insert(1);
         }
-        #[cfg(debug_assertions)]
-        println!("{:?}", proposed_pos);
-        if proposed_pos.is_empty() {
+        if proposed_elves.is_empty() {
             print!("{} ", i_round + 1);
             break;
         }
         // second half
-        for (elf, new_pos) in proposed_elves.drain() {
-            if proposed_pos[&new_pos] == 1 {
-                // extra check for debugging purposes:
-                // if elves.contains(&new_pos) { panic!("overwriting elf at {:?}!", new_pos); }
-                elves.remove(&elf);
-                elves.insert(new_pos);
-            }
+        for (new_pos, elf) in proposed_elves.drain() {
+            // extra check for debugging purposes:
+            // if elves.contains(&new_pos) { panic!("overwriting elf at {:?}!", new_pos); }
+            elves.remove(&elf);
+            elves.insert(new_pos);
         }
         // reset
-        proposed_pos.clear();
         #[cfg(debug_assertions)]
         print_elves(&elves);
         #[cfg(debug_assertions)]
