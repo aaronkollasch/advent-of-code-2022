@@ -79,7 +79,7 @@ pub fn main() {
         println!("{:?}", ins);
         match (ins.dist, ins.rotation) {
             (Some(dist), None) => {
-                for step in 0..dist {
+                for _step in 0..dist {
                     let mut next_pos = (pos.0 + facing.0, pos.1 + facing.1);
                     #[cfg(debug_assertions)]
                     println!("next_pos: {} {}", next_pos.0, next_pos.1);

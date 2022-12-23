@@ -31,8 +31,7 @@ fn facing_angle_to_axes(facing: isize) -> Pos {
 fn next_pos_facing(
     pos: Pos,
     facing: Pos,
-    map: &Vec<Vec<u8>>,
-    edges: &Vec<(Vec<Pos>, Vec<Pos>, isize, isize)>,
+    edges: &[(Vec<Pos>, Vec<Pos>, isize, isize)],
 ) -> (Pos, Pos) {
     let mut next_pos = (pos.0 + facing.0, pos.1 + facing.1);
     let mut next_facing = facing;
@@ -171,7 +170,7 @@ pub fn main() {
         match (ins.dist, ins.rotation) {
             (Some(dist), None) => {
                 for _step in 0..dist {
-                    let (next_pos, next_facing) = next_pos_facing(pos, facing, &map, &edges);
+                    let (next_pos, next_facing) = next_pos_facing(pos, facing, &edges);
                     match map[next_pos.1 as usize][next_pos.0 as usize] {
                         b'#' => {
                             break;
