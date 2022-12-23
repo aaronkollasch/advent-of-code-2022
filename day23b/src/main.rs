@@ -1,10 +1,17 @@
 use rustc_hash::{FxHashMap as HashMap, FxHashSet as HashSet};
 #[cfg(debug_assertions)]
 use std::cmp::{min, max};
-use kdam::tqdm;
+#[cfg(debug_assertions)]
+use kdam::{tqdm, BarExt};
 
 type Number = isize;
 type Pos = (Number, Number);
+
+const SURROUND: [Pos; 8] = [
+    (1, 1), (1, 0), (1, -1),
+    (0, 1), (0, -1),
+    (-1, 1), (-1, 0), (-1, -1),
+];
 
 const DIRECTIONS: [[Pos; 3]; 4] = [
     [(1, -1), (0, -1), (-1, -1)],
@@ -56,24 +63,23 @@ pub fn main() {
     proposed_elves.reserve(elves.len());
     #[cfg(debug_assertions)]
     print_elves(&elves);
-    for i_round in tqdm!(0..) {
+    #[cfg(debug_assertions)]
+    let mut pb = tqdm!();
+    for i_round in 0.. {
         // first half
         proposed_elves.extend(elves.iter().filter_map(|elf| {
-            let mut num_clear: u8 = 0;
-            let mut p: Option<Pos> = None;
-            for dir in (i_round..i_round + 4).rev() {
-                let dirs = DIRECTIONS[dir % 4];
-                if !dirs.iter().any(|d| elves.contains(&(elf.0 + d.0, elf.1 + d.1))) {
-                    p = Some(dirs[1]);
-                    num_clear += 1;
+            if SURROUND.iter().any(|d| elves.contains(&(elf.0 + d.0, elf.1 + d.1))) {
+                for dir in i_round..i_round + 4 {
+                    let dirs = DIRECTIONS[dir % 4];
+                    if !dirs.iter().any(|d| elves.contains(&(elf.0 + d.0, elf.1 + d.1))) {
+                        let dir = dirs[1];
+                        let p = (elf.0 + dir.0, elf.1 + dir.1);
+                        return Some((*elf, p))
+                    }
                 }
-            }
-            match p {
-                Some(p) if num_clear < 4 => {
-                    let p = (elf.0 + p.0, elf.1 + p.1);
-                    Some((*elf, p))
-                }
-                _ => { None }
+                None
+            } else {
+                None
             }
         }));
         for (_, new_pos) in proposed_elves.iter() {
@@ -101,5 +107,7 @@ pub fn main() {
         proposed_pos.clear();
         #[cfg(debug_assertions)]
         print_elves(&elves);
+        #[cfg(debug_assertions)]
+        pb.update(1);
     }
 }
