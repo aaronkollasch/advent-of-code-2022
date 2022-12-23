@@ -69,15 +69,16 @@ fn dest(elf: Pos, t: usize, elves: &HashSet<Pos>) -> Pos {
 }
 
 pub fn main() {
-    let s = include_bytes!("../input.txt");
+    let s = include_str!("../input.txt");
 
     let mut elves: HashSet<Pos> = Default::default();
     elves.reserve(s.len());
-    s.split(|b| *b == b'\n')
+    let mut new_elves = elves.clone();
+    s.lines()
         .filter(|l| !l.is_empty())
         .enumerate()
         .for_each(|(y, l)| {
-            for (x, b) in l.iter().enumerate() {
+            for (x, b) in l.as_bytes().iter().enumerate() {
                 if *b == b'#' {
                     elves.insert((x as Number, y as Number));
                 }
@@ -88,8 +89,6 @@ pub fn main() {
     #[cfg(debug_assertions)]
     let mut pb = tqdm!();
     for i_round in 0.. {
-        let mut new_elves = elves.clone();
-        new_elves.clear();
         let mut num_moves = 0;
         for &elf in elves.iter() {
             let new_pos = dest(elf, i_round, &elves);
@@ -108,7 +107,8 @@ pub fn main() {
             print!("{} ", i_round + 1);
             break;
         }
-        elves = new_elves;
+        (elves, new_elves) = (new_elves, elves);
+        new_elves.clear();
         // reset
         #[cfg(debug_assertions)]
         print_elves(&elves);
