@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use rustc_hash::FxHashSet as HashSet;
 use itertools::iproduct;
 
 type Number = usize;
@@ -52,7 +52,7 @@ pub fn main() {
         }
         println!();
     }
-    let mut positions: HashSet<Pos> = HashSet::with_capacity(1024);
+    let mut positions: HashSet<Pos> = HashSet::with_capacity_and_hasher(1024, Default::default());
     let mut next_positions: HashSet<Pos> = positions.clone();
     let mut t = 0;
     while !positions.iter().any(|p| *p == (w - 1, h - 1)) {
