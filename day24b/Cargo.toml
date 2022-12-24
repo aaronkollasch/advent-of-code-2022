@@ -11,3 +11,5 @@ path = "src/main.rs"
 [dependencies]
 itertools = "0.10"
 rustc-hash = "1.1"
+primitive-types = "0.8"
+u256-literal = "1.0"

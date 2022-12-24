@@ -1,173 +1,215 @@
-use rustc_hash::FxHashSet as HashSet;
-use itertools::iproduct;
+use primitive_types::U256;
+use u256_literal::u256;
 
 type Number = usize;
 type Pos = (Number, Number);
 
-struct Hurricane {
-    x: Number,
-    y: Number,
-    delta_x: Number,
-    delta_y: Number,
+#[allow(dead_code)]
+const MAX_COLS: usize = 256;
+const MAX_ROWS: usize = 32;
+
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
+struct Grid {
+    vals: [U256; MAX_ROWS],
+    width: usize,
+    height: usize,
 }
 
-const MOVEMENTS: [(isize, isize); 5] = [
-    (0, 0),
-    (1, 0),
-    (-1, 0),
-    (0, 1),
-    (0, -1),
-];
+impl Grid {
+    pub fn new(width: usize, height: usize) -> Self {
+        Self { vals: [u256!(0); MAX_ROWS], width, height }
+    }
+
+    fn get_val(&self, pos: Pos) -> bool {
+        (self.vals[pos.1] >> pos.0) & u256!(1) > u256!(0)
+    }
+
+    fn insert_val(&mut self, pos: Pos) {
+        self.vals[pos.1] |= u256!(1) << pos.0;
+    }
+
+    fn blow_up(&mut self) {
+        self.vals[..self.height].rotate_left(1);
+    }
+
+    fn blow_down(&mut self) {
+        self.vals[..self.height].rotate_right(1);
+    }
+
+    fn blow_left(&mut self) {
+        for y in 0..self.height {
+            self.vals[y] = (self.vals[y] >> 1) | ((self.vals[y] & u256!(1)) << (self.width - 1));
+        }
+    }
+
+    fn blow_right(&mut self) {
+        for y in 0..self.height {
+            self.vals[y] = (self.vals[y] << 1) | (self.vals[y] >> (self.width - 1));
+        }
+    }
+
+    fn expand_one(&mut self, obstacles: [[U256; MAX_ROWS]; 4]) {
+        let mut above: U256 = u256!(0);
+        for y in 0..self.height {
+            let row = self.vals[y];
+            self.vals[y] |= above | (row >> 1) | (row << 1 & ((u256!(1) << self.width) - 1));
+            if y + 1 < self.height {
+                self.vals[y] |= self.vals[y + 1];
+            }
+            above = row;
+
+            let obstacle = obstacles[0][y]
+                | obstacles[1][y]
+                | obstacles[2][y]
+                | obstacles[3][y];
+            self.vals[y] &= !obstacle;
+        }
+    }
+}
+
+#[cfg(debug_assertions)]
+fn debug_print(t: usize, h: usize, w: usize, hurricanes_up: Grid, hurricanes_down: Grid, hurricanes_left: Grid, hurricanes_right: Grid, elves: Grid) {
+    println!("\ntime: {}", t);
+    for y in 0..h {
+        for x in 0..w {
+            let vars = [
+                hurricanes_right.get_val((x, y)),
+                hurricanes_left.get_val((x, y)),
+                hurricanes_up.get_val((x, y)),
+                hurricanes_down.get_val((x, y)),
+                elves.get_val((x, y)),
+            ];
+            match vars[0..4].iter().map(|b| *b as u8).sum::<u8>() {
+                s if s > 1 => { print!("{}", s); }
+                s if s == 1 && vars[0] => { print!(">"); }
+                s if s == 1 && vars[1] => { print!("<"); }
+                s if s == 1 && vars[2] => { print!("^"); }
+                s if s == 1 && vars[3] => { print!("v"); }
+                _ if vars[4] => { print!("*"); }
+                _ => { print!(" "); }
+            }
+        }
+        println!();
+    }
+    println!();
+}
 
 pub fn main() {
     let s = include_bytes!("../input.txt");
     let w = s.iter().position(|b| *b == b'\n').unwrap() - 2;
     let h = s.len() / (w + 3) - 2;
+    let mut hurricanes_up = Grid::new(w, h);
+    let mut hurricanes_down = Grid::new(w, h);
+    let mut hurricanes_left = Grid::new(w, h);
+    let mut hurricanes_right = Grid::new(w, h);
+    let mut elves = Grid::new(w, h);
 
     #[cfg(debug_assertions)]
     println!("w: {}, h: {}", w, h);
-    let mut hurricanes = s
-        .split(|b| *b == b'\n')
+    s.split(|b| *b == b'\n')
         .filter(|l| !l.is_empty())
         .skip(1)
         .take(h)
         .enumerate()
-        .flat_map(move |(y, l)| {
-            l[1..].iter().take(w).enumerate().filter_map(move |(x, b)| {
+        .for_each(|(y, l)| {
+            l[1..].iter().take(w).enumerate().for_each(|(x, b)| {
                 match b {
-                    b'>' => Some(Hurricane { x, y, delta_x: 1, delta_y: 0 }),
-                    b'<' => Some(Hurricane { x, y, delta_x: w - 1, delta_y: 0 }),
-                    b'v' => Some(Hurricane { x, y, delta_x: 0, delta_y: 1 }),
-                    b'^' => Some(Hurricane { x, y, delta_x: 0, delta_y: h - 1 }),
-                    _ => None,
+                    b'>' => { hurricanes_right.insert_val((x, y)); }
+                    b'<' => { hurricanes_left.insert_val((x, y)); }
+                    b'v' => { hurricanes_down.insert_val((x, y)); }
+                    b'^' => { hurricanes_up.insert_val((x, y)); }
+                    _ => {}
                 }
             })
-        })
-        .collect::<Vec<_>>();
-    let mut map: Vec<bool> = Vec::from_iter(iproduct!(0..h, 0..w).map(|(y, x)| hurricanes.iter().any(|h| (h.x, h.y) == (x, y))));
-    #[cfg(debug_assertions)]
-    {
-        for y in 0..h {
-            println!("{:?}", String::from_iter(map[y * w..(y + 1) * w].iter().map(|b| if *b { '*' } else { ' ' })));
-        }
-        println!();
-    }
-    let mut positions: HashSet<Pos> = HashSet::with_capacity_and_hasher(1024, Default::default());
-    let mut next_positions: HashSet<Pos> = positions.clone();
+        });
     let mut t = 0;
-    while !positions.iter().any(|p| *p == (w - 1, h - 1)) {
-        #[cfg(debug_assertions)]
-        println!("{:?}", positions);
-        for hurricane in hurricanes.iter_mut() {
-            hurricane.x = (hurricane.x + hurricane.delta_x) % w;
-            hurricane.y = (hurricane.y + hurricane.delta_y) % h;
+    #[cfg(debug_assertions)]
+    debug_print(t, h, w, hurricanes_up, hurricanes_down, hurricanes_left, hurricanes_right, elves);
+    while !elves.get_val((w - 1, h - 1)) {
+        hurricanes_left.blow_left();
+        hurricanes_right.blow_right();
+        hurricanes_up.blow_up();
+        hurricanes_down.blow_down();
+        elves.expand_one([
+            hurricanes_up.vals,
+            hurricanes_down.vals,
+            hurricanes_left.vals,
+            hurricanes_right.vals,
+        ]);
+        if !hurricanes_right.get_val((0, 0))
+                && !hurricanes_left.get_val((0, 0))
+                && !hurricanes_up.get_val((0, 0))
+                && !hurricanes_down.get_val((0, 0)) {
+            elves.insert_val((0, 0));
         }
-        map.clear();
-        map.extend(iproduct!(0..h, 0..w).map(|(y, x)| hurricanes.iter().any(|h| (h.x, h.y) == (x, y))));
-        #[cfg(debug_assertions)]
-        {
-            for y in 0..h {
-                println!("{:?}", String::from_iter(map[y * w..(y + 1) * w].iter().map(|b| if *b { '*' } else { ' ' })));
-            }
-            println!();
-        }
-        if !map[0] {
-            next_positions.insert((0, 0));
-        }
-        for position in positions.drain() {
-            for movement in MOVEMENTS.into_iter() {
-                let new_pos = (position.0.wrapping_add_signed(movement.0), position.1.wrapping_add_signed(movement.1));
-                if new_pos.0 < w && new_pos.1 < h && !map[new_pos.1 * w + new_pos.0] {
-                    next_positions.insert(new_pos);
-                }
-            }
-        }
-
-        (positions, next_positions) = (next_positions, positions);
-        next_positions.clear();
         t += 1;
+        #[cfg(debug_assertions)]
+        debug_print(t, h, w, hurricanes_up, hurricanes_down, hurricanes_left, hurricanes_right, elves);
     }
     t += 1; // 1 extra minute to reach goal
+    hurricanes_left.blow_left();
+    hurricanes_right.blow_right();
+    hurricanes_up.blow_up();
+    hurricanes_down.blow_down();
+    elves.vals.fill(u256!(0));
     #[cfg(debug_assertions)]
     println!("t1: {}", t);
-    for hurricane in hurricanes.iter_mut() {
-        hurricane.x = (hurricane.x + hurricane.delta_x) % w;
-        hurricane.y = (hurricane.y + hurricane.delta_y) % h;
-    }
-    positions.clear();
-    while !positions.iter().any(|p| *p == (0, 0)) {
-        #[cfg(debug_assertions)]
-        println!("{:?}", positions);
-        for hurricane in hurricanes.iter_mut() {
-            hurricane.x = (hurricane.x + hurricane.delta_x) % w;
-            hurricane.y = (hurricane.y + hurricane.delta_y) % h;
+    hurricanes_left.blow_left();
+    hurricanes_right.blow_right();
+    hurricanes_up.blow_up();
+    hurricanes_down.blow_down();
+    t += 1;
+    while !elves.get_val((0, 0)) {
+        hurricanes_left.blow_left();
+        hurricanes_right.blow_right();
+        hurricanes_up.blow_up();
+        hurricanes_down.blow_down();
+        elves.expand_one([
+            hurricanes_up.vals,
+            hurricanes_down.vals,
+            hurricanes_left.vals,
+            hurricanes_right.vals,
+        ]);
+        if !hurricanes_right.get_val((w - 1, h - 1))
+                && !hurricanes_left.get_val((w - 1, h - 1))
+                && !hurricanes_up.get_val((w - 1, h - 1))
+                && !hurricanes_down.get_val((w - 1, h - 1)) {
+            elves.insert_val((w - 1, h - 1));
         }
-        map.clear();
-        map.extend(iproduct!(0..h, 0..w).map(|(y, x)| hurricanes.iter().any(|h| (h.x, h.y) == (x, y))));
-        #[cfg(debug_assertions)]
-        {
-            for y in 0..h {
-                println!("{:?}", String::from_iter(map[y * w..(y + 1) * w].iter().map(|b| if *b { '*' } else { ' ' })));
-            }
-            println!();
-        }
-        if !map[0] {
-            next_positions.insert((w - 1, h - 1));
-        }
-        for position in positions.drain() {
-            for movement in MOVEMENTS.into_iter() {
-                let new_pos = (position.0.wrapping_add_signed(movement.0), position.1.wrapping_add_signed(movement.1));
-                if new_pos.0 < w && new_pos.1 < h && !map[new_pos.1 * w + new_pos.0] {
-                    next_positions.insert(new_pos);
-                }
-            }
-        }
-
-        (positions, next_positions) = (next_positions, positions);
-        next_positions.clear();
         t += 1;
+        #[cfg(debug_assertions)]
+        debug_print(t, h, w, hurricanes_up, hurricanes_down, hurricanes_left, hurricanes_right, elves);
     }
     t += 1;
-    for hurricane in hurricanes.iter_mut() {
-        hurricane.x = (hurricane.x + hurricane.delta_x) % w;
-        hurricane.y = (hurricane.y + hurricane.delta_y) % h;
-    }
+    hurricanes_left.blow_left();
+    hurricanes_right.blow_right();
+    hurricanes_up.blow_up();
+    hurricanes_down.blow_down();
+    elves.vals.fill(u256!(0));
     #[cfg(debug_assertions)]
     println!("t2: {}", t);
-    positions.clear();
-    while !positions.iter().any(|p| *p == (w - 1, h - 1)) {
-        #[cfg(debug_assertions)]
-        println!("{:?}", positions);
-        for hurricane in hurricanes.iter_mut() {
-            hurricane.x = (hurricane.x + hurricane.delta_x) % w;
-            hurricane.y = (hurricane.y + hurricane.delta_y) % h;
+    while !elves.get_val((w - 1, h - 1)) {
+        hurricanes_left.blow_left();
+        hurricanes_right.blow_right();
+        hurricanes_up.blow_up();
+        hurricanes_down.blow_down();
+        elves.expand_one([
+            hurricanes_up.vals,
+            hurricanes_down.vals,
+            hurricanes_left.vals,
+            hurricanes_right.vals,
+        ]);
+        if !hurricanes_right.get_val((0, 0))
+                && !hurricanes_left.get_val((0, 0))
+                && !hurricanes_up.get_val((0, 0))
+                && !hurricanes_down.get_val((0, 0)) {
+            elves.insert_val((0, 0));
         }
-        map.clear();
-        map.extend(iproduct!(0..h, 0..w).map(|(y, x)| hurricanes.iter().any(|h| (h.x, h.y) == (x, y))));
-        #[cfg(debug_assertions)]
-        {
-            for y in 0..h {
-                println!("{:?}", String::from_iter(map[y * w..(y + 1) * w].iter().map(|b| if *b { '*' } else { ' ' })));
-            }
-            println!();
-        }
-        if !map[0] {
-            next_positions.insert((0, 0));
-        }
-        for position in positions.drain() {
-            for movement in MOVEMENTS.into_iter() {
-                let new_pos = (position.0.wrapping_add_signed(movement.0), position.1.wrapping_add_signed(movement.1));
-                if new_pos.0 < w && new_pos.1 < h && !map[new_pos.1 * w + new_pos.0] {
-                    next_positions.insert(new_pos);
-                }
-            }
-        }
-
-        (positions, next_positions) = (next_positions, positions);
-        next_positions.clear();
         t += 1;
+        #[cfg(debug_assertions)]
+        debug_print(t, h, w, hurricanes_up, hurricanes_down, hurricanes_left, hurricanes_right, elves);
     }
     t += 1; // 1 extra minute to reach goal
 
-    println!("{} ", t);
+    print!("{} ", t);
 }
