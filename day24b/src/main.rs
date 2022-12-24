@@ -24,6 +24,7 @@ pub fn main() {
     let w = s.iter().position(|b| *b == b'\n').unwrap() - 2;
     let h = s.len() / (w + 3) - 2;
 
+    #[cfg(debug_assertions)]
     println!("w: {}, h: {}", w, h);
     let mut hurricanes = s
         .split(|b| *b == b'\n')
@@ -45,10 +46,12 @@ pub fn main() {
         .collect::<Vec<_>>();
     let mut map: Vec<bool> = Vec::from_iter(iproduct!(0..h, 0..w).map(|(y, x)| hurricanes.iter().any(|h| (h.x, h.y) == (x, y))));
     #[cfg(debug_assertions)]
-    for y in 0..h {
-        println!("{:?}", String::from_iter(map[y * w..(y + 1) * w].iter().map(|b| if *b { '*' } else { ' ' })));
+    {
+        for y in 0..h {
+            println!("{:?}", String::from_iter(map[y * w..(y + 1) * w].iter().map(|b| if *b { '*' } else { ' ' })));
+        }
+        println!();
     }
-    println!();
     let mut positions: HashSet<Pos> = HashSet::with_capacity(1024);
     let mut next_positions: HashSet<Pos> = positions.clone();
     let mut t = 0;
@@ -85,6 +88,7 @@ pub fn main() {
         t += 1;
     }
     t += 1; // 1 extra minute to reach goal
+    #[cfg(debug_assertions)]
     println!("t1: {}", t);
     for hurricane in hurricanes.iter_mut() {
         hurricane.x = (hurricane.x + hurricane.delta_x) % w;
@@ -128,6 +132,7 @@ pub fn main() {
         hurricane.x = (hurricane.x + hurricane.delta_x) % w;
         hurricane.y = (hurricane.y + hurricane.delta_y) % h;
     }
+    #[cfg(debug_assertions)]
     println!("t2: {}", t);
     positions.clear();
     while !positions.iter().any(|p| *p == (w - 1, h - 1)) {
@@ -164,5 +169,5 @@ pub fn main() {
     }
     t += 1; // 1 extra minute to reach goal
 
-    print!("{} ", t);
+    println!("{} ", t);
 }

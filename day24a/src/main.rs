@@ -24,6 +24,7 @@ pub fn main() {
     let w = s.iter().position(|b| *b == b'\n').unwrap() - 2;
     let h = s.len() / (w + 3) - 2;
 
+    #[cfg(debug_assertions)]
     println!("w: {}, h: {}", w, h);
     let mut hurricanes = s
         .split(|b| *b == b'\n')
@@ -64,10 +65,12 @@ pub fn main() {
         map.clear();
         map.extend(iproduct!(0..h, 0..w).map(|(y, x)| hurricanes.iter().any(|h| (h.x, h.y) == (x, y))));
         #[cfg(debug_assertions)]
-        for y in 0..h {
-            println!("{:?}", String::from_iter(map[y * w..(y + 1) * w].iter().map(|b| if *b { '*' } else { ' ' })));
+        {
+            for y in 0..h {
+                println!("{:?}", String::from_iter(map[y * w..(y + 1) * w].iter().map(|b| if *b { '*' } else { ' ' })));
+            }
+            println!();
         }
-        println!();
         if !map[0] {
             next_positions.insert((0, 0));
         }
@@ -84,5 +87,5 @@ pub fn main() {
         next_positions.clear();
         t += 1;
     }
-    print!("{} ", t + 1);
+    println!("{} ", t + 1);
 }
