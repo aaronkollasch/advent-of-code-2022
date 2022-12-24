@@ -56,21 +56,13 @@ pub fn main() {
     let mut next_positions: HashSet<Pos> = positions.clone();
     let mut t = 0;
     while !positions.iter().any(|p| *p == (w - 1, h - 1)) {
-        #[cfg(debug_assertions)]
-        println!("{:?}", positions);
+        t += 1;
         for hurricane in hurricanes.iter_mut() {
             hurricane.x = (hurricane.x + hurricane.delta_x) % w;
             hurricane.y = (hurricane.y + hurricane.delta_y) % h;
         }
         map.clear();
         map.extend(iproduct!(0..h, 0..w).map(|(y, x)| hurricanes.iter().any(|h| (h.x, h.y) == (x, y))));
-        #[cfg(debug_assertions)]
-        {
-            for y in 0..h {
-                println!("{:?}", String::from_iter(map[y * w..(y + 1) * w].iter().map(|b| if *b { '*' } else { ' ' })));
-            }
-            println!();
-        }
         if !map[0] {
             next_positions.insert((0, 0));
         }
@@ -82,10 +74,17 @@ pub fn main() {
                 }
             }
         }
-
         (positions, next_positions) = (next_positions, positions);
         next_positions.clear();
-        t += 1;
+        #[cfg(debug_assertions)]
+        {
+            println!("time: {}", t);
+            println!("{:?}", positions);
+            for y in 0..h {
+                println!("{}", String::from_iter(map[y * w..(y + 1) * w].iter().enumerate().map(|(x, b)| if *b { 'v' } else if positions.contains(&(x, y)) { '*' } else { ' ' })));
+            }
+            println!();
+        }
     }
     println!("{} ", t + 1);
 }
