@@ -48,7 +48,7 @@ impl Grid {
         }
     }
 
-    fn expand_one(&mut self, obstacles: [[U256; MAX_ROWS]; 4]) {
+    fn expand_one_and_filter(&mut self, obstacles: [[U256; MAX_ROWS]; 4]) {
         let mut above: U256 = u256!(0);
         for y in 0..self.height {
             let row = self.vals[y];
@@ -130,7 +130,7 @@ pub fn main() {
         hurricanes_right.blow_right();
         hurricanes_up.blow_up();
         hurricanes_down.blow_down();
-        elves.expand_one([
+        elves.expand_one_and_filter([
             hurricanes_up.vals,
             hurricanes_down.vals,
             hurricanes_left.vals,
@@ -164,7 +164,7 @@ pub fn main() {
         hurricanes_right.blow_right();
         hurricanes_up.blow_up();
         hurricanes_down.blow_down();
-        elves.expand_one([
+        elves.expand_one_and_filter([
             hurricanes_up.vals,
             hurricanes_down.vals,
             hurricanes_left.vals,
@@ -193,7 +193,7 @@ pub fn main() {
         hurricanes_right.blow_right();
         hurricanes_up.blow_up();
         hurricanes_down.blow_down();
-        elves.expand_one([
+        elves.expand_one_and_filter([
             hurricanes_up.vals,
             hurricanes_down.vals,
             hurricanes_left.vals,
