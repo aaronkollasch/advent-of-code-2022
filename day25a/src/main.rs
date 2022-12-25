@@ -5,13 +5,15 @@ pub fn main() {
     let mut snafu_sum: Int = s
         .split(|b| *b == b'\n')
         .map(|l| {
-            l.iter()
-                .fold(0, |acc, x| acc * 5 + match x {
-                    b'0'..=b'2' => (*x - b'0') as Int,
-                    b'-' => -1,
-                    b'=' => -2,
-                    _ => unreachable!(),
-                })
+            l.iter().fold(0, |acc, x| {
+                acc * 5
+                    + match x {
+                        b'0'..=b'2' => (*x - b'0') as Int,
+                        b'-' => -1,
+                        b'=' => -2,
+                        _ => unreachable!(),
+                    }
+            })
         })
         .sum();
     #[cfg(debug_assertions)]
