@@ -6,14 +6,14 @@ pub fn main() {
     let s = include_bytes!("../input.txt");
     let mut zones = Vec::with_capacity(32);
     s.split(|b| *b == b'\n')
-        .filter(|l| l.len() > 0)
+        .filter(|l| !l.is_empty())
         .for_each(|l| {
             let mut has_number = false;
             let mut i_num = 0;
             let mut acc = 0;
             let mut sign = 1;
             let mut result = [0; 4];
-            for b in l.into_iter() {
+            for b in l.iter() {
                 match b {
                     b'-' => {
                         has_number = true;
@@ -67,7 +67,6 @@ pub fn main() {
         .iter()
         .filter_map(|zone| if zone[3] == y { Some(zone[2]) } else { None })
         .collect::<HashSet<_>>()
-        .iter()
-        .count() as isize;
+        .len() as isize;
     print!("{} ", total);
 }

@@ -2,14 +2,14 @@ pub fn main() {
     let s = include_bytes!("../input.txt");
     let mut zones = Vec::with_capacity(32);
     s.split(|b| *b == b'\n')
-        .filter(|l| l.len() > 0)
+        .filter(|l| !l.is_empty())
         .for_each(|l| {
             let mut has_number = false;
             let mut i_num = 0;
             let mut acc = 0;
             let mut sign = 1;
             let mut result = [0; 4];
-            for b in l.into_iter() {
+            for b in l.iter() {
                 match b {
                     b'-' => {
                         has_number = true;
@@ -40,29 +40,27 @@ pub fn main() {
 
     let mut s_iter = zones
         .iter()
-        .map(|(_left, right, top, bottom)| {
+        .flat_map(|(_left, right, top, bottom)| {
             zones
                 .iter()
                 .filter(|(z_left, _z_right, z_top, z_bottom)| {
                     *z_left == *right && (*top <= *z_bottom || *z_top <= *bottom)
                 })
                 .map(|zone| zone.0)
-        })
-        .flatten();
+        });
     let s = s_iter.next().unwrap();
     #[cfg(debug_assertions)]
     println!("s matches: {}", s_iter.count() + 1);
     let mut r_iter = zones
         .iter()
-        .map(|(left, right, _top, bottom)| {
+        .flat_map(|(left, right, _top, bottom)| {
             zones
                 .iter()
                 .filter(|(z_left, z_right, z_top, _z_bottom)| {
                     *z_top == *bottom && (*left <= *z_right || *z_left <= *right)
                 })
                 .map(|zone| zone.2)
-        })
-        .flatten();
+        });
     let r = r_iter.next().unwrap();
     #[cfg(debug_assertions)]
     println!("r matches: {}", r_iter.count() + 1);
