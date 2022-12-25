@@ -4,7 +4,6 @@ pub fn main() {
     let s = include_bytes!("../input.txt");
     let mut snafu_sum: Int = s
         .split(|b| *b == b'\n')
-        .filter(|l| !l.is_empty())
         .map(|l| {
             l.iter()
                 .fold(0, |acc, x| acc * 5 + match x {
@@ -18,12 +17,10 @@ pub fn main() {
     #[cfg(debug_assertions)]
     println!("snafu sum: {}", snafu_sum);
     let mut snafu_vec: Vec<u8> = Vec::with_capacity(32);
-    let mut place: Int = 5;
-    let mut last_place: Int = 1;
     while snafu_sum != 0 {
-        let num = ((snafu_sum + 2 * last_place) % place) / last_place - 2;
+        let num = ((snafu_sum + 2) % 5) - 2;
         #[cfg(debug_assertions)]
-        println!("{}\t{}\t{}", place, snafu_sum, num);
+        println!("{}\t{}", snafu_sum, num);
         let snafu_char = match num {
             0..=2 => b'0' + num as u8,
             -1 => b'-',
@@ -31,9 +28,8 @@ pub fn main() {
             _ => unreachable!(),
         };
         snafu_vec.push(snafu_char);
-        snafu_sum -= num * last_place;
-        last_place = place;
-        place *= 5;
+        snafu_sum -= num;
+        snafu_sum /= 5;
     }
     snafu_vec.reverse();
     print!("{} ", String::from_utf8(snafu_vec).unwrap());
