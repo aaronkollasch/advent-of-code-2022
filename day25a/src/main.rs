@@ -24,7 +24,8 @@ pub fn main() {
     let mut last_place: isize = 1;
     while snafu_sum != 0 {
         let num = ((snafu_sum + 2 * last_place) % place) / last_place - 2;
-        println!("{} {} {}", place, snafu_sum, num);
+        #[cfg(debug_assertions)]
+        println!("{}\t{}\t{}", place, snafu_sum, num);
         let snafu_char = match num {
             2 => '2',
             1 => '1',
