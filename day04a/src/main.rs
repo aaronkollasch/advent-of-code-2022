@@ -1,6 +1,6 @@
 #[inline]
 fn parse(b: &[u8]) -> u8 {
-    b.iter().fold(0, |acc, x| acc * 10 + (x - b'0') as u8)
+    b.iter().fold(0, |acc, x| acc * 10 + (x - b'0'))
 }
 
 pub fn main() {
