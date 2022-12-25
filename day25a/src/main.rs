@@ -1,5 +1,3 @@
-use std::collections::VecDeque;
-
 type Int = isize;
 
 pub fn main() {
@@ -19,7 +17,7 @@ pub fn main() {
         .sum();
     #[cfg(debug_assertions)]
     println!("snafu sum: {}", snafu_sum);
-    let mut snafu_vec: VecDeque<char> = VecDeque::with_capacity(32);
+    let mut snafu_vec: Vec<u8> = Vec::with_capacity(32);
     let mut place: Int = 5;
     let mut last_place: Int = 1;
     while snafu_sum != 0 {
@@ -27,17 +25,16 @@ pub fn main() {
         #[cfg(debug_assertions)]
         println!("{}\t{}\t{}", place, snafu_sum, num);
         let snafu_char = match num {
-            2 => '2',
-            1 => '1',
-            0 => '0',
-            -1 => '-',
-            -2 => '=',
+            0..=2 => b'0' + num as u8,
+            -1 => b'-',
+            -2 => b'=',
             _ => unreachable!(),
         };
-        snafu_vec.push_front(snafu_char);
+        snafu_vec.push(snafu_char);
         snafu_sum -= num * last_place;
         last_place = place;
         place *= 5;
     }
-    print!("{} ", snafu_vec.into_iter().collect::<String>());
+    snafu_vec.reverse();
+    print!("{} ", String::from_utf8(snafu_vec).unwrap());
 }
