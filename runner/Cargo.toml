@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 rayon = "1.5"
 took = "0.1"
+common = { path = "../common" }
 
 # Days
 day01a = { path = "../day01a" }
