@@ -1,4 +1,5 @@
 use std::collections::VecDeque;
+use common::parse_signed;
 
 type Number = isize;
 
@@ -6,20 +7,7 @@ pub fn main() {
     let s = include_bytes!("../input.txt");
     let mut numbers: VecDeque<(Number, bool)> = VecDeque::with_capacity(8192);
     s.split(|b| *b == b'\n').filter(|l| !l.is_empty()).for_each(|l| {
-        let mut acc = 0;
-        let mut sign = 1;
-        for b in l.iter() {
-            match b {
-                b'-' => {
-                    sign = -1;
-                }
-                b'0'..=b'9' => {
-                    acc = acc * 10 + (b - b'0') as Number;
-                }
-                _ => {}
-            }
-        }
-        numbers.push_back((sign * acc, false));
+        numbers.push_back((parse_signed::<Number>(l), false));
     });
     let mut num_moves = 0;
     let mut index = 0;

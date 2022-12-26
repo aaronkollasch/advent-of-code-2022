@@ -2,6 +2,7 @@ use std::collections::VecDeque;
 // TODO: see https://www.reddit.com/r/adventofcode/comments/zqezkn/comment/j0yaksg
 // TODO: see https://github.com/p88h/aoc2022/blob/main/lib/day20.cs
 // TODO: see https://github.com/orlp/aoc2022/blob/master/src/treap.rs
+use common::parse_signed;
 
 type Number = isize;
 
@@ -9,20 +10,7 @@ pub fn main() {
     let s = include_bytes!("../input.txt");
     let mut numbers: VecDeque<(Number, usize)> = VecDeque::with_capacity(32);
     s.split(|b| *b == b'\n').filter(|l| !l.is_empty()).enumerate().for_each(|(i, l)| {
-        let mut acc = 0;
-        let mut sign = 1;
-        for b in l.iter() {
-            match b {
-                b'-' => {
-                    sign = -1;
-                }
-                b'0'..=b'9' => {
-                    acc = acc * 10 + (b - b'0') as Number;
-                }
-                _ => {}
-            }
-        }
-        numbers.push_back((sign * acc * 811589153, i));
+        numbers.push_back((parse_signed::<Number>(l) * 811589153, i));
     });
     let len = numbers.len();
     for _round in 0..10 {
