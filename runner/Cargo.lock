@@ -155,6 +155,7 @@ dependencies = [
 name = "day05a"
 version = "0.1.0"
 dependencies = [
+ "common",
  "itertools",
 ]
 
@@ -162,6 +163,7 @@ dependencies = [
 name = "day05b"
 version = "0.1.0"
 dependencies = [
+ "common",
  "itertools",
 ]
 
