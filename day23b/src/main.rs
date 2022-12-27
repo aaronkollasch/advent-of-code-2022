@@ -1,3 +1,4 @@
+// TODO: see https://www.reddit.com/r/adventofcode/comments/zusbnc/2022odin_advent_of_code_2022_in_200ms/
 #[cfg(debug_assertions)]
 use kdam::{tqdm, BarExt};
 use rustc_hash::FxHashSet as HashSet;
