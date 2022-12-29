@@ -163,7 +163,7 @@ pub fn main() {
     });
     #[cfg(debug_assertions)]
     println!("y_max: {}, x_min: {}, x_max: {}", y_max, x_min, x_max);
-    map.fill_line(pos(0, y_max + 2), pos(MAP_WIDTH-1, y_max + 2), MAP_ROCK);
+    map.fill_line(pos(0, y_max + 2), pos(MAP_WIDTH - 1, y_max + 2), MAP_ROCK);
     let i = map.fill_sand(DROP_POS);
     #[cfg(debug_assertions)]
     {

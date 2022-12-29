@@ -1,6 +1,6 @@
 use priority_queue::DoublePriorityQueue;
-use std::cmp::Ordering;
 use rayon::prelude::*;
+use std::cmp::Ordering;
 
 type SimType = u32;
 type CostVal = SimType;

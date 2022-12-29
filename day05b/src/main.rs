@@ -1,6 +1,6 @@
+use common::parse;
 use itertools::Itertools;
 use std::collections::LinkedList;
-use common::parse;
 
 pub fn main() {
     let d = include_bytes!("../input.txt");

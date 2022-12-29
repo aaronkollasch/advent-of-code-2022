@@ -38,29 +38,25 @@ pub fn main() {
             zones.push((left, right, top, bottom));
         });
 
-    let mut s_iter = zones
-        .iter()
-        .flat_map(|(_left, right, top, bottom)| {
-            zones
-                .iter()
-                .filter(|(z_left, _z_right, z_top, z_bottom)| {
-                    *z_left == *right && (*top <= *z_bottom || *z_top <= *bottom)
-                })
-                .map(|zone| zone.0)
-        });
+    let mut s_iter = zones.iter().flat_map(|(_left, right, top, bottom)| {
+        zones
+            .iter()
+            .filter(|(z_left, _z_right, z_top, z_bottom)| {
+                *z_left == *right && (*top <= *z_bottom || *z_top <= *bottom)
+            })
+            .map(|zone| zone.0)
+    });
     let s = s_iter.next().unwrap();
     #[cfg(debug_assertions)]
     println!("s matches: {}", s_iter.count() + 1);
-    let mut r_iter = zones
-        .iter()
-        .flat_map(|(left, right, _top, bottom)| {
-            zones
-                .iter()
-                .filter(|(z_left, z_right, z_top, _z_bottom)| {
-                    *z_top == *bottom && (*left <= *z_right || *z_left <= *right)
-                })
-                .map(|zone| zone.2)
-        });
+    let mut r_iter = zones.iter().flat_map(|(left, right, _top, bottom)| {
+        zones
+            .iter()
+            .filter(|(z_left, z_right, z_top, _z_bottom)| {
+                *z_top == *bottom && (*left <= *z_right || *z_left <= *right)
+            })
+            .map(|zone| zone.2)
+    });
     let r = r_iter.next().unwrap();
     #[cfg(debug_assertions)]
     println!("r matches: {}", r_iter.count() + 1);

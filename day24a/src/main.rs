@@ -17,7 +17,11 @@ struct Grid {
 
 impl Grid {
     pub fn new(width: usize, height: usize) -> Self {
-        Self { vals: [u256!(0); MAX_ROWS], width, height }
+        Self {
+            vals: [u256!(0); MAX_ROWS],
+            width,
+            height,
+        }
     }
 
     fn get_val(&self, pos: Pos) -> bool {
@@ -58,17 +62,23 @@ impl Grid {
             }
             above = row;
 
-            let obstacle = obstacles[0][y]
-                | obstacles[1][y]
-                | obstacles[2][y]
-                | obstacles[3][y];
+            let obstacle = obstacles[0][y] | obstacles[1][y] | obstacles[2][y] | obstacles[3][y];
             self.vals[y] &= !obstacle;
         }
     }
 }
 
 #[cfg(debug_assertions)]
-fn debug_print(t: usize, h: usize, w: usize, hurricanes_up: Grid, hurricanes_down: Grid, hurricanes_left: Grid, hurricanes_right: Grid, elves: Grid) {
+fn debug_print(
+    t: usize,
+    h: usize,
+    w: usize,
+    hurricanes_up: Grid,
+    hurricanes_down: Grid,
+    hurricanes_left: Grid,
+    hurricanes_right: Grid,
+    elves: Grid,
+) {
     println!("\ntime: {}", t);
     for y in 0..h {
         for x in 0..w {
@@ -112,19 +122,38 @@ pub fn main() {
         .take(h)
         .enumerate()
         .for_each(|(y, l)| {
-            l[1..].iter().take(w).enumerate().for_each(|(x, b)| {
-                match b {
-                    b'>' => { hurricanes_right.insert_val((x, y)); }
-                    b'<' => { hurricanes_left.insert_val((x, y)); }
-                    b'v' => { hurricanes_down.insert_val((x, y)); }
-                    b'^' => { hurricanes_up.insert_val((x, y)); }
+            l[1..]
+                .iter()
+                .take(w)
+                .enumerate()
+                .for_each(|(x, b)| match b {
+                    b'>' => {
+                        hurricanes_right.insert_val((x, y));
+                    }
+                    b'<' => {
+                        hurricanes_left.insert_val((x, y));
+                    }
+                    b'v' => {
+                        hurricanes_down.insert_val((x, y));
+                    }
+                    b'^' => {
+                        hurricanes_up.insert_val((x, y));
+                    }
                     _ => {}
-                }
-            })
+                })
         });
     let mut t = 0;
     #[cfg(debug_assertions)]
-    debug_print(t, h, w, hurricanes_up, hurricanes_down, hurricanes_left, hurricanes_right, elves);
+    debug_print(
+        t,
+        h,
+        w,
+        hurricanes_up,
+        hurricanes_down,
+        hurricanes_left,
+        hurricanes_right,
+        elves,
+    );
     while !elves.get_val((w - 1, h - 1)) {
         hurricanes_left.blow_left();
         hurricanes_right.blow_right();
@@ -137,14 +166,24 @@ pub fn main() {
             hurricanes_right.vals,
         ]);
         if !hurricanes_right.get_val((0, 0))
-                && !hurricanes_left.get_val((0, 0))
-                && !hurricanes_up.get_val((0, 0))
-                && !hurricanes_down.get_val((0, 0)) {
+            && !hurricanes_left.get_val((0, 0))
+            && !hurricanes_up.get_val((0, 0))
+            && !hurricanes_down.get_val((0, 0))
+        {
             elves.insert_val((0, 0));
         }
         t += 1;
         #[cfg(debug_assertions)]
-        debug_print(t, h, w, hurricanes_up, hurricanes_down, hurricanes_left, hurricanes_right, elves);
+        debug_print(
+            t,
+            h,
+            w,
+            hurricanes_up,
+            hurricanes_down,
+            hurricanes_left,
+            hurricanes_right,
+            elves,
+        );
     }
     t += 1;
     print!("{} ", t);

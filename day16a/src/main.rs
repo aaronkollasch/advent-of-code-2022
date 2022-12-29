@@ -15,7 +15,9 @@ struct BitVec {
 
 impl BitVec {
     pub fn new(size: Index) -> Self {
-        if size as u32 > u64::BITS { panic!("too many bits for BitVec: {}", size); }
+        if size as u32 > u64::BITS {
+            panic!("too many bits for BitVec: {}", size);
+        }
         Self { vec: 0u64, size }
     }
 
@@ -31,8 +33,7 @@ impl BitVec {
 
     #[inline]
     pub fn iter_unset(&self) -> impl Iterator<Item = Index> + '_ {
-        (0..self.size)
-            .filter(|i| self.get_bit(*i) == 0)
+        (0..self.size).filter(|i| self.get_bit(*i) == 0)
     }
 }
 
@@ -86,7 +87,13 @@ fn get_distance<'a>(
 #[cfg(debug_assertions)]
 impl fmt::Display for BitVec {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        write!(formatter, "BitVec({})", format!("{:064b}", self.vec.reverse_bits()).split_at(self.size as usize).0)
+        write!(
+            formatter,
+            "BitVec({})",
+            format!("{:064b}", self.vec.reverse_bits())
+                .split_at(self.size as usize)
+                .0
+        )
     }
 }
 

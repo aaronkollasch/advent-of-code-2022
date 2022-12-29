@@ -65,7 +65,9 @@ fn compare_lists(left: &[u8], right: &[u8], left_idx: usize, right_idx: usize) -
             (l, r) => {
                 let left = str::from_utf8(left).unwrap();
                 let right = str::from_utf8(right).unwrap();
-                panic!("Found {l} ({left_idx}) and {r} ({right_idx}) for \"{left}\" and \"{right}\"")
+                panic!(
+                    "Found {l} ({left_idx}) and {r} ({right_idx}) for \"{left}\" and \"{right}\""
+                )
             }
         }
     }
@@ -76,16 +78,14 @@ pub fn main() {
     const FIRST: &[u8] = b"[[2]]";
     const SECOND: &[u8] = b"[[6]]";
     let (mut n_before_first, mut n_before_second) = (1, 2);
-    s.lines()
-        .filter(|l| l.len() > 0)
-        .for_each(|l| {
-            if compare_lists(l.as_bytes(), &SECOND, 0, 0) == Less {
-                n_before_second += 1;
-                if compare_lists(l.as_bytes(), &FIRST, 0, 0) == Less {
-                    n_before_first += 1;
-                }
+    s.lines().filter(|l| l.len() > 0).for_each(|l| {
+        if compare_lists(l.as_bytes(), &SECOND, 0, 0) == Less {
+            n_before_second += 1;
+            if compare_lists(l.as_bytes(), &FIRST, 0, 0) == Less {
+                n_before_first += 1;
             }
-        });
+        }
+    });
     #[cfg(debug_assertions)]
     println!("{} {}", n_before_first, n_before_second);
     print!("{} ", n_before_first * n_before_second);

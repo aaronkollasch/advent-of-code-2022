@@ -1,5 +1,5 @@
-use std::collections::VecDeque;
 use common::parse_signed;
+use std::collections::VecDeque;
 // TODO: see https://www.reddit.com/r/adventofcode/comments/zqezkn/comment/j0yaksg
 // TODO: see https://github.com/p88h/aoc2022/blob/main/lib/day20.cs
 // TODO: see https://github.com/orlp/aoc2022/blob/master/src/treap.rs

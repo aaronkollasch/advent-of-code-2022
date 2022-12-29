@@ -1,5 +1,5 @@
-use itertools::Itertools;
 use common::parse;
+use itertools::Itertools;
 
 pub fn main() {
     let d = include_bytes!("../input.txt");

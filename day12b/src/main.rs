@@ -154,6 +154,10 @@ pub fn main() {
         distance += 1;
     }
     #[cfg(debug_assertions)]
-    println!("capacities: {} {}", next_positions.capacity(), new_positions.capacity());
+    println!(
+        "capacities: {} {}",
+        next_positions.capacity(),
+        new_positions.capacity()
+    );
     print!("{} ", distances.get_val(start));
 }

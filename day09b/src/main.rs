@@ -13,7 +13,9 @@ struct BitVec {
 
 impl BitVec {
     pub fn new() -> Self {
-        Self { vec: [0usize; VISITED_SIZE] }
+        Self {
+            vec: [0usize; VISITED_SIZE],
+        }
     }
 
     #[inline]

@@ -66,7 +66,9 @@ fn compare_lists(left: &[u8], right: &[u8], left_idx: usize, right_idx: usize) -
             (l, r) => {
                 let left = str::from_utf8(left).unwrap();
                 let right = str::from_utf8(right).unwrap();
-                panic!("Found {l} ({left_idx}) and {r} ({right_idx}) for \"{left}\" and \"{right}\"")
+                panic!(
+                    "Found {l} ({left_idx}) and {r} ({right_idx}) for \"{left}\" and \"{right}\""
+                )
             }
         }
     }
