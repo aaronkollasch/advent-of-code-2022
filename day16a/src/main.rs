@@ -1,41 +1,10 @@
+use common::BitVec;
 use itertools::Itertools;
 use rustc_hash::FxHashMap;
-#[cfg(debug_assertions)]
-use std::fmt;
 
 const NUM_LINES: usize = 60;
 
 type Index = usize;
-
-#[derive(Debug, Clone)]
-struct BitVec {
-    vec: u64,
-    size: Index,
-}
-
-impl BitVec {
-    pub fn new(size: Index) -> Self {
-        if size as u32 > u64::BITS {
-            panic!("too many bits for BitVec: {}", size);
-        }
-        Self { vec: 0u64, size }
-    }
-
-    #[inline]
-    pub fn set_bit(&mut self, pos: Index) {
-        self.vec |= 1 << pos;
-    }
-
-    #[inline]
-    pub fn get_bit(&self, pos: Index) -> u64 {
-        (self.vec >> (pos as u64)) & 1
-    }
-
-    #[inline]
-    pub fn iter_unset(&self) -> impl Iterator<Item = Index> + '_ {
-        (0..self.size).filter(|i| self.get_bit(*i) == 0)
-    }
-}
 
 fn get_distance<'a>(
     depth: Index,
@@ -84,27 +53,14 @@ fn get_distance<'a>(
     }
 }
 
-#[cfg(debug_assertions)]
-impl fmt::Display for BitVec {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            formatter,
-            "BitVec({})",
-            format!("{:064b}", self.vec.reverse_bits())
-                .split_at(self.size as usize)
-                .0
-        )
-    }
-}
-
 fn calc_opportunity<'a>(
     current_valve: Index,
     valve_map: &Vec<Vec<Index>>,
     flow_rates: [isize; NUM_LINES],
-    valve_values: BitVec,
+    valve_values: BitVec<Index>,
     available_time: isize,
     mut distance_memo: &mut FxHashMap<(Index, Index), isize>,
-) -> (isize, Option<BitVec>) {
+) -> (isize, Option<BitVec<Index>>) {
     #[cfg(debug_assertions)]
     if available_time >= 20 {
         println!("{} {}", current_valve, available_time);
@@ -210,7 +166,7 @@ pub fn main() {
 
     let mut distance_memo: FxHashMap<(Index, Index), isize> = Default::default();
     distance_memo.reserve(1024);
-    let valve_values = BitVec::new(valve_map.len() as Index);
+    let valve_values = BitVec::<Index>::new(valve_map.len() as Index);
 
     let result1 = calc_opportunity(
         valve_indices["AA"],
