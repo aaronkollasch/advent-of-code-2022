@@ -105,8 +105,8 @@ pub fn main() {
                 }
             }
             Instruction::Rotate(rot) => match rot {
-                1 => (facing.0, facing.1) = (-facing.1, facing.0),
-                -1 => (facing.0, facing.1) = (facing.1, -facing.0),
+                1 => facing = (-facing.1, facing.0),
+                -1 => facing = (facing.1, -facing.0),
                 _ => unreachable!(),
             },
         }

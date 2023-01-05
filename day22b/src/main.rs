@@ -170,7 +170,7 @@ pub fn main() {
                 }
             }
             Instruction::Rotate(rot) => {
-                (facing.0, facing.1) = rotate((facing.0, facing.1), rot);
+                facing = rotate(facing, rot);
             }
         }
         #[cfg(debug_assertions)]
