@@ -1,9 +1,9 @@
 use std::iter::repeat;
 
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
-pub struct Instruction {
-    dist: Option<isize>,
-    rotation: Option<isize>,
+pub enum Instruction {
+    Move(isize),
+    Rotate(isize),
 }
 
 pub fn main() {
@@ -40,33 +40,18 @@ pub fn main() {
                 acc = acc * 10 + (b - b'0') as isize;
             }
             b'R' => {
-                path.push(Instruction {
-                    dist: Some(acc),
-                    rotation: None,
-                });
-                path.push(Instruction {
-                    dist: None,
-                    rotation: Some(1),
-                });
+                path.push(Instruction::Move(acc));
+                path.push(Instruction::Rotate(1));
                 acc = 0;
             }
             b'L' => {
-                path.push(Instruction {
-                    dist: Some(acc),
-                    rotation: None,
-                });
-                path.push(Instruction {
-                    dist: None,
-                    rotation: Some(-1),
-                });
+                path.push(Instruction::Move(acc));
+                path.push(Instruction::Rotate(-1));
                 acc = 0;
             }
             _ => unreachable!(),
         });
-    path.push(Instruction {
-        dist: Some(acc),
-        rotation: None,
-    });
+    path.push(Instruction::Move(acc));
     #[cfg(debug_assertions)]
     println!("{} {}", map.len(), map[0].len());
     #[cfg(debug_assertions)]
@@ -74,11 +59,11 @@ pub fn main() {
         "pos: ({}, {}), facing ({} {})",
         pos.0, pos.1, facing.0, facing.1
     );
-    for ins in path.iter() {
+    for ins in path.into_iter() {
         #[cfg(debug_assertions)]
         println!("{:?}", ins);
-        match (ins.dist, ins.rotation) {
-            (Some(dist), None) => {
+        match ins {
+            Instruction::Move(dist) => {
                 for _step in 0..dist {
                     let mut next_pos = (pos.0 + facing.0, pos.1 + facing.1);
                     #[cfg(debug_assertions)]
@@ -119,12 +104,11 @@ pub fn main() {
                     }
                 }
             }
-            (None, Some(rot)) => match rot {
+            Instruction::Rotate(rot) => match rot {
                 1 => (facing.0, facing.1) = (-facing.1, facing.0),
                 -1 => (facing.0, facing.1) = (facing.1, -facing.0),
                 _ => unreachable!(),
             },
-            _ => unreachable!(),
         }
         #[cfg(debug_assertions)]
         println!(

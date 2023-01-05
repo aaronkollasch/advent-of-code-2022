@@ -3,9 +3,9 @@ use std::iter::repeat;
 type Pos = (isize, isize);
 
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
-struct Instruction {
-    dist: Option<isize>,
-    rotation: Option<isize>,
+pub enum Instruction {
+    Move(isize),
+    Rotate(isize),
 }
 
 fn rotate(facing: Pos, by: isize) -> Pos {
@@ -130,33 +130,18 @@ pub fn main() {
                 acc = acc * 10 + (b - b'0') as isize;
             }
             b'R' => {
-                path.push(Instruction {
-                    dist: Some(acc),
-                    rotation: None,
-                });
-                path.push(Instruction {
-                    dist: None,
-                    rotation: Some(1),
-                });
+                path.push(Instruction::Move(acc));
+                path.push(Instruction::Rotate(1));
                 acc = 0;
             }
             b'L' => {
-                path.push(Instruction {
-                    dist: Some(acc),
-                    rotation: None,
-                });
-                path.push(Instruction {
-                    dist: None,
-                    rotation: Some(-1),
-                });
+                path.push(Instruction::Move(acc));
+                path.push(Instruction::Rotate(-1));
                 acc = 0;
             }
             _ => unreachable!(),
         });
-    path.push(Instruction {
-        dist: Some(acc),
-        rotation: None,
-    });
+    path.push(Instruction::Move(acc));
     #[cfg(debug_assertions)]
     println!("{} {}", map.len(), map[0].len());
     #[cfg(debug_assertions)]
@@ -164,11 +149,11 @@ pub fn main() {
         "pos: ({}, {}), facing ({} {})",
         pos.0, pos.1, facing.0, facing.1
     );
-    for ins in path.iter() {
+    for ins in path.into_iter() {
         #[cfg(debug_assertions)]
         println!("{:?}", ins);
-        match (ins.dist, ins.rotation) {
-            (Some(dist), None) => {
+        match ins {
+            Instruction::Move(dist) => {
                 for _step in 0..dist {
                     let (next_pos, next_facing) = next_pos_facing(pos, facing, &edges);
                     match map[next_pos.1 as usize][next_pos.0 as usize] {
@@ -184,10 +169,9 @@ pub fn main() {
                     }
                 }
             }
-            (None, Some(rot)) => {
+            Instruction::Rotate(rot) => {
                 (facing.0, facing.1) = rotate((facing.0, facing.1), rot);
             }
-            _ => unreachable!(),
         }
         #[cfg(debug_assertions)]
         println!(
