@@ -1,5 +1,6 @@
 use std::cmp::Reverse;
 use std::collections::BinaryHeap;
+use common::parse;
 
 pub fn main() {
     let num_top = 3;
@@ -17,7 +18,7 @@ pub fn main() {
                 top_elves.pop();
                 elf_total = 0;
             } else {
-                elf_total += l.iter().fold(0, |acc, x| acc * 10 + (x - b'0') as u32);
+                elf_total += parse::<u32>(l);
             }
         });
     print!("{} ", top_elves.iter().map(|e| e.0).sum::<u32>());

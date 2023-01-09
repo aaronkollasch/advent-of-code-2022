@@ -1,4 +1,5 @@
 use std::cmp::max;
+use common::parse;
 
 pub fn main() {
     let mut elf_total = 0u32;
@@ -10,7 +11,7 @@ pub fn main() {
                 max_elf = max(max_elf, elf_total);
                 elf_total = 0;
             } else {
-                elf_total += l.iter().fold(0, |acc, x| acc * 10 + (x - b'0') as u32);
+                elf_total += parse::<u32>(l);
             }
         });
     print!("{} ", max_elf);
