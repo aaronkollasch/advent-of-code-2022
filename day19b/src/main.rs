@@ -28,7 +28,7 @@ impl SimState {
     #[inline]
     fn priority(&self) -> SimType {
         self.geo.wrapping_shl(24)
-            + self.rob_geo.wrapping_shl(16)
+            + self.rob_geo.wrapping_shl(24)
             + self.obs
             + self.rob_obs
             + self.rob_clay
@@ -67,7 +67,7 @@ impl PartialOrd for SimState {
     }
 }
 
-const QUEUE_SIZE: usize = 2 << 11; // if wrong answer found, try a larger QUEUE_SIZE
+const QUEUE_SIZE: usize = 2 << 6; // if wrong answer found, try a larger QUEUE_SIZE
 
 fn sim_blueprint(init_state: SimState, minutes: usize, costs: [Cost; 4]) -> SimState {
     let mut prev_states = DoublePriorityQueue::<SimState, SimType>::with_capacity(QUEUE_SIZE);
