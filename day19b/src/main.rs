@@ -33,6 +33,26 @@ impl SimState {
             + self.rob_obs
             + self.rob_clay
     }
+
+    #[inline]
+    fn can_buy(&self, cost: Cost) -> bool {
+        self.ore >= cost.ore && self.clay >= cost.clay && self.obs >= cost.obs
+    }
+
+    #[inline]
+    fn buy(&mut self, cost: Cost) {
+        self.ore -= cost.ore;
+        self.clay -= cost.clay;
+        self.obs -= cost.obs;
+    }
+
+    #[inline]
+    fn step(&mut self) {
+        self.ore += self.rob_ore;
+        self.clay += self.rob_clay;
+        self.obs += self.rob_obs;
+        self.geo += self.rob_geo;
+    }
 }
 
 impl Ord for SimState {
@@ -47,11 +67,12 @@ impl PartialOrd for SimState {
     }
 }
 
+const QUEUE_SIZE: usize = 2 << 11; // if wrong answer found, try a larger QUEUE_SIZE
+
 fn sim_blueprint(init_state: SimState, minutes: usize, costs: [Cost; 4]) -> SimState {
-    let queue_size = 2 << 11;
-    let mut prev_states = DoublePriorityQueue::<SimState, SimType>::with_capacity(queue_size);
+    let mut prev_states = DoublePriorityQueue::<SimState, SimType>::with_capacity(QUEUE_SIZE);
     prev_states.push(init_state, init_state.priority());
-    let mut new_states = DoublePriorityQueue::<SimState, SimType>::with_capacity(queue_size);
+    let mut new_states = DoublePriorityQueue::<SimState, SimType>::with_capacity(QUEUE_SIZE);
     for _min in 1..minutes {
         #[cfg(debug_assertions)]
         println!("min: {}, {}", _min, prev_states.len());
@@ -61,14 +82,9 @@ fn sim_blueprint(init_state: SimState, minutes: usize, costs: [Cost; 4]) -> SimS
                 let mut state = *state;
                 if i < costs.len() {
                     let cost = costs[i];
-                    if state.ore >= cost.ore && state.clay >= cost.clay && state.obs >= cost.obs {
-                        state.ore -= cost.ore;
-                        state.clay -= cost.clay;
-                        state.obs -= cost.obs;
-                        state.ore += state.rob_ore;
-                        state.clay += state.rob_clay;
-                        state.obs += state.rob_obs;
-                        state.geo += state.rob_geo;
+                    if state.can_buy(cost) {
+                        state.buy(cost);
+                        state.step();
                         match i {
                             0 => {
                                 state.rob_ore += 1;
@@ -87,16 +103,11 @@ fn sim_blueprint(init_state: SimState, minutes: usize, costs: [Cost; 4]) -> SimS
                         new_states.push(state, state.priority());
                     }
                 } else {
-                    state.ore += state.rob_ore;
-                    state.clay += state.rob_clay;
-                    state.obs += state.rob_obs;
-                    state.geo += state.rob_geo;
+                    state.step();
                     new_states.push(state, state.priority());
                 }
-                if new_states.len() > queue_size - 10 {
-                    for _ in 0..10 {
-                        new_states.pop_min();
-                    }
+                if new_states.len() >= QUEUE_SIZE {
+                    new_states.pop_min();
                 }
             }
         }
@@ -202,10 +213,7 @@ fn sim_blueprint(init_state: SimState, minutes: usize, costs: [Cost; 4]) -> SimS
         .into_sorted_iter()
         .rev()
         .map(|(mut state, _priority)| {
-            state.ore += state.rob_ore;
-            state.clay += state.rob_clay;
-            state.obs += state.rob_obs;
-            state.geo += state.rob_geo;
+            state.step();
             #[cfg(debug_assertions)]
             if state
                 == (SimState {
