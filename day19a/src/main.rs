@@ -1,6 +1,6 @@
-use priority_queue::DoublePriorityQueue;
 use rayon::prelude::*;
 use std::cmp::Ordering;
+use std::collections::BinaryHeap;
 
 type SimType = u32;
 type CostVal = SimType;
@@ -57,7 +57,7 @@ impl SimState {
 
 impl Ord for SimState {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.priority().cmp(&other.priority())
+        other.priority().cmp(&self.priority())
     }
 }
 
@@ -70,13 +70,13 @@ impl PartialOrd for SimState {
 const QUEUE_SIZE: usize = 31; // if wrong answer found, try a larger QUEUE_SIZE
 
 fn sim_blueprint(init_state: SimState, minutes: usize, costs: [Cost; 4]) -> SimState {
-    let mut prev_states = DoublePriorityQueue::<SimState, SimType>::with_capacity(QUEUE_SIZE);
-    prev_states.push(init_state, init_state.priority());
-    let mut new_states = DoublePriorityQueue::<SimState, SimType>::with_capacity(QUEUE_SIZE);
+    let mut prev_states = BinaryHeap::<SimState>::with_capacity(QUEUE_SIZE);
+    prev_states.push(init_state);
+    let mut new_states = BinaryHeap::<SimState>::with_capacity(QUEUE_SIZE);
     for _min in 1..minutes {
         #[cfg(debug_assertions)]
         println!("min: {}, {}", _min, prev_states.len());
-        for (state, _priority) in prev_states.iter() {
+        for state in prev_states.iter() {
             for i in 0..=costs.len() {
                 // continue sim as if robot i was purchased
                 let mut state = *state;
@@ -100,24 +100,21 @@ fn sim_blueprint(init_state: SimState, minutes: usize, costs: [Cost; 4]) -> SimS
                             }
                             _ => unreachable!(),
                         }
-                        if new_states.len() >= QUEUE_SIZE {
-                            new_states.pop_min();
-                        }
-                        new_states.push(state, state.priority());
+                        new_states.push(state);
                     }
                 } else {
                     state.step();
-                    if new_states.len() >= QUEUE_SIZE {
-                        new_states.pop_min();
-                    }
-                    new_states.push(state, state.priority());
+                    new_states.push(state);
+                }
+                if new_states.len() >= QUEUE_SIZE {
+                    new_states.pop();
                 }
             }
         }
         prev_states.clear();
         (new_states, prev_states) = (prev_states, new_states);
         #[cfg(debug_assertions)]
-        for (state, priority) in prev_states.iter() {
+        for state in prev_states.iter() {
             if _min == 1
                 && *state
                     == (SimState {
@@ -131,7 +128,7 @@ fn sim_blueprint(init_state: SimState, minutes: usize, costs: [Cost; 4]) -> SimS
                         rob_geo: 0,
                     })
             {
-                println!("    {}: {:?}", priority, state);
+                println!("    {}: {:?}", state.priority(), state);
             }
             if _min == 4
                 && *state
@@ -146,7 +143,7 @@ fn sim_blueprint(init_state: SimState, minutes: usize, costs: [Cost; 4]) -> SimS
                         rob_geo: 0,
                     })
             {
-                println!("    {}: {:?}", priority, state);
+                println!("    {}: {:?}", state.priority(), state);
             }
             if _min == 8
                 && *state
@@ -161,7 +158,7 @@ fn sim_blueprint(init_state: SimState, minutes: usize, costs: [Cost; 4]) -> SimS
                         rob_geo: 0,
                     })
             {
-                println!("    {}: {:?}", priority, state);
+                println!("    {}: {:?}", state.priority(), state);
             }
             if _min == 16
                 && *state
@@ -176,7 +173,7 @@ fn sim_blueprint(init_state: SimState, minutes: usize, costs: [Cost; 4]) -> SimS
                         rob_geo: 0,
                     })
             {
-                println!("    {}: {:?}", priority, state);
+                println!("    {}: {:?}", state.priority(), state);
             }
             if _min == 20
                 && *state
@@ -191,7 +188,7 @@ fn sim_blueprint(init_state: SimState, minutes: usize, costs: [Cost; 4]) -> SimS
                         rob_geo: 1,
                     })
             {
-                println!("    {}: {:?}", priority, state);
+                println!("    {}: {:?}", state.priority(), state);
             }
             if _min == 24
                 && *state
@@ -206,16 +203,16 @@ fn sim_blueprint(init_state: SimState, minutes: usize, costs: [Cost; 4]) -> SimS
                         rob_geo: 4,
                     })
             {
-                println!("    {}: {:?}", priority, state);
+                println!("    {}: {:?}", state.priority(), state);
             }
         }
     }
     #[cfg(debug_assertions)]
     println!("min: {}, {}", minutes, prev_states.len());
     prev_states
-        .into_sorted_iter()
+        .into_iter()
         .rev()
-        .map(|(mut state, _priority)| {
+        .map(|mut state| {
             state.step();
             #[cfg(debug_assertions)]
             if state
