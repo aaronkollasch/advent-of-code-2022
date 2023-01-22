@@ -67,7 +67,7 @@ impl PartialOrd for SimState {
     }
 }
 
-const QUEUE_SIZE: usize = 2 << 4; // if wrong answer found, try a larger QUEUE_SIZE
+const QUEUE_SIZE: usize = 31; // if wrong answer found, try a larger QUEUE_SIZE
 
 fn sim_blueprint(init_state: SimState, minutes: usize, costs: [Cost; 4]) -> SimState {
     let mut prev_states = DoublePriorityQueue::<SimState, SimType>::with_capacity(QUEUE_SIZE);
@@ -100,14 +100,17 @@ fn sim_blueprint(init_state: SimState, minutes: usize, costs: [Cost; 4]) -> SimS
                             }
                             _ => unreachable!(),
                         }
+                        if new_states.len() >= QUEUE_SIZE {
+                            new_states.pop_min();
+                        }
                         new_states.push(state, state.priority());
                     }
                 } else {
                     state.step();
+                    if new_states.len() >= QUEUE_SIZE {
+                        new_states.pop_min();
+                    }
                     new_states.push(state, state.priority());
-                }
-                if new_states.len() >= QUEUE_SIZE {
-                    new_states.pop_min();
                 }
             }
         }
