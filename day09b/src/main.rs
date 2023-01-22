@@ -1,3 +1,5 @@
+use common::parse;
+
 type Pos = (i32, i32);
 
 const ROPE_LEN: usize = 10;
@@ -34,8 +36,7 @@ impl BitVec {
     #[cfg(debug_assertions)]
     pub fn bits_pos(&self) -> impl Iterator<Item = (usize, usize)> + '_ {
         (0..self.vec.len())
-            .map(|i| (0..USIZE_EXP).map(move |j| (i, j)))
-            .flatten()
+            .flat_map(|i| (0..USIZE_EXP).map(move |j| (i, j)))
             .map(|(i, j)| (i, j, self.vec[i]))
             .filter(|(_i, j, b)| (b >> j) & 0b1 > 0)
             .map(|(i, j, _b)| {
@@ -50,16 +51,11 @@ impl BitVec {
 pub fn main() {
     let cmds = include_bytes!("../input.txt")
         .split(|b| b == &b'\n')
-        .map(|l| {
-            match (
-                l[0],
-                l[2..].iter().fold(0, |acc, x| acc * 10 + (x - b'0') as u8),
-            ) {
-                (b'U', l) => ((0, -1), l),
-                (b'D', l) => ((0, 1), l),
-                (b'L', l) => ((-1, 0), l),
-                (_, l) => ((1, 0), l),
-            }
+        .map(|l| match (l[0], parse::<u8>(&l[2..])) {
+            (b'U', l) => ((0, -1), l),
+            (b'D', l) => ((0, 1), l),
+            (b'L', l) => ((-1, 0), l),
+            (_, l) => ((1, 0), l),
         });
     let mut rope: [Pos; ROPE_LEN] = [START_POS; ROPE_LEN];
     let mut visited = BitVec::new();
