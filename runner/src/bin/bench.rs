@@ -1,3 +1,5 @@
+use std::io::{self, Write};
+
 use took::{Timer, Took};
 
 const RUNS: usize = 100;
@@ -14,7 +16,9 @@ fn main() {
                     .map(|_| {
                         let took = Timer::new();
                         j.0();
-                        took.took().into_std()
+                        let result = took.took().into_std();
+                        io::stdout().flush().expect("Could not flush stdout");
+                        result
                     })
                     .min()
                     .unwrap(),
