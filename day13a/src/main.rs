@@ -15,8 +15,8 @@ fn compare_lists(left: &[u8], right: &[u8], left_idx: usize, right_idx: usize) -
     #[cfg(debug_assertions)]
     {
         println!("compare");
-        println!("{}", str::from_utf8(&left).unwrap());
-        println!("{}", str::from_utf8(&right).unwrap());
+        println!("{}", str::from_utf8(left).unwrap());
+        println!("{}", str::from_utf8(right).unwrap());
     }
     let (mut left_idx, mut right_idx) = (left_idx, right_idx);
     let (mut left_depth, mut right_depth) = (0, 0);
@@ -78,7 +78,7 @@ pub fn main() {
     let s = include_str!("../input.txt");
     let result = s
         .lines()
-        .filter(|l| l.len() > 0)
+        .filter(|l| !l.is_empty())
         .tuples()
         .enumerate()
         .filter_map(|(i, (left, right))| {

@@ -14,8 +14,8 @@ fn compare_lists(left: &[u8], right: &[u8], left_idx: usize, right_idx: usize) -
     #[cfg(debug_assertions)]
     {
         println!("compare");
-        println!("{}", str::from_utf8(&left).unwrap());
-        println!("{}", str::from_utf8(&right).unwrap());
+        println!("{}", str::from_utf8(left).unwrap());
+        println!("{}", str::from_utf8(right).unwrap());
     }
     let (mut left_idx, mut right_idx) = (left_idx, right_idx);
     let (mut left_depth, mut right_depth) = (0, 0);
@@ -78,10 +78,10 @@ pub fn main() {
     const FIRST: &[u8] = b"[[2]]";
     const SECOND: &[u8] = b"[[6]]";
     let (mut n_before_first, mut n_before_second) = (1, 2);
-    s.lines().filter(|l| l.len() > 0).for_each(|l| {
-        if compare_lists(l.as_bytes(), &SECOND, 0, 0) == Less {
+    s.lines().filter(|l| !l.is_empty()).for_each(|l| {
+        if compare_lists(l.as_bytes(), SECOND, 0, 0) == Less {
             n_before_second += 1;
-            if compare_lists(l.as_bytes(), &FIRST, 0, 0) == Less {
+            if compare_lists(l.as_bytes(), FIRST, 0, 0) == Less {
                 n_before_first += 1;
             }
         }
