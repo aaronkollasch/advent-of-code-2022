@@ -19,7 +19,7 @@ pub fn main() {
                         has_number = true;
                         acc = acc * 10 + (b - b'0') as isize;
                     }
-                    b' ' | b',' if has_number => {
+                    _ if has_number => {
                         result[i_num] = sign * acc;
                         i_num += 1;
                         has_number = false;
