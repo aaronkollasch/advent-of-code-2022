@@ -1,9 +1,12 @@
+// todo: see https://github.com/orlp/aoc2022/blob/master/src/bin/day19.rs
+// todo: and https://www.reddit.com/r/adventofcode/comments/zpihwi/comment/j0vvzgz
 use rayon::prelude::*;
 use std::cmp::Ordering;
 use std::collections::BinaryHeap;
 
-type SimType = u32;
+type SimType = u8;
 type CostVal = SimType;
+type ResultType = u32;
 
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 struct Cost {
@@ -26,12 +29,12 @@ struct SimState {
 
 impl SimState {
     #[inline]
-    fn priority(&self) -> SimType {
-        self.geo.wrapping_shl(24)
-            + self.rob_geo.wrapping_shl(24)
-            + self.obs
-            + self.rob_obs
-            + self.rob_clay
+    fn priority(&self) -> ResultType {
+        (self.geo as ResultType).wrapping_shl(24)
+            + (self.rob_geo as ResultType).wrapping_shl(24)
+            + (self.obs as ResultType)
+            + (self.rob_obs as ResultType)
+            + (self.rob_clay as ResultType)
     }
 
     #[inline]
@@ -246,7 +249,7 @@ pub fn main() {
                 .unwrap()
                 .strip_suffix(':')
                 .unwrap()
-                .parse::<CostVal>()
+                .parse::<ResultType>()
                 .unwrap();
             let ore_cost = words.nth(4).unwrap().parse::<CostVal>().unwrap();
             let clay_cost = words.nth(5).unwrap().parse::<CostVal>().unwrap();
@@ -303,9 +306,12 @@ pub fn main() {
                 println!("{:?}", state);
                 println!("blueprint {} had at most {} geodes", i, state.geo);
             }
-            (*i, state.geo)
+            (*i, state.geo as ResultType)
         })
         .collect::<Vec<_>>();
-    let result = results.iter().map(|(i, geo)| i * geo).sum::<SimType>();
+    let result = results
+        .into_iter()
+        .map(|(i, geo)| i * geo)
+        .sum::<ResultType>();
     print!("{} ", result);
 }

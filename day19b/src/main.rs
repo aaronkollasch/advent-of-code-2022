@@ -2,8 +2,9 @@ use rayon::prelude::*;
 use std::cmp::Ordering;
 use std::collections::BinaryHeap;
 
-type SimType = u32;
+type SimType = u8;
 type CostVal = SimType;
+type ResultType = u32;
 
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 struct Cost {
@@ -26,12 +27,12 @@ struct SimState {
 
 impl SimState {
     #[inline]
-    fn priority(&self) -> SimType {
-        self.geo.wrapping_shl(24)
-            + self.rob_geo.wrapping_shl(24)
-            + self.obs
-            + self.rob_obs
-            + self.rob_clay
+    fn priority(&self) -> ResultType {
+        (self.geo as ResultType).wrapping_shl(24)
+            + (self.rob_geo as ResultType).wrapping_shl(24)
+            + (self.obs as ResultType)
+            + (self.rob_obs as ResultType)
+            + (self.rob_clay as ResultType)
     }
 
     #[inline]
@@ -304,9 +305,9 @@ pub fn main() {
                 println!("{:?}", state);
                 println!("blueprint {} had at most {} geodes", _i, state.geo);
             }
-            state.geo
+            state.geo as ResultType
         })
         .collect::<Vec<_>>();
-    let result = results.iter().product::<SimType>();
+    let result = results.into_iter().product::<ResultType>();
     print!("{} ", result);
 }
