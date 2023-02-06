@@ -1,3 +1,5 @@
+use common::parse_signed;
+
 const WIDTH: usize = 40;
 const LINES: usize = 6;
 const CYCLES: usize = WIDTH * LINES;
@@ -15,10 +17,7 @@ pub fn main() {
 
     s.split(|b| b == &b'\n').for_each(|l| match l[0] {
         b'a' => {
-            let addx = match l[5] {
-                b'-' => -l[6..].iter().fold(0, |acc, x| acc * 10 + (x - b'0') as i8),
-                _ => l[5..].iter().fold(0, |acc, x| acc * 10 + (x - b'0') as i8),
-            };
+            let addx: i8 = parse_signed(&l[5..]);
             #[cfg(debug_assertions)]
             eprintln!("addx {}", addx);
             cycle += 1;

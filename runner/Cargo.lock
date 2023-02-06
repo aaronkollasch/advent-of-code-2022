@@ -217,10 +217,16 @@ dependencies = [
 [[package]]
 name = "day10a"
 version = "0.1.0"
+dependencies = [
+ "common",
+]
 
 [[package]]
 name = "day10b"
 version = "0.1.0"
+dependencies = [
+ "common",
+]
 
 [[package]]
 name = "day11a"
