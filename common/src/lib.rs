@@ -1,7 +1,8 @@
 extern crate num;
 
-use num::{PrimInt, Signed, Unsigned};
+use num::{PrimInt, Signed, Unsigned, Num};
 use std::fmt;
+use std::ops::{Add, Sub, Mul, Div, Rem, AddAssign, SubAssign, MulAssign, DivAssign};
 use std::{
     fmt::{Binary, Display},
     iter::{Product, Sum},
@@ -96,5 +97,176 @@ where
                 .split_at(self.size)
                 .0
         )
+    }
+}
+
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
+pub struct Vec2<T: Num> {
+    pub x: T,
+    pub y: T
+}
+
+impl<T: Num> Add<(T, T)> for Vec2<T> {
+    type Output = Vec2<T>;
+
+    fn add(self, rhs: (T, T)) -> Vec2<T> {
+        Vec2::<T> {
+            x: self.x + rhs.0,
+            y: self.y + rhs.1
+        }
+    }
+}
+
+impl<T: Num> Add<Vec2<T>> for Vec2<T> {
+    type Output = Vec2<T>;
+
+    fn add(self, rhs: Vec2<T>) -> Vec2<T> {
+        Vec2::<T> {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y
+        }
+    }
+}
+
+impl<T> AddAssign<(T, T)> for Vec2<T> where T: Num + AddAssign {
+    fn add_assign(&mut self, rhs: (T, T)) {
+        self.x += rhs.0;
+        self.y += rhs.1;
+    }
+}
+
+impl<T> AddAssign<Vec2<T>> for Vec2<T> where T: Num + AddAssign {
+    fn add_assign(&mut self, rhs: Vec2<T>) {
+        self.x += rhs.x;
+        self.y += rhs.y;
+    }
+}
+
+impl<T: Num> Sub<(T, T)> for Vec2<T> {
+    type Output = Vec2<T>;
+
+    fn sub(self, rhs: (T, T)) -> Vec2<T> {
+        Vec2::<T> {
+            x: self.x - rhs.0,
+            y: self.y - rhs.1
+        }
+    }
+}
+
+impl<T: Num> Sub<Vec2<T>> for Vec2<T> {
+    type Output = Vec2<T>;
+
+    fn sub(self, rhs: Vec2<T>) -> Vec2<T> {
+        Vec2::<T> {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y
+        }
+    }
+}
+
+impl<T> SubAssign<(T, T)> for Vec2<T> where T: Num + SubAssign {
+    fn sub_assign(&mut self, rhs: (T, T)) {
+        self.x -= rhs.0;
+        self.y -= rhs.1;
+    }
+}
+
+impl<T> SubAssign<Vec2<T>> for Vec2<T> where T: Num + SubAssign {
+    fn sub_assign(&mut self, rhs: Vec2<T>) {
+        self.x -= rhs.x;
+        self.y -= rhs.y;
+    }
+}
+
+impl<T: Num> Mul<(T, T)> for Vec2<T> {
+    type Output = Vec2<T>;
+
+    fn mul(self, rhs: (T, T)) -> Vec2<T> {
+        Vec2::<T> {
+            x: self.x * rhs.0,
+            y: self.y * rhs.1
+        }
+    }
+}
+impl<T: Num> Mul<Vec2<T>> for Vec2<T> {
+    type Output = Vec2<T>;
+
+    fn mul(self, rhs: Vec2<T>) -> Vec2<T> {
+        Vec2::<T> {
+            x: self.x * rhs.x,
+            y: self.y * rhs.y
+        }
+    }
+}
+
+impl<T> MulAssign<(T, T)> for Vec2<T> where T: Num + MulAssign {
+    fn mul_assign(&mut self, rhs: (T, T)) {
+        self.x *= rhs.0;
+        self.y *= rhs.1;
+    }
+}
+
+impl<T> MulAssign<Vec2<T>> for Vec2<T> where T: Num + MulAssign {
+    fn mul_assign(&mut self, rhs: Vec2<T>) {
+        self.x *= rhs.x;
+        self.y *= rhs.y;
+    }
+}
+
+impl<T: Num> Div<(T, T)> for Vec2<T> {
+    type Output = Vec2<T>;
+
+    fn div(self, rhs: (T, T)) -> Vec2<T> {
+        Vec2::<T> {
+            x: self.x / rhs.0,
+            y: self.y / rhs.1
+        }
+    }
+}
+
+impl<T: Num> Div<Vec2<T>> for Vec2<T> {
+    type Output = Vec2<T>;
+
+    fn div(self, rhs: Vec2<T>) -> Vec2<T> {
+        Vec2::<T> {
+            x: self.x / rhs.x,
+            y: self.y / rhs.y
+        }
+    }
+}
+
+impl<T> DivAssign<(T, T)> for Vec2<T> where T: Num + DivAssign {
+    fn div_assign(&mut self, rhs: (T, T)) {
+        self.x /= rhs.0;
+        self.y /= rhs.1;
+    }
+}
+
+impl<T> DivAssign<Vec2<T>> for Vec2<T> where T: Num + DivAssign {
+    fn div_assign(&mut self, rhs: Vec2<T>) {
+        self.x /= rhs.x;
+        self.y /= rhs.y;
+    }
+}
+
+impl<T: Num> Rem<(T, T)> for Vec2<T> {
+    type Output = Vec2<T>;
+
+    fn rem(self, rhs: (T, T)) -> Vec2<T> {
+        Vec2::<T> {
+            x: self.x.rem(rhs.0),
+            y: self.y.rem(rhs.1)
+        }
+    }
+}
+
+impl<T: Num> Rem<Vec2<T>> for Vec2<T> {
+    type Output = Vec2<T>;
+
+    fn rem(self, rhs: Vec2<T>) -> Vec2<T> {
+        Vec2::<T> {
+            x: self.x.rem(rhs.x),
+            y: self.y.rem(rhs.y)
+        }
     }
 }
