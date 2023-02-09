@@ -270,3 +270,30 @@ impl<T: Num> Rem<Vec2<T>> for Vec2<T> {
         }
     }
 }
+
+impl<T: Num> From<(T, T)> for Vec2<T> {
+    fn from(value: (T, T)) -> Self {
+        Vec2 {
+            x: value.0,
+            y: value.1,
+        }
+    }
+}
+
+impl<T> PartialEq<(T, T)> for Vec2<T>
+where
+    T: Num,
+{
+    fn eq(&self, other: &(T, T)) -> bool {
+        self.x == other.0 && self.y == other.1
+    }
+}
+
+impl<T> fmt::Display for Vec2<T>
+where
+    T: Num + Display,
+{
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        write!(formatter, "({}, {})", self.x, self.y)
+    }
+}

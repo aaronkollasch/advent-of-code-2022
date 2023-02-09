@@ -1,6 +1,19 @@
+use common::Vec2;
 use std::iter::repeat;
+// todo: replace edges with FxHashMap of (pos, facing) -> (pos, facing)
 
-type Pos = (isize, isize);
+type Pos = Vec2<isize>;
+type PosTup = (isize, isize);
+
+#[non_exhaustive]
+struct Dir;
+
+impl Dir {
+    pub const UP: Pos = Pos { x: 0, y: -1 };
+    pub const DOWN: Pos = Pos { x: 0, y: 1 };
+    pub const LEFT: Pos = Pos { x: -1, y: 0 };
+    pub const RIGHT: Pos = Pos { x: 1, y: 0 };
+}
 
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub enum Instruction {
@@ -11,19 +24,28 @@ pub enum Instruction {
 fn rotate(facing: Pos, by: isize) -> Pos {
     match by.rem_euclid(4) {
         0 => facing,
-        1 => (-facing.1, facing.0),
-        2 => (-facing.0, -facing.1),
-        3 => (facing.1, -facing.0),
+        1 => Pos {
+            x: -facing.y,
+            y: facing.x,
+        },
+        2 => Pos {
+            x: -facing.x,
+            y: -facing.y,
+        },
+        3 => Pos {
+            x: facing.y,
+            y: -facing.x,
+        },
         _ => unreachable!(),
     }
 }
 
 fn facing_angle_to_axes(facing: isize) -> Pos {
     match facing.rem_euclid(4) {
-        0 => (1, 0),
-        1 => (0, 1),
-        2 => (-1, 0),
-        3 => (0, -1),
+        0 => Dir::RIGHT,
+        1 => Dir::DOWN,
+        2 => Dir::LEFT,
+        3 => Dir::UP,
         _ => unreachable!(),
     }
 }
@@ -31,41 +53,29 @@ fn facing_angle_to_axes(facing: isize) -> Pos {
 fn next_pos_facing(
     pos: Pos,
     facing: Pos,
-    edges: &[(Vec<Pos>, Vec<Pos>, isize, isize)],
+    edges: &[(Vec<PosTup>, Vec<PosTup>, isize, isize)],
 ) -> (Pos, Pos) {
-    let mut next_pos = (pos.0 + facing.0, pos.1 + facing.1);
+    let mut next_pos = pos + facing;
     let mut next_facing = facing;
     for edge in edges.iter() {
-        if let Some(i) = edge.0.iter().position(|p| *p == pos) {
+        if let Some(i) = edge.0.iter().position(|p| pos == *p) {
             if facing_angle_to_axes(edge.2) == facing {
-                (next_pos, next_facing) = (edge.1[i], rotate(facing, (edge.3 + 2) - edge.2));
+                (next_pos, next_facing) =
+                    (Pos::from(edge.1[i]), rotate(facing, (edge.3 + 2) - edge.2));
                 #[cfg(debug_assertions)]
                 println!(
-                    "cross edge: {} {} ({} {}) -> {} {} ({} {})",
-                    pos.0,
-                    pos.1,
-                    facing.0,
-                    facing.1,
-                    next_pos.0,
-                    next_pos.1,
-                    next_facing.0,
-                    next_facing.1
+                    "cross edge: {}, facing {} -> {}, facing {}",
+                    pos, facing, next_pos, next_facing,
                 );
             }
-        } else if let Some(i) = edge.1.iter().position(|p| *p == pos) {
+        } else if let Some(i) = edge.1.iter().position(|p| pos == *p) {
             if facing_angle_to_axes(edge.3) == facing {
-                (next_pos, next_facing) = (edge.0[i], rotate(facing, (edge.2 + 2) - edge.3));
+                (next_pos, next_facing) =
+                    (Pos::from(edge.0[i]), rotate(facing, (edge.2 + 2) - edge.3));
                 #[cfg(debug_assertions)]
                 println!(
-                    "cross edge: {} {} ({} {}) -> {} {} ({} {})",
-                    pos.0,
-                    pos.1,
-                    facing.0,
-                    facing.1,
-                    next_pos.0,
-                    next_pos.1,
-                    next_facing.0,
-                    next_facing.1
+                    "cross edge: {}, facing {} -> {}, facing {}",
+                    pos, facing, next_pos, next_facing,
                 );
             }
         }
@@ -75,8 +85,11 @@ fn next_pos_facing(
 
 pub fn main() {
     let s = include_bytes!("../input.txt");
-    let mut pos = (s.iter().position(|b| *b == b'.').unwrap() as isize, 0);
-    let mut facing: (isize, isize) = (1, 0);
+    let mut pos = Pos {
+        x: s.iter().position(|b| *b == b'.').unwrap() as isize,
+        y: 0,
+    };
+    let mut facing: Pos = Dir::RIGHT;
     let w = s
         .split(|b| *b == b'\n')
         .take_while(|l| !l.is_empty())
@@ -97,7 +110,7 @@ pub fn main() {
     // // edges: stored as (Edge1, Edge2, facing1, facing2)
     // let l = 4isize;
     // #[rustfmt::skip]
-    // let edges: Vec<(Vec<Pos>, Vec<Pos>, isize, isize)> = vec![
+    // let edges: Vec<(Vec<PosTup>, Vec<PosTup>, isize, isize)> = vec![
     //     (repeat(0).take(l as usize).zip(l*2..l*3).collect(), repeat(l).take(l as usize).zip((0..l).rev()).collect(), 3, 3),
     //     ((l..l*2).zip(repeat(l).take(l as usize)).collect(), repeat(l*2).take(l as usize).zip(0..l).collect(), 3, 1),
     //     (repeat(l*3-1).take(l as usize).zip(l..l*2).collect(), (l*3..l*4).rev().zip(repeat(l*2).take(l as usize)).collect(), 0, 3),
@@ -109,7 +122,7 @@ pub fn main() {
     // edges: stored as (Edge1, Edge2, facing1, facing2)
     let l = 50isize;
     #[rustfmt::skip]
-    let edges: Vec<(Vec<Pos>, Vec<Pos>, isize, isize)> = vec![
+    let edges: Vec<(Vec<PosTup>, Vec<PosTup>, isize, isize)> = vec![
         ((0..l).zip(repeat(l*2).take(l as usize)).collect(), repeat(l).take(l as usize).zip(l..l*2).collect(), 3, 2),
         (repeat(0).take(l as usize).zip(l*2..l*3).collect(), repeat(l).take(l as usize).zip((0..l).rev()).collect(), 2, 2),
         (repeat(0).take(l as usize).zip(l*3..l*4).collect(), (l..l*2).zip(repeat(0).take(l as usize)).collect(), 2, 3),
@@ -145,10 +158,7 @@ pub fn main() {
     #[cfg(debug_assertions)]
     println!("{} {}", map.len(), map[0].len());
     #[cfg(debug_assertions)]
-    println!(
-        "pos: ({}, {}), facing ({} {})",
-        pos.0, pos.1, facing.0, facing.1
-    );
+    println!("pos: {}, facing {}", pos, facing);
     for ins in path.into_iter() {
         #[cfg(debug_assertions)]
         println!("{:?}", ins);
@@ -156,7 +166,7 @@ pub fn main() {
             Instruction::Move(dist) => {
                 for _step in 0..dist {
                     let (next_pos, next_facing) = next_pos_facing(pos, facing, &edges);
-                    match map[next_pos.1 as usize][next_pos.0 as usize] {
+                    match map[next_pos.y as usize][next_pos.x as usize] {
                         b'#' => {
                             break;
                         }
@@ -174,20 +184,10 @@ pub fn main() {
             }
         }
         #[cfg(debug_assertions)]
-        println!(
-            "pos: ({}, {}), facing ({} {})",
-            pos.0, pos.1, facing.0, facing.1
-        );
+        println!("pos: {}, facing {}", pos, facing);
     }
-    let facing_dir = facing.0.abs() * (1 - facing.0) + facing.1.abs() * (2 - facing.1);
+    let facing_dir = facing.x.abs() * (1 - facing.x) + facing.y.abs() * (2 - facing.y);
     #[cfg(debug_assertions)]
-    println!(
-        "pos: ({}, {}), facing ({} {}) = {}",
-        pos.0 + 1,
-        pos.1 + 1,
-        facing.0,
-        facing.1,
-        facing_dir
-    );
-    print!("{} ", 1000 * (pos.1 + 1) + 4 * (pos.0 + 1) + facing_dir);
+    println!("pos: {}, facing {} = {}", pos + (1, 1), facing, facing_dir);
+    print!("{} ", 1000 * (pos.y + 1) + 4 * (pos.x + 1) + facing_dir);
 }
