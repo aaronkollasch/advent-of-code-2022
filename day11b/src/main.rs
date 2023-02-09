@@ -110,7 +110,7 @@ pub fn main() {
         pb.update(1);
     }
     #[cfg(debug_assertions)]
-    eprint!("\n");
+    eprintln!();
 
     print!(
         "{} ",

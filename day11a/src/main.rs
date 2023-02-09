@@ -22,7 +22,7 @@ pub fn main() {
     let mut monkeys: Vec<Monkey> = Vec::<Monkey>::new();
 
     // parse input
-    for (i_line, l) in s.split(|b| *b == b'\n').filter(|l| l.len() > 0).enumerate() {
+    for (i_line, l) in s.split(|b| *b == b'\n').filter(|l| !l.is_empty()).enumerate() {
         let (i_monkey, i_line) = (i_line / 6, i_line % 6);
         if i_line == 0 {
             monkeys.push(Monkey {
