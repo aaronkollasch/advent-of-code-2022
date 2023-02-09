@@ -119,11 +119,11 @@ pub fn main() {
     let (mut pair_0, mut acc) = (0, 0);
     let mut pair_idx: bool = false;
     let s = include_bytes!("../input.txt");
-    s.into_iter().for_each(|b| match b {
+    s.iter().for_each(|b| match b {
         b' ' if pair_idx => {
             let next = pos(pair_0 - X_MIN, acc);
-            if prev.is_some() {
-                map.fill_line(prev.unwrap(), next, MAP_ROCK);
+            if let Some(prev) = prev {
+                map.fill_line(prev, next, MAP_ROCK);
             }
             prev = Some(next);
             y_max = max(y_max, y(next));
@@ -143,8 +143,8 @@ pub fn main() {
         }
         b'\n' => {
             let next = pos(pair_0 - X_MIN, acc);
-            if prev.is_some() {
-                map.fill_line(prev.unwrap(), next, MAP_ROCK);
+            if let Some(prev) = prev {
+                map.fill_line(prev, next, MAP_ROCK);
             }
             y_max = max(y_max, y(next));
             #[cfg(debug_assertions)]
