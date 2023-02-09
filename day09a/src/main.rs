@@ -13,7 +13,10 @@ impl Dir {
 }
 
 const VISITED_WIDTH: i32 = 512;
-const START_POS: Pos = Pos { x: VISITED_WIDTH / 2, y: VISITED_WIDTH / 2 };
+const START_POS: Pos = Pos {
+    x: VISITED_WIDTH / 2,
+    y: VISITED_WIDTH / 2,
+};
 const VISITED_SIZE: usize = (VISITED_WIDTH * VISITED_WIDTH / usize::BITS as i32) as usize;
 const USIZE_EXP: usize = usize::BITS.trailing_zeros() as usize;
 const USIZE_MASK: usize = (usize::BITS - 1) as usize;
@@ -48,11 +51,9 @@ impl BitVec {
             .flat_map(|i| (0..USIZE_EXP).map(move |j| (i, j)))
             .map(|(i, j)| (i, j, self.vec[i]))
             .filter(|(_i, j, b)| (b >> j) & 0b1 > 0)
-            .map(|(i, j, _b)| {
-                Vec2 {
-                    x: ((i << USIZE_EXP) + j) % VISITED_WIDTH as usize,
-                    y: ((i << USIZE_EXP) + j) / VISITED_WIDTH as usize,
-                }
+            .map(|(i, j, _b)| Vec2 {
+                x: ((i << USIZE_EXP) + j) % VISITED_WIDTH as usize,
+                y: ((i << USIZE_EXP) + j) / VISITED_WIDTH as usize,
             })
     }
 }
