@@ -1,0 +1,57 @@
+use aoc2022::days::*;
+use criterion::{Criterion, criterion_group, criterion_main};
+
+fn criterion_benchmark(c: &mut Criterion) {
+    c.bench_function("day01a", |b| b.iter(|| day01a::get_result()));
+    c.bench_function("day01b", |b| b.iter(|| day01b::get_result()));
+    c.bench_function("day02a", |b| b.iter(|| day02a::get_result()));
+    c.bench_function("day02b", |b| b.iter(|| day02b::get_result()));
+    c.bench_function("day03a", |b| b.iter(|| day03a::get_result()));
+    c.bench_function("day03b", |b| b.iter(|| day03b::get_result()));
+    c.bench_function("day04a", |b| b.iter(|| day04a::get_result()));
+    c.bench_function("day04b", |b| b.iter(|| day04b::get_result()));
+    c.bench_function("day05a", |b| b.iter(|| day05a::get_result()));
+    c.bench_function("day05b", |b| b.iter(|| day05b::get_result()));
+    c.bench_function("day06a", |b| b.iter(|| day06a::get_result()));
+    c.bench_function("day06b", |b| b.iter(|| day06b::get_result()));
+    c.bench_function("day07a", |b| b.iter(|| day07a::get_result()));
+    c.bench_function("day07b", |b| b.iter(|| day07b::get_result()));
+    c.bench_function("day08a", |b| b.iter(|| day08a::get_result()));
+    c.bench_function("day08b", |b| b.iter(|| day08b::get_result()));
+    c.bench_function("day09a", |b| b.iter(|| day09a::get_result()));
+    c.bench_function("day09b", |b| b.iter(|| day09b::get_result()));
+    c.bench_function("day10a", |b| b.iter(|| day10a::get_result()));
+    c.bench_function("day10b", |b| b.iter(|| day10b::get_result()));
+    c.bench_function("day11a", |b| b.iter(|| day11a::get_result()));
+    c.bench_function("day11b", |b| b.iter(|| day11b::get_result()));
+    c.bench_function("day12a", |b| b.iter(|| day12a::get_result()));
+    c.bench_function("day12b", |b| b.iter(|| day12b::get_result()));
+    c.bench_function("day13a", |b| b.iter(|| day13a::get_result()));
+    c.bench_function("day13b", |b| b.iter(|| day13b::get_result()));
+    c.bench_function("day14a", |b| b.iter(|| day14a::get_result()));
+    c.bench_function("day14b", |b| b.iter(|| day14b::get_result()));
+    c.bench_function("day15a", |b| b.iter(|| day15a::get_result()));
+    c.bench_function("day15b", |b| b.iter(|| day15b::get_result()));
+    c.bench_function("day16a", |b| b.iter(|| day16a::get_result()));
+    c.bench_function("day16b", |b| b.iter(|| day16b::get_result()));
+    c.bench_function("day17a", |b| b.iter(|| day17a::get_result()));
+    c.bench_function("day17b", |b| b.iter(|| day17b::get_result()));
+    c.bench_function("day18a", |b| b.iter(|| day18a::get_result()));
+    c.bench_function("day18b", |b| b.iter(|| day18b::get_result()));
+    c.bench_function("day19a", |b| b.iter(|| day19a::get_result()));
+    c.bench_function("day19b", |b| b.iter(|| day19b::get_result()));
+    c.bench_function("day20a", |b| b.iter(|| day20a::get_result()));
+    c.bench_function("day20b", |b| b.iter(|| day20b::get_result()));
+    c.bench_function("day21a", |b| b.iter(|| day21a::get_result()));
+    c.bench_function("day21b", |b| b.iter(|| day21b::get_result()));
+    c.bench_function("day22a", |b| b.iter(|| day22a::get_result()));
+    c.bench_function("day22b", |b| b.iter(|| day22b::get_result()));
+    c.bench_function("day23a", |b| b.iter(|| day23a::get_result()));
+    c.bench_function("day23b", |b| b.iter(|| day23b::get_result()));
+    c.bench_function("day24a", |b| b.iter(|| day24a::get_result()));
+    c.bench_function("day24b", |b| b.iter(|| day24b::get_result()));
+    c.bench_function("day25a", |b| b.iter(|| day25a::get_result()));
+}
+
+criterion_group!(benches, criterion_benchmark);
+criterion_main!(benches);

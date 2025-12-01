@@ -33,3 +33,40 @@
 | 25  | 1.50 μs   |           |
 
 Total runtime: 193.90 ms
+
+## How to Run
+
+First copy the input text files into the `inputs/` directory, and name them by day, e.g. `day01.txt`.
+
+To run an individual solution in debug mode:
+```shell
+cargo run --bin day01a
+```
+
+To run everything in parallel:
+```shell
+cargo run --release --bin runner-par
+```
+
+To benchmark every day:
+```shell
+cargo run --release --bin bench
+```
+
+or using criterion:
+```shell
+cargo bench --bench all-days
+```
+
+To run tests:
+```shell
+cargo test --lib
+```
+
+## Other years
+
+- [2025](https://github.com/aaronkollasch/advent-of-code-2025)
+- [2022](https://github.com/aaronkollasch/advent-of-code-2022) _(current)_
+
+## License
+This project is released under the GNU GPL-3.0 license. Check out the [LICENSE](LICENSE) file for more information.

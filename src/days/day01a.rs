@@ -1,0 +1,33 @@
+use std::cmp::max;
+use crate::common::parse;
+
+pub fn get_result() -> u32 {
+    let mut elf_total = 0u32;
+    let mut max_elf = 0u32;
+    include_bytes!("../../inputs/day01.txt")
+        .split(|b| *b == b'\n')
+        .for_each(|l| {
+            if l.is_empty() {
+                max_elf = max(max_elf, elf_total);
+                elf_total = 0;
+            } else {
+                elf_total += parse::<u32>(l);
+            }
+        });
+    return max_elf;
+}
+
+pub fn main() {
+    print!("{} ", get_result());
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn correct_result() {
+        let result = get_result();
+        assert_eq!(result, 71924);
+    }
+}

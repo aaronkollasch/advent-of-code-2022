@@ -1,0 +1,231 @@
+[package]
+name = "aoc2022"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+num = "0.4"
+rayon = "1.5"
+took = "0.1"
+itertools = "0.10"
+u256-literal = "1.0"
+primitive-types = "0.8"
+rustc-hash = "1.1"
+kdam = "0.3.0"
+
+[dev-dependencies]
+criterion = { version = "0.7", features = ["html_reports"] }
+
+[lib]
+
+[[bin]]
+name = "runner"
+path = "src/bin/runner.rs"
+
+[[bin]]
+name = "runner-par"
+path = "src/bin/runner-par.rs"
+
+[[bin]]
+name = "bench"
+path = "src/bin/bench.rs"
+
+[[bench]]
+name = "all-days"
+harness = false
+
+[[bin]]
+name = "day01a"
+path = "src/bin/days/day01a.rs"
+
+[[bin]]
+name = "day01b"
+path = "src/bin/days/day01b.rs"
+
+[[bin]]
+name = "day02a"
+path = "src/bin/days/day02a.rs"
+
+[[bin]]
+name = "day02b"
+path = "src/bin/days/day02b.rs"
+
+[[bin]]
+name = "day03a"
+path = "src/bin/days/day03a.rs"
+
+[[bin]]
+name = "day03b"
+path = "src/bin/days/day03b.rs"
+
+[[bin]]
+name = "day04a"
+path = "src/bin/days/day04a.rs"
+
+[[bin]]
+name = "day04b"
+path = "src/bin/days/day04b.rs"
+
+[[bin]]
+name = "day05a"
+path = "src/bin/days/day05a.rs"
+
+[[bin]]
+name = "day05b"
+path = "src/bin/days/day05b.rs"
+
+[[bin]]
+name = "day06a"
+path = "src/bin/days/day06a.rs"
+
+[[bin]]
+name = "day06b"
+path = "src/bin/days/day06b.rs"
+
+[[bin]]
+name = "day07a"
+path = "src/bin/days/day07a.rs"
+
+[[bin]]
+name = "day07b"
+path = "src/bin/days/day07b.rs"
+
+[[bin]]
+name = "day08a"
+path = "src/bin/days/day08a.rs"
+
+[[bin]]
+name = "day08b"
+path = "src/bin/days/day08b.rs"
+
+[[bin]]
+name = "day09a"
+path = "src/bin/days/day09a.rs"
+
+[[bin]]
+name = "day09b"
+path = "src/bin/days/day09b.rs"
+
+[[bin]]
+name = "day10a"
+path = "src/bin/days/day10a.rs"
+
+[[bin]]
+name = "day10b"
+path = "src/bin/days/day10b.rs"
+
+[[bin]]
+name = "day11a"
+path = "src/bin/days/day11a.rs"
+
+[[bin]]
+name = "day11b"
+path = "src/bin/days/day11b.rs"
+
+[[bin]]
+name = "day12a"
+path = "src/bin/days/day12a.rs"
+
+[[bin]]
+name = "day12b"
+path = "src/bin/days/day12b.rs"
+
+[[bin]]
+name = "day13a"
+path = "src/bin/days/day13a.rs"
+
+[[bin]]
+name = "day13b"
+path = "src/bin/days/day13b.rs"
+
+[[bin]]
+name = "day14a"
+path = "src/bin/days/day14a.rs"
+
+[[bin]]
+name = "day14b"
+path = "src/bin/days/day14b.rs"
+
+[[bin]]
+name = "day15a"
+path = "src/bin/days/day15a.rs"
+
+[[bin]]
+name = "day15b"
+path = "src/bin/days/day15b.rs"
+
+[[bin]]
+name = "day16a"
+path = "src/bin/days/day16a.rs"
+
+[[bin]]
+name = "day16b"
+path = "src/bin/days/day16b.rs"
+
+[[bin]]
+name = "day17a"
+path = "src/bin/days/day17a.rs"
+
+[[bin]]
+name = "day17b"
+path = "src/bin/days/day17b.rs"
+
+[[bin]]
+name = "day18a"
+path = "src/bin/days/day18a.rs"
+
+[[bin]]
+name = "day18b"
+path = "src/bin/days/day18b.rs"
+
+[[bin]]
+name = "day19a"
+path = "src/bin/days/day19a.rs"
+
+[[bin]]
+name = "day19b"
+path = "src/bin/days/day19b.rs"
+
+[[bin]]
+name = "day20a"
+path = "src/bin/days/day20a.rs"
+
+[[bin]]
+name = "day20b"
+path = "src/bin/days/day20b.rs"
+
+[[bin]]
+name = "day21a"
+path = "src/bin/days/day21a.rs"
+
+[[bin]]
+name = "day21b"
+path = "src/bin/days/day21b.rs"
+
+[[bin]]
+name = "day22a"
+path = "src/bin/days/day22a.rs"
+
+[[bin]]
+name = "day22b"
+path = "src/bin/days/day22b.rs"
+
+[[bin]]
+name = "day23a"
+path = "src/bin/days/day23a.rs"
+
+[[bin]]
+name = "day23b"
+path = "src/bin/days/day23b.rs"
+
+[[bin]]
+name = "day24a"
+path = "src/bin/days/day24a.rs"
+
+[[bin]]
+name = "day24b"
+path = "src/bin/days/day24b.rs"
+
+[[bin]]
+name = "day25a"
+path = "src/bin/days/day25a.rs"
