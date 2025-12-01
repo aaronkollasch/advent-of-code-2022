@@ -23,7 +23,10 @@ pub fn get_result() -> u32 {
             _ => {}
         });
 
-    sizes.extend(wd.into_iter().rev().scan(0, |size, s| Some(*size + s)));
+    sizes.extend(wd.into_iter().rev().scan(0, |size, s| {
+        *size += s;
+        Some(*size)
+    }));
 
     let free_space = 70000000 - sizes.last().unwrap();
     let to_delete = 30000000 - free_space;
